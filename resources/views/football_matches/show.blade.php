@@ -52,11 +52,11 @@
             <tbody>
                 @foreach(range(1,4) as $q)
                     @php
-                        $present = $footballMatch->players->filter(fn($p) => (int)($p->pivot->quarter ?? 0) === $q);
-                        $bench = $present->filter(fn($p) => is_null($p->pivot->position_id));
-                        $starters = $present->filter(fn($p) => !is_null($p->pivot->position_id));
+                        $present = $assignmentsByQuarter[$q] ?? collect();
+                        $bench = $present->filter(fn($p) => is_null($p->position_id));
+                        $starters = $present->filter(fn($p) => !is_null($p->position_id));
                         $keeper = $starters->first(function($p) use ($positionNames){
-                            $pid = $p->pivot->position_id;
+                            $pid = $p->position_id;
                             $n = strtolower($positionNames[$pid] ?? '');
                             return str_contains($n, 'keep') || str_contains($n, 'goal') || str_contains($n, 'doel');
                         });
@@ -101,14 +101,14 @@
     <div class="grid md:grid-cols-2 gap-4">
         @foreach(range(1,4) as $q)
             @php
-                $present = $footballMatch->players->filter(fn($p) => (int)($p->pivot->quarter ?? 0) === $q);
-                $starters = $present->filter(fn($p) => !is_null($p->pivot->position_id));
+                $present = $assignmentsByQuarter[$q] ?? collect();
+                $starters = $present->filter(fn($p) => !is_null($p->position_id));
                 $attackers = collect();
                 $midfielders = collect();
                 $defenders = collect();
                 $keepers = collect();
                 foreach ($starters as $p) {
-                    $pid = $p->pivot->position_id;
+                    $pid = $p->position_id;
                     $n = strtolower($positionNames[$pid] ?? '');
                     if (str_contains($n, 'keep') || str_contains($n, 'goal') || str_contains($n, 'doel')) {
                         $keepers->push($p);
@@ -127,27 +127,27 @@
             <div class="border rounded p-3">
                 <div class="text-sm font-medium mb-2">Quarter {{ $q }}</div>
                 {{-- Simple vertical lines: Aanvaller (top), Middenvelder, Verdediger, Keeper (bottom) --}}
-                <div class="flex flex-col gap-3 bg-emerald-50 p-3 rounded">
+                <div class="flex flex-col gap-6 bg-emerald-50 p-3 rounded">
                     {{-- Aanvallers --}}
-                    <div class="flex flex-wrap justify-center gap-2 min-h-6">
+                    <div class="flex flex-wrap justify-center gap-16 min-h-6">
                         @foreach($attackers as $p)
                             <span class="inline-block px-2 py-1 rounded text-white bg-green-600">{{ $p->name }}</span>
                         @endforeach
                     </div>
                     {{-- Middenvelders --}}
-                    <div class="flex flex-wrap justify-center gap-2 min-h-6">
+                    <div class="flex flex-wrap justify-center gap-16 min-h-6">
                         @foreach($midfielders as $p)
                             <span class="inline-block px-2 py-1 rounded text-white bg-green-600">{{ $p->name }}</span>
                         @endforeach
                     </div>
                     {{-- Verdedigers --}}
-                    <div class="flex flex-wrap justify-center gap-2 min-h-6">
+                    <div class="flex flex-wrap justify-center gap-16 min-h-6">
                         @foreach($defenders as $p)
                             <span class="inline-block px-2 py-1 rounded text-white bg-green-600">{{ $p->name }}</span>
                         @endforeach
                     </div>
                     {{-- Keeper(s) --}}
-                    <div class="flex flex-wrap justify-center gap-2 min-h-6">
+                    <div class="flex flex-wrap justify-center gap-16 min-h-6">
                         @foreach($keepers as $p)
                             <span class="inline-block px-2 py-1 rounded text-white bg-green-800">{{ $p->name }}</span>
                         @endforeach
@@ -158,7 +158,7 @@
     </div>
 </div>
 
-<div class="mt-4">
+<div class="my-4">
     <a href="{{ route('football-matches.index') }}" class="px-3 py-2 bg-gray-200 rounded">Back</a>
 </div>
 @endsection

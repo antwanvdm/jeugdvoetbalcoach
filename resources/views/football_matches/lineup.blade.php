@@ -29,7 +29,7 @@
                     <tbody>
                         @foreach($players as $player)
                             @php
-                                $present = isset($existing[$q][$player->id]);
+                                $present = array_key_exists($player->id, $existing[$q] ?? []);
                                 $posId = $existing[$q][$player->id] ?? '';
                             @endphp
                             <tr class="border-t">

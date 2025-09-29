@@ -51,12 +51,26 @@ class FootballMatchController extends Controller
      */
     public function show(FootballMatch $footballMatch): View
     {
-        $footballMatch->load(['opponent','players']);
+        $footballMatch->load(['opponent']);
+        // Fetch all pivot rows for this match and group by quarter to avoid de-duplication by player_id
+        $rows = \App\Models\Player::query()
+            ->select('players.id','players.name','football_match_player.quarter','football_match_player.position_id')
+            ->join('football_match_player', 'football_match_player.player_id', '=', 'players.id')
+            ->where('football_match_player.football_match_id', $footballMatch->id)
+            ->orderBy('players.name')
+            ->get();
+
+        $assignmentsByQuarter = [1 => collect(), 2 => collect(), 3 => collect(), 4 => collect()];
+        foreach ($rows as $row) {
+            $assignmentsByQuarter[(int)$row->quarter]->push($row);
+        }
+
         // Map of position names by id for resolving per-quarter pivot position names
         $positionNames = Position::pluck('name','id');
         return view('football_matches.show', [
             'footballMatch' => $footballMatch,
             'positionNames' => $positionNames,
+            'assignmentsByQuarter' => $assignmentsByQuarter,
         ]);
     }
 
