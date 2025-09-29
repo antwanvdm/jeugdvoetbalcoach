@@ -1,15 +1,15 @@
 @extends('layouts.app')
 
 @section('content')
-<h1 class="text-2xl font-semibold mb-4">New Opponent</h1>
+<h1 class="text-2xl font-semibold mb-4">Nieuwe tegenstander</h1>
 <form action="{{ route('opponents.store') }}" method="POST" class="bg-white p-4 shadow rounded max-w-lg">
     @csrf
     <div class="mb-3">
-        <label class="block text-sm font-medium mb-1">Name</label>
+        <label class="block text-sm font-medium mb-1">Naam</label>
         <input type="text" name="name" value="{{ old('name') }}" class="w-full border rounded p-2" required>
     </div>
     <div class="mb-3">
-        <label class="block text-sm font-medium mb-1">Location</label>
+        <label class="block text-sm font-medium mb-1">Locatie</label>
         <input type="text" name="location" value="{{ old('location') }}" class="w-full border rounded p-2" required>
     </div>
     <div class="mb-3">
@@ -27,8 +27,8 @@
         </div>
     </div>
     <div class="flex gap-2">
-        <button class="px-3 py-2 bg-blue-600 text-white rounded">Save</button>
-        <a href="{{ route('opponents.index') }}" class="px-3 py-2 bg-gray-200 rounded">Cancel</a>
+        <button class="px-3 py-2 bg-blue-600 text-white rounded">Opslaan</button>
+        <a href="{{ route('opponents.index') }}" class="px-3 py-2 bg-gray-200 rounded">Annuleren</a>
     </div>
 </form>
 @endsection

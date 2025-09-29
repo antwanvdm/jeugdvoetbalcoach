@@ -2,8 +2,8 @@
 
 @section('content')
 <div class="flex items-center justify-between mb-4">
-    <h1 class="text-2xl font-semibold">Players</h1>
-    <a href="{{ route('players.create') }}" class="px-3 py-2 bg-blue-600 text-white rounded">New Player</a>
+    <h1 class="text-2xl font-semibold">Spelers</h1>
+    <a href="{{ route('players.create') }}" class="px-3 py-2 bg-blue-600 text-white rounded">Nieuwe speler</a>
 </div>
 
 <table class="min-w-full bg-white shadow rounded">
@@ -11,7 +11,7 @@
         <tr class="border-b">
             <th class="text-left p-3">Naam</th>
             <th class="text-left p-3">Favoriete positie</th>
-            <th class="text-right p-3">Acties</th>
+            <th class="text-right p-3"></th>
         </tr>
     </thead>
     <tbody>
@@ -25,7 +25,7 @@
                     <form action="{{ route('players.destroy', $player) }}" method="POST" class="inline">
                         @csrf
                         @method('DELETE')
-                        <button class="text-red-600" onclick="return confirm('Delete this player?')">Verwijder</button>
+                        <button class="text-red-600" onclick="return confirm('Deze speler verwijderen?')">Verwijder</button>
                     </form>
                 </td>
             </tr>

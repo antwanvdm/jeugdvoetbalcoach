@@ -43,7 +43,7 @@ class FootballMatchController extends Controller
             'date' => ['required','date'],
         ]);
         $match = FootballMatch::create($validated);
-        return redirect()->route('football-matches.show', $match)->with('success', 'Match created.');
+        return redirect()->route('football-matches.show', $match)->with('success', 'Wedstrijd aangemaakt.');
     }
 
     /**
@@ -96,7 +96,7 @@ class FootballMatchController extends Controller
             'date' => ['required','date'],
         ]);
         $footballMatch->update($validated);
-        return redirect()->route('football-matches.show', $footballMatch)->with('success', 'Match updated.');
+        return redirect()->route('football-matches.show', $footballMatch)->with('success', 'Wedstrijd bijgewerkt.');
     }
 
     /**
@@ -105,7 +105,7 @@ class FootballMatchController extends Controller
     public function destroy(FootballMatch $footballMatch): RedirectResponse
     {
         $footballMatch->delete();
-        return redirect()->route('football-matches.index')->with('success', 'Match deleted.');
+        return redirect()->route('football-matches.index')->with('success', 'Wedstrijd verwijderd.');
     }
 
     /**
@@ -172,6 +172,6 @@ class FootballMatchController extends Controller
             }
         }
 
-        return redirect()->route('football-matches.lineup', $footballMatch)->with('success', 'Lineup saved.');
+        return redirect()->route('football-matches.lineup', $footballMatch)->with('success', 'Line-up opgeslagen.');
     }
 }
