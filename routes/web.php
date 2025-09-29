@@ -8,6 +8,9 @@ use App\Http\Controllers\FootballMatchController;
 
 Route::redirect('/', '/players');
 
+Route::get('football-matches/{footballMatch}/lineup', [FootballMatchController::class, 'lineup'])->name('football-matches.lineup');
+Route::post('football-matches/{footballMatch}/lineup', [FootballMatchController::class, 'lineupUpdate'])->name('football-matches.lineup.update');
+
 Route::resources([
     'players' => PlayerController::class,
     'positions' => PositionController::class,

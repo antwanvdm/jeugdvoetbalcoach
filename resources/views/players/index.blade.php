@@ -9,9 +9,9 @@
 <table class="min-w-full bg-white shadow rounded">
     <thead>
         <tr class="border-b">
-            <th class="text-left p-3">Name</th>
-            <th class="text-left p-3">Position</th>
-            <th class="text-right p-3">Actions</th>
+            <th class="text-left p-3">Naam</th>
+            <th class="text-left p-3">Favoriete positie</th>
+            <th class="text-right p-3">Acties</th>
         </tr>
     </thead>
     <tbody>
@@ -20,18 +20,18 @@
                 <td class="p-3">{{ $player->name }}</td>
                 <td class="p-3">{{ $player->position->name ?? '-' }}</td>
                 <td class="p-3 text-right">
-                    <a class="text-blue-600 mr-2" href="{{ route('players.show', $player) }}">Show</a>
-                    <a class="text-yellow-600 mr-2" href="{{ route('players.edit', $player) }}">Edit</a>
+                    <a class="text-blue-600 mr-2" href="{{ route('players.show', $player) }}">Toon</a>
+                    <a class="text-yellow-600 mr-2" href="{{ route('players.edit', $player) }}">Bewerk</a>
                     <form action="{{ route('players.destroy', $player) }}" method="POST" class="inline">
                         @csrf
                         @method('DELETE')
-                        <button class="text-red-600" onclick="return confirm('Delete this player?')">Delete</button>
+                        <button class="text-red-600" onclick="return confirm('Delete this player?')">Verwijder</button>
                     </form>
                 </td>
             </tr>
         @empty
             <tr>
-                <td colspan="3" class="p-3 text-center text-gray-500">No players yet.</td>
+                <td colspan="3" class="p-3 text-center text-gray-500">Voeg eerst spelers toe.</td>
             </tr>
         @endforelse
     </tbody>

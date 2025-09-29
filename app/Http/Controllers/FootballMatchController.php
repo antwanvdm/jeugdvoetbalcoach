@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\FootballMatch;
 use App\Models\Opponent;
+use App\Models\Player;
+use App\Models\Position;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -49,8 +51,13 @@ class FootballMatchController extends Controller
      */
     public function show(FootballMatch $footballMatch): View
     {
-        $footballMatch->load('opponent');
-        return view('football_matches.show', compact('footballMatch'));
+        $footballMatch->load(['opponent','players']);
+        // Map of position names by id for resolving per-quarter pivot position names
+        $positionNames = Position::pluck('name','id');
+        return view('football_matches.show', [
+            'footballMatch' => $footballMatch,
+            'positionNames' => $positionNames,
+        ]);
     }
 
     /**
@@ -85,5 +92,72 @@ class FootballMatchController extends Controller
     {
         $footballMatch->delete();
         return redirect()->route('football-matches.index')->with('success', 'Match deleted.');
+    }
+
+    /**
+     * Edit lineup (players to positions) per quarter for a match.
+     */
+    public function lineup(FootballMatch $footballMatch): View
+    {
+        $players = Player::orderBy('name')->get();
+        $positions = Position::orderBy('name')->pluck('name','id');
+
+        // Load existing assignments: [quarter][player_id] => position_id|null
+        $existing = [];
+        $footballMatch->load('players');
+        foreach ($footballMatch->players as $p) {
+            $q = (int)$p->pivot->quarter;
+            $existing[$q][$p->id] = $p->pivot->position_id; // null means bench
+        }
+
+        return view('football_matches.lineup', [
+            'footballMatch' => $footballMatch,
+            'players' => $players,
+            'positions' => $positions,
+            'existing' => $existing,
+        ]);
+    }
+
+    /**
+     * Update lineup assignments.
+     */
+    public function lineupUpdate(Request $request, FootballMatch $footballMatch): RedirectResponse
+    {
+        // Expect structure: assignments[quarter][player_id] = position_id or "" for bench
+        $data = $request->validate([
+            'assignments' => ['array'],
+            'assignments.*' => ['array'],
+            'assignments.*.*' => ['nullable','integer','exists:positions,id'],
+        ]);
+
+        $assignments = $data['assignments'] ?? [];
+
+        // We'll rebuild pivot entries for the provided quarters only.
+        // Each quarter from 1..4 is valid. Absent players: no pivot row.
+        // Bench: pivot row with position_id = null.
+        $toAttach = [];
+
+        foreach (range(1,4) as $quarter) {
+            $quarterAssignments = $assignments[$quarter] ?? [];
+
+            // Detach all existing rows for this quarter; then attach the new set for that quarter
+            $footballMatch->players()->wherePivot('quarter', $quarter)->detach();
+
+            foreach ($quarterAssignments as $playerId => $posId) {
+                // If value is null or empty string, treat as bench => attach with null position
+                if ($posId === '' || is_null($posId)) {
+                    $toAttach[$playerId] = ['quarter' => $quarter, 'position_id' => null];
+                } else {
+                    $toAttach[$playerId] = ['quarter' => $quarter, 'position_id' => (int)$posId];
+                }
+            }
+
+            if (!empty($toAttach)) {
+                $footballMatch->players()->attach($toAttach);
+                $toAttach = [];
+            }
+        }
+
+        return redirect()->route('football-matches.lineup', $footballMatch)->with('success', 'Lineup saved.');
     }
 }

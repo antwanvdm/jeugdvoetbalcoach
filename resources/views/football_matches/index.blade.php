@@ -31,6 +31,7 @@
                 </td>
                 <td class="p-3 text-right">
                     <a class="text-blue-600 mr-2" href="{{ route('football-matches.show', $match) }}">Show</a>
+                    <a class="text-blue-600 mr-2" href="{{ route('football-matches.lineup', $match) }}">Lineup</a>
                     <a class="text-yellow-600 mr-2" href="{{ route('football-matches.edit', $match) }}">Edit</a>
                     <form action="{{ route('football-matches.destroy', $match) }}" method="POST" class="inline">
                         @csrf
