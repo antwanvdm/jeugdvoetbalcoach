@@ -18,7 +18,7 @@
             <tr class="border-b">
                 <td class="p-3">{{ $position->name }}</td>
                 <td class="p-3 text-right">
-                    <a class="text-blue-600 mr-2" href="{{ route('positions.show', $position) }}">Toon</a>
+                    <a class="text-blue-600 mr-2" href="{{ route('positions.show', $position) }}">Bekijk</a>
                     <a class="text-yellow-600 mr-2" href="{{ route('positions.edit', $position) }}">Bewerk</a>
                     <form action="{{ route('positions.destroy', $position) }}" method="POST" class="inline">
                         @csrf

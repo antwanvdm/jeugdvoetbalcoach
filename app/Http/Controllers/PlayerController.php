@@ -40,7 +40,7 @@ class PlayerController extends Controller
 
         $player = Player::create($validated);
 
-        return redirect()->route('players.show', $player)->with('success', 'Player created.');
+        return redirect()->route('players.show', $player)->with('success', 'Speler aangemaakt.');
     }
 
     /**
@@ -73,7 +73,7 @@ class PlayerController extends Controller
 
         $player->update($validated);
 
-        return redirect()->route('players.show', $player)->with('success', 'Player updated.');
+        return redirect()->route('players.show', $player)->with('success', 'Speler bijgewerkt.');
     }
 
     /**

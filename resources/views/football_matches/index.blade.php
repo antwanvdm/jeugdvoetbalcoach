@@ -30,7 +30,7 @@
                     @endif
                 </td>
                 <td class="p-3 text-right">
-                    <a class="text-blue-600 mr-2" href="{{ route('football-matches.show', $match) }}">Toon</a>
+                    <a class="text-blue-600 mr-2" href="{{ route('football-matches.show', $match) }}">Bekijk</a>
                     <a class="text-blue-600 mr-2" href="{{ route('football-matches.lineup', $match) }}">Line-up</a>
                     <a class="text-yellow-600 mr-2" href="{{ route('football-matches.edit', $match) }}">Bewerk</a>
                     <form action="{{ route('football-matches.destroy', $match) }}" method="POST" class="inline">

@@ -20,7 +20,7 @@
                 <td class="p-3">{{ $player->name }}</td>
                 <td class="p-3">{{ $player->position->name ?? '-' }}</td>
                 <td class="p-3 text-right">
-                    <a class="text-blue-600 mr-2" href="{{ route('players.show', $player) }}">Toon</a>
+                    <a class="text-blue-600 mr-2" href="{{ route('players.show', $player) }}">Bekijk</a>
                     <a class="text-yellow-600 mr-2" href="{{ route('players.edit', $player) }}">Bewerk</a>
                     <form action="{{ route('players.destroy', $player) }}" method="POST" class="inline">
                         @csrf

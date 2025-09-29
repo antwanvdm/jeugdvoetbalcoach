@@ -43,7 +43,209 @@ class FootballMatchController extends Controller
             'date' => ['required','date'],
         ]);
         $match = FootballMatch::create($validated);
-        return redirect()->route('football-matches.show', $match)->with('success', 'Wedstrijd aangemaakt.');
+
+        // Auto-generate line-up for 4 quarters according to rules
+        // 1) Pick 4 goalkeepers with least historical keeper appearances
+        $positions = Position::orderBy('name')->get();
+        // Build role buckets from position names (Dutch keywords)
+        $keeperPositionIds = [];
+        $defenderPositionIds = [];
+        $midfielderPositionIds = [];
+        $attackerPositionIds = [];
+        foreach ($positions as $pos) {
+            $n = strtolower($pos->name);
+            if (str_contains($n, 'keep') || str_contains($n, 'goal') || str_contains($n, 'doel')) {
+                $keeperPositionIds[] = $pos->id;
+            } elseif (str_contains($n, 'verded')) {
+                $defenderPositionIds[] = $pos->id;
+            } elseif (str_contains($n, 'midden')) {
+                $midfielderPositionIds[] = $pos->id;
+            } elseif (str_contains($n, 'aanv')) {
+                $attackerPositionIds[] = $pos->id;
+            }
+        }
+        $nonKeeperPositionIds = $positions->reject(function($pos) use ($keeperPositionIds){
+            return in_array($pos->id, $keeperPositionIds, true);
+        })->pluck('id')->values()->all();
+        $fallbackOutfieldPositionId = $nonKeeperPositionIds[0] ?? null;
+        $repRolePos = [
+            'keeper' => $keeperPositionIds[0] ?? null,
+            'defender' => $defenderPositionIds[0] ?? $fallbackOutfieldPositionId,
+            'midfielder' => $midfielderPositionIds[0] ?? $fallbackOutfieldPositionId,
+            'attacker' => $attackerPositionIds[0] ?? $fallbackOutfieldPositionId,
+        ];
+
+        $players = Player::orderBy('name')->get();
+
+        // Helper to determine a player's favorite role
+        $positionIdToRole = function (?int $pid) use ($keeperPositionIds, $defenderPositionIds, $midfielderPositionIds, $attackerPositionIds) {
+            if (!$pid) return null;
+            if (in_array($pid, $keeperPositionIds, true)) return 'keeper';
+            if (in_array($pid, $defenderPositionIds, true)) return 'defender';
+            if (in_array($pid, $midfielderPositionIds, true)) return 'midfielder';
+            if (in_array($pid, $attackerPositionIds, true)) return 'attacker';
+            return null;
+        };
+
+        // Historical keeper counts per player
+        $keeperCounts = collect();
+        if (!empty($keeperPositionIds)) {
+            $counts = \DB::table('football_match_player')
+                ->select('player_id', \DB::raw('COUNT(*) as c'))
+                ->whereIn('position_id', $keeperPositionIds)
+                ->groupBy('player_id')
+                ->pluck('c', 'player_id');
+            $keeperCounts = collect($counts);
+        }
+
+        // Choose 4 keepers with the least historical keeper counts
+        $keepers = $players->sortBy(function($p) use ($keeperCounts){
+            return [(int)$keeperCounts->get($p->id, 0), $p->name];
+        })->take(4)->values();
+
+        // Map keeper per quarter (1..4)
+        $keeperByQuarter = [];
+        foreach (range(1,4) as $i => $q) {
+            $kp = $keepers[$i] ?? null;
+            if ($kp) { $keeperByQuarter[$q] = $kp->id; }
+        }
+
+        // Bench plan per player per quarter
+        $benchPlan = []; // [player_id => [quarters...]]
+
+        // Non-keepers: bench exactly 2 times, not consecutive -> alternate Q1+Q3 vs Q2+Q4
+        $toggle = false;
+        foreach ($players as $p) {
+            $isSelectedKeeper = in_array($p->id, $keepers->pluck('id')->all(), true);
+            if ($isSelectedKeeper) continue; // handle below
+            if ($toggle) {
+                $benchPlan[$p->id] = [2,4];
+            } else {
+                $benchPlan[$p->id] = [1,3];
+            }
+            $toggle = !$toggle;
+        }
+
+        // Keepers: each keeps one distinct quarter and benches exactly once (not the keeper quarter)
+        foreach ($keepers as $index => $kp) {
+            $keeperQuarter = $index + 1; // mapped to Q1..Q4
+            // choose a bench quarter different from keeperQuarter, spread them a bit
+            $candidate = ($index % 4) + 2; // yields 2,3,4,5 -> mod 4 to 1..4
+            $benchQuarter = (($candidate - 1) % 4) + 1;
+            if ($benchQuarter === $keeperQuarter) {
+                $benchQuarter = ($benchQuarter % 4) + 1; // next quarter
+            }
+            $benchPlan[$kp->id] = [$benchQuarter];
+        }
+
+        // Build attachments per quarter enforcing formation: 1 GK, 2 DEF, 1 MID, 2 ATT
+        foreach (range(1,4) as $q) {
+            $attach = [];
+
+            // First mark benches
+            foreach ($players as $p) {
+                $isBench = in_array($q, $benchPlan[$p->id] ?? [], true);
+                if ($isBench) {
+                    $attach[$p->id] = ['quarter' => $q, 'position_id' => null];
+                }
+            }
+
+            // Determine available players this quarter (not benched)
+            $available = $players->reject(function($p) use ($benchPlan, $q) {
+                return in_array($q, $benchPlan[$p->id] ?? [], true);
+            })->values();
+
+            // Select keeper for the quarter (if available)
+            $selected = collect(); // player_id => role
+            $keeperId = $keeperByQuarter[$q] ?? null;
+            if ($keeperId) {
+                // Only assign as keeper if not benched this quarter
+                if (!isset($attach[$keeperId])) {
+                    $selected[$keeperId] = 'keeper';
+                    $attach[$keeperId] = ['quarter' => $q, 'position_id' => $repRolePos['keeper']];
+                }
+            }
+
+            // Build role needs
+            $needs = [
+                'defender' => 2,
+                'midfielder' => 1,
+                'attacker' => 2,
+            ];
+
+            // Helper: pick players matching role preference first
+            $alreadySelectedIds = function() use ($selected) {
+                return $selected->keys()->all();
+            };
+
+            $pickForRole = function(string $role) use (&$available, &$selected, $alreadySelectedIds, $positionIdToRole, $q, &$attach, $repRolePos) {
+                foreach ($available as $p) {
+                    if (in_array($p->id, $alreadySelectedIds(), true)) continue;
+                    $favRole = $positionIdToRole($p->position_id);
+                    if ($favRole === $role) {
+                        $selected[$p->id] = $role;
+                        // Assign position_id: player's favorite if within role, else representative
+                        $posId = $repRolePos[$role] ?? null;
+                        if ($favRole === $role && $p->position_id) {
+                            $posId = $p->position_id;
+                        }
+                        $attach[$p->id] = ['quarter' => $q, 'position_id' => $posId];
+                        return true;
+                    }
+                }
+                return false;
+            };
+
+            // First pass: satisfy needs with matching favorites
+            foreach (array_keys($needs) as $role) {
+                while ($needs[$role] > 0 && $pickForRole($role)) {
+                    $needs[$role]--;
+                }
+            }
+
+            // Second pass: fill remaining slots from any available players not yet selected
+            foreach (array_keys($needs) as $role) {
+                while ($needs[$role] > 0) {
+                    $filled = false;
+                    foreach ($available as $p) {
+                        if (isset($selected[$p->id])) continue;
+                        $selected[$p->id] = $role;
+                        $posId = $repRolePos[$role] ?? null;
+                        // if player's favorite fits this role use it, otherwise use representative
+                        $favRole = $positionIdToRole($p->position_id);
+                        if ($favRole === $role && $p->position_id) {
+                            $posId = $p->position_id;
+                        }
+                        $attach[$p->id] = ['quarter' => $q, 'position_id' => $posId];
+                        $needs[$role]--;
+                        $filled = true;
+                        break;
+                    }
+                    if (!$filled) {
+                        // No more players to fill this role; break to avoid infinite loop
+                        break;
+                    }
+                }
+            }
+
+            // Any remaining available players not selected and not benched should get a generic outfield position
+            foreach ($available as $p) {
+                if (isset($selected[$p->id])) continue;
+                if (isset($attach[$p->id])) continue; // benched already
+                // Assign their favorite non-keeper, else fallback
+                $posId = $p->position_id;
+                if ($positionIdToRole($posId) === 'keeper') {
+                    $posId = $fallbackOutfieldPositionId;
+                }
+                $attach[$p->id] = ['quarter' => $q, 'position_id' => $posId];
+            }
+
+            if (!empty($attach)) {
+                $match->players()->attach($attach);
+            }
+        }
+
+        return redirect()->route('football-matches.show', $match)->with('success', 'Wedstrijd aangemaakt en line-up automatisch gegenereerd.');
     }
 
     /**

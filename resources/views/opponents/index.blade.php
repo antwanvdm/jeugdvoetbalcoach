@@ -32,7 +32,7 @@
                     @endif
                 </td>
                 <td class="p-3 text-right">
-                    <a class="text-blue-600 mr-2" href="{{ route('opponents.show', $opponent) }}">Toon</a>
+                    <a class="text-blue-600 mr-2" href="{{ route('opponents.show', $opponent) }}">Bekijk</a>
                     <a class="text-yellow-600 mr-2" href="{{ route('opponents.edit', $opponent) }}">Bewerk</a>
                     <form action="{{ route('opponents.destroy', $opponent) }}" method="POST" class="inline">
                         @csrf

@@ -39,7 +39,7 @@ class OpponentController extends Controller
             'longitude' => ['required','numeric'],
         ]);
         $opponent = Opponent::create($validated);
-        return redirect()->route('opponents.show', $opponent)->with('success', 'Opponent created.');
+        return redirect()->route('opponents.show', $opponent)->with('success', 'Tegenstander aangemaakt.');
     }
 
     /**
@@ -71,7 +71,7 @@ class OpponentController extends Controller
             'longitude' => ['required','numeric'],
         ]);
         $opponent->update($validated);
-        return redirect()->route('opponents.show', $opponent)->with('success', 'Opponent updated.');
+        return redirect()->route('opponents.show', $opponent)->with('success', 'Tegenstander bijgewerkt.');
     }
 
     /**

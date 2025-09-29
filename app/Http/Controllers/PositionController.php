@@ -35,7 +35,7 @@ class PositionController extends Controller
             'name' => ['required','string','max:255'],
         ]);
         $position = Position::create($validated);
-        return redirect()->route('positions.show', $position)->with('success', 'Position created.');
+        return redirect()->route('positions.show', $position)->with('success', 'Positie aangemaakt.');
     }
 
     /**
@@ -63,7 +63,7 @@ class PositionController extends Controller
             'name' => ['required','string','max:255'],
         ]);
         $position->update($validated);
-        return redirect()->route('positions.show', $position)->with('success', 'Position updated.');
+        return redirect()->route('positions.show', $position)->with('success', 'Positie bijgewerkt.');
     }
 
     /**
