@@ -21,10 +21,32 @@
             <dd class="col-span-2">{{ $footballMatch->opponent->name ?? '-' }}</dd>
 
             <dt class="font-medium text-gray-600">Locatie</dt>
-            <dd class="col-span-2">{{ $footballMatch->home ? 'Thuis' : 'Uit' }}</dd>
+            <dd class="col-span-2">
+                @php
+                    $label = $footballMatch->home ? 'Thuis' : 'Uit';
+                    $homeUrl = 'https://maps.app.goo.gl/oBBodGTYQJxh9iKT7';
+                    $mapsUrl = null;
+                    $locLabel = null;
+                    if ($footballMatch->home) {
+                        $mapsUrl = $homeUrl;
+                        $locLabel = 'VVOR';
+                    } else {
+                        $opp = $footballMatch->opponent;
+                        $hasCoords = $opp && !is_null($opp->latitude) && !is_null($opp->longitude);
+                        $mapsUrl = $hasCoords
+                            ? 'https://www.google.com/maps?q=' . urlencode($opp->latitude . ',' . $opp->longitude)
+                            : ($opp && $opp->location ? 'https://www.google.com/maps?q=' . urlencode($opp->location) : null);
+                        $locLabel = $opp?->location ?: ($hasCoords ? ($opp->latitude . ', ' . $opp->longitude) : null);
+                    }
+                @endphp
+                {{ $label }}
+                @if($mapsUrl)
+                    (<a href="{{ $mapsUrl }}" target="_blank" rel="noopener" class="text-blue-600 hover:underline">{{ $locLabel ?? 'bekijk op kaart' }}</a>)
+                @endif
+            </dd>
 
             <dt class="font-medium text-gray-600">Datum</dt>
-            <dd class="col-span-2">{{ $footballMatch->date?->format('Y-m-d H:i') }}</dd>
+            <dd class="col-span-2">{{ $footballMatch->date?->translatedFormat('j F Y H:i') }}</dd>
 
             <dt class="font-medium text-gray-600">Uitslag</dt>
             <dd class="col-span-2">

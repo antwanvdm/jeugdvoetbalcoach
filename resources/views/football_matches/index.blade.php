@@ -19,7 +19,7 @@
     <tbody>
         @forelse($footballMatches as $match)
             <tr class="border-b">
-                <td class="p-3">{{ $match->date?->format('Y-m-d H:i') }}</td>
+                <td class="p-3">{{ $match->date?->translatedFormat('d-m-Y H:i') }}</td>
                 <td class="p-3">{{ $match->opponent->name ?? '-' }}</td>
                 <td class="p-3">{{ $match->home ? 'Thuis' : 'Uit' }}</td>
                 <td class="p-3">
