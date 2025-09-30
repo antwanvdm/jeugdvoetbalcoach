@@ -73,6 +73,36 @@ class FootballMatchController extends Controller
             };
         };
 
+        // Helper to calculate weight balance score for a group of players
+        $calculateWeightBalance = function ($playerIds) use ($players) {
+            if (empty($playerIds)) return 0;
+
+            $selectedPlayers = $players->whereIn('id', $playerIds);
+            $weights = $selectedPlayers->pluck('weight')->countBy();
+            $totalPlayers = count($playerIds);
+
+            if ($totalPlayers <= 1) return 0;
+
+            // Calculate penalty for having too many players with same weight
+            $penalty = 0;
+            foreach ($weights as $weight => $count) {
+                if ($count > 2) { // More than 2 players with same weight is less desirable
+                    $penalty += ($count - 2) * 10; // Heavy penalty for clustering
+                } elseif ($count > 1) {
+                    $penalty += ($count - 1) * 2; // Light penalty for pairs
+                }
+            }
+
+            // Add variance component for overall distribution
+            $idealCountPerWeight = $totalPlayers / max(1, $weights->count());
+            $variance = 0;
+            foreach ($weights as $count) {
+                $variance += pow($count - $idealCountPerWeight, 2);
+            }
+
+            return $penalty + ($variance * 0.5);
+        };
+
         // Historical keeper counts per player
         $keeperCounts = Player::query()
             ->withCount([
@@ -80,18 +110,57 @@ class FootballMatchController extends Controller
             ])
             ->pluck('keeper_count', 'id');
 
-        // Choose 4 keepers with the least historical keeper counts
-        $keepers = $players->sortBy(fn($p) => [(int)$keeperCounts->get($p->id, 0), $p->name])->take(4)->values();
+        // Choose 4 keepers with the least historical keeper counts, also considering weight diversity
+        $sortedKeepers = $players->sortBy(fn($p) => [(int)$keeperCounts->get($p->id, 0), $p->name]);
+
+        // Select keepers with better weight distribution
+        $keepers = collect();
+        $availableKeepers = $sortedKeepers->values();
+
+        // Pick first keeper (least appearances)
+        if ($availableKeepers->isNotEmpty()) {
+            $keepers->push($availableKeepers->shift());
+        }
+
+        // Pick remaining 3 keepers considering weight diversity
+        while ($keepers->count() < 4 && $availableKeepers->isNotEmpty()) {
+            $bestCandidate = null;
+            $bestBalance = PHP_FLOAT_MAX;
+
+            foreach ($availableKeepers as $index => $candidate) {
+                $testGroup = $keepers->push($candidate);
+                $balance = $calculateWeightBalance($testGroup->pluck('id')->all());
+
+                if ($balance < $bestBalance) {
+                    $bestBalance = $balance;
+                    $bestCandidate = $index;
+                }
+
+                $keepers->pop(); // Remove test candidate
+            }
+
+            if ($bestCandidate !== null) {
+                $keepers->push($availableKeepers->splice($bestCandidate, 1)->first());
+            } else {
+                // Fallback: just take next available
+                $keepers->push($availableKeepers->shift());
+            }
+        }
+
         $keeperByQuarter = $keepers->mapWithKeys(fn($keeper, $index) => [$index + 1 => $keeper->id])->toArray();
 
         // Bench plan per player per quarter
         $benchPlan = []; // [player_id => [quarters...]]
 
         // Non-keepers: bench exactly 2 times, not consecutive -> alternate Q1+Q3 vs Q2+Q4
+        // Consider weight distribution when assigning bench patterns
+        $nonKeepers = $players->reject(fn($p) => in_array($p->id, $keepers->pluck('id')->all(), true));
+
+        // Sort non-keepers by weight to help distribute them evenly across quarters
+        $nonKeepersSorted = $nonKeepers->sortBy(['weight', 'name']);
+
         $toggle = false;
-        foreach ($players as $p) {
-            $isSelectedKeeper = in_array($p->id, $keepers->pluck('id')->all(), true);
-            if ($isSelectedKeeper) continue; // handle below
+        foreach ($nonKeepersSorted as $p) {
             if ($toggle) {
                 $benchPlan[$p->id] = [2, 4];
             } else {
@@ -147,27 +216,50 @@ class FootballMatchController extends Controller
                 'attacker' => 2,
             ];
 
-            // Helper: pick players matching role preference first
+            // Helper: pick players matching role preference first, considering weight balance
             $alreadySelectedIds = function () use ($selected) {
                 return $selected->keys()->all();
             };
 
-            $pickForRole = function (string $role) use (&$available, &$selected, $alreadySelectedIds, $positionIdToRole, $q, &$attach, $repRolePos) {
+            $pickForRole = function (string $role) use (&$available, &$selected, $alreadySelectedIds, $positionIdToRole, $q, &$attach, $repRolePos, $calculateWeightBalance) {
+                // Get candidates for this role
+                $candidates = [];
                 foreach ($available as $p) {
                     if (in_array($p->id, $alreadySelectedIds(), true)) continue;
                     $favRole = $positionIdToRole($p->position_id);
                     if ($favRole === $role) {
-                        $selected[$p->id] = $role;
-                        // Assign position_id: player's favorite if within role, else representative
-                        $posId = $repRolePos[$role] ?? null;
-                        if ($favRole === $role && $p->position_id) {
-                            $posId = $p->position_id;
-                        }
-                        $attach[$p->id] = ['quarter' => $q, 'position_id' => $posId];
-                        return true;
+                        $candidates[] = $p;
                     }
                 }
-                return false;
+
+                if (empty($candidates)) return false;
+
+                // Sort candidates by weight balance impact (prefer candidates that improve balance)
+                usort($candidates, function ($a, $b) use ($selected, $calculateWeightBalance) {
+                    $currentSelectedIds = $selected->keys()->all();
+
+                    // Calculate balance score with each candidate added
+                    $balanceWithA = $calculateWeightBalance(array_merge($currentSelectedIds, [$a->id]));
+                    $balanceWithB = $calculateWeightBalance(array_merge($currentSelectedIds, [$b->id]));
+
+                    // If balance scores are similar, prefer by weight (avoid clustering same weights)
+                    if (abs($balanceWithA - $balanceWithB) < 0.1) {
+                        return $a->weight <=> $b->weight;
+                    }
+
+                    return $balanceWithA <=> $balanceWithB;
+                });
+
+                // Pick the best candidate
+                $p = $candidates[0];
+                $selected[$p->id] = $role;
+                // Assign position_id: player's favorite if within role, else representative
+                $posId = $repRolePos[$role] ?? null;
+                if ($positionIdToRole($p->position_id) === $role && $p->position_id) {
+                    $posId = $p->position_id;
+                }
+                $attach[$p->id] = ['quarter' => $q, 'position_id' => $posId];
+                return true;
             };
 
             // First pass: satisfy needs with matching favorites
@@ -177,24 +269,47 @@ class FootballMatchController extends Controller
                 }
             }
 
-            // Second pass: fill remaining slots from any available players not yet selected
+            // Second pass: fill remaining slots from any available players not yet selected, considering weight balance
             foreach (array_keys($needs) as $role) {
                 while ($needs[$role] > 0) {
                     $filled = false;
-                    foreach ($available as $p) {
-                        if (isset($selected[$p->id])) continue;
-                        $selected[$p->id] = $role;
-                        $posId = $repRolePos[$role] ?? null;
-                        // if player's favorite fits this role use it, otherwise use representative
-                        $favRole = $positionIdToRole($p->position_id);
-                        if ($favRole === $role && $p->position_id) {
-                            $posId = $p->position_id;
-                        }
-                        $attach[$p->id] = ['quarter' => $q, 'position_id' => $posId];
-                        $needs[$role]--;
-                        $filled = true;
-                        break;
+
+                    // Get all unselected available players and sort by weight balance impact
+                    $remainingPlayers = $available->filter(function ($p) use ($selected) {
+                        return !isset($selected[$p->id]);
+                    })->values();
+
+                    if ($remainingPlayers->isEmpty()) {
+                        break; // No more players available
                     }
+
+                    // Sort by weight balance impact
+                    $remainingPlayers = $remainingPlayers->sort(function ($a, $b) use ($selected, $calculateWeightBalance) {
+                        $currentSelectedIds = $selected->keys()->all();
+
+                        $balanceWithA = $calculateWeightBalance(array_merge($currentSelectedIds, [$a->id]));
+                        $balanceWithB = $calculateWeightBalance(array_merge($currentSelectedIds, [$b->id]));
+
+                        // If balance scores are similar, prefer by weight diversity
+                        if (abs($balanceWithA - $balanceWithB) < 0.1) {
+                            return $a->weight <=> $b->weight;
+                        }
+
+                        return $balanceWithA <=> $balanceWithB;
+                    });
+
+                    $p = $remainingPlayers->first();
+                    $selected[$p->id] = $role;
+                    $posId = $repRolePos[$role] ?? null;
+                    // if player's favorite fits this role use it, otherwise use representative
+                    $favRole = $positionIdToRole($p->position_id);
+                    if ($favRole === $role && $p->position_id) {
+                        $posId = $p->position_id;
+                    }
+                    $attach[$p->id] = ['quarter' => $q, 'position_id' => $posId];
+                    $needs[$role]--;
+                    $filled = true;
+
                     if (!$filled) {
                         // No more players to fill this role; break to avoid infinite loop
                         break;
@@ -230,7 +345,7 @@ class FootballMatchController extends Controller
         $footballMatch->load(['opponent']);
         // Fetch all pivot rows for this match and group by quarter to avoid de-duplication by player_id
         $rows = \App\Models\Player::query()
-            ->select('players.id', 'players.name', 'football_match_player.quarter', 'football_match_player.position_id')
+            ->select('players.id', 'players.name', 'players.weight', 'football_match_player.quarter', 'football_match_player.position_id')
             ->join('football_match_player', 'football_match_player.player_id', '=', 'players.id')
             ->where('football_match_player.football_match_id', $footballMatch->id)
             ->orderBy('players.name')
