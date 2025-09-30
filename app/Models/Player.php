@@ -11,6 +11,7 @@ class Player extends Model
     protected $fillable = [
         'name',
         'position_id',
+        'weight',
     ];
 
     public function position(): BelongsTo

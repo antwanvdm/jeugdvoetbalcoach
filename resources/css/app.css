@@ -9,3 +9,47 @@
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
+
+@layer components {
+    .border,
+    .border-r,
+    .border-l,
+    .border-t,
+    .border-b,
+    .border-x,
+    .border-y {
+        @apply border-gray-200;
+    }
+}
+
+@media print {
+    * {
+        background: white;
+        color: black !important;
+    }
+
+    main.football-matches-show .top-row-actions,
+    main.football-matches-show .opponent-info,
+    main.football-matches-show .line-up-header {
+        display: none;
+    }
+
+    main.football-matches-show .line-up-block {
+        padding: 2px !important;
+    }
+
+    main.football-matches-show .line-up-player-rows {
+        padding: 0 !important;
+        gap: 5px;
+    }
+
+    td, th {
+        padding-right: 0 !important;
+        padding-block: 5px !important;
+        width: auto !important;
+    }
+
+    nav, footer {
+        display: none;
+    }
+}

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ config('app.name', 'VVOR') }}</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    @vite('resources/css/app.css')
 </head>
 <body class="bg-gray-100 text-gray-900">
     <nav class="bg-white shadow mb-6">
@@ -17,7 +17,7 @@
         </div>
     </nav>
 
-    <main class="max-w-5xl mx-auto px-4 mb-4">
+    <main class="max-w-5xl mx-auto px-4 mb-4 {{str_replace('.', '-', request()->route()->getName())}}">
         @if(session('success'))
             <div class="mb-4 p-3 rounded bg-green-100 text-green-800">
                 {{ session('success') }}

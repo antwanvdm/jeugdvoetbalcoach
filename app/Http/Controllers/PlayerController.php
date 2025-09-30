@@ -34,8 +34,9 @@ class PlayerController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'name' => ['required','string','max:255'],
-            'position_id' => ['required','exists:positions,id'],
+            'name' => ['required', 'string', 'max:255'],
+            'position_id' => ['required', 'exists:positions,id'],
+            'weight' => ['required', 'numeric'],
         ]);
 
         $player = Player::create($validated);
@@ -58,7 +59,7 @@ class PlayerController extends Controller
     public function edit(Player $player): View
     {
         $positions = Position::orderBy('name')->pluck('name', 'id');
-        return view('players.edit', compact('player','positions'));
+        return view('players.edit', compact('player', 'positions'));
     }
 
     /**
@@ -67,8 +68,9 @@ class PlayerController extends Controller
     public function update(Request $request, Player $player): RedirectResponse
     {
         $validated = $request->validate([
-            'name' => ['required','string','max:255'],
-            'position_id' => ['required','exists:positions,id'],
+            'name' => ['required', 'string', 'max:255'],
+            'position_id' => ['required', 'exists:positions,id'],
+            'weight' => ['required', 'numeric'],
         ]);
 
         $player->update($validated);

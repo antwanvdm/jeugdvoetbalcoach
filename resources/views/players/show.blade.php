@@ -23,6 +23,10 @@
         <div class="text-sm text-gray-600">Favoriete positie</div>
         <div class="font-medium">{{ $player->position->name ?? '-' }}</div>
     </div>
+    <div class="mb-2">
+        <div class="text-sm text-gray-600">Fysiek</div>
+        <div class="font-medium">{{ $player->weight }}</div>
+    </div>
 </div>
 
 @endsection

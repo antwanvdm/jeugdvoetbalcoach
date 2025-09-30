@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="flex items-center justify-between mb-4">
+    <div class="flex items-center justify-between mb-4 top-row-actions">
         <h1 class="text-2xl font-semibold">Wedstrijd tegen {{ $footballMatch->opponent->name ?? 'Onbekend' }}</h1>
         <div class="flex gap-2">
             <a href="{{ route('football-matches.index') }}" class="px-3 py-2 bg-gray-200 rounded">Terug</a>
@@ -15,7 +15,7 @@
         </div>
     </div>
 
-    <div class="bg-white p-4 shadow rounded max-w-xl">
+    <div class="bg-white p-4 shadow rounded max-w-xl opponent-info">
         <dl class="grid grid-cols-3 gap-2">
             <dt class="font-medium text-gray-600">Tegenstander</dt>
             <dd class="col-span-2">{{ $footballMatch->opponent->name ?? '-' }}</dd>
@@ -61,7 +61,7 @@
 
     {{-- Lineup overview table --}}
     <div class="mt-6 bg-white p-4 shadow rounded">
-        <div class="flex justify-between">
+        <div class="flex justify-between line-up-header">
             <h2 class="text-xl font-semibold mb-3">Line-up per kwart</h2>
             <a href="{{ route('football-matches.lineup', $footballMatch) }}" class="px-3 py-2 bg-indigo-600 text-white rounded">Bewerk line-up</a>
         </div>
@@ -88,7 +88,7 @@
                         });
                         $field = $starters->filter(fn($p) => $keeper ? $p->id !== $keeper->id : true);
                     @endphp
-                    <tr class="border-t align-top">
+                    <tr class="border-t align-middle">
                         <td class="py-2 pr-4 font-medium">Q{{ $q }}</td>
                         <td class="py-2 pr-4">
                             @if($keeper)
@@ -99,14 +99,14 @@
                         </td>
                         <td class="py-2 pr-4">
                             @forelse($field as $p)
-                                <span class="inline-block mr-1 mb-1 px-2 py-1 rounded text-white bg-green-600">{{ $p->name }}</span>
+                                <span class="inline-block px-2 py-1 rounded text-white bg-green-600">{{ $p->name }}</span>
                             @empty
                                 <span class="text-gray-400">-</span>
                             @endforelse
                         </td>
                         <td class="py-2 pr-4">
                             @forelse($bench as $p)
-                                <span class="inline-block mr-1 mb-1 px-2 py-1 rounded bg-yellow-300 text-yellow-900">{{ $p->name }}</span>
+                                <span class="inline-block px-2 py-1 rounded bg-yellow-300 text-yellow-900">{{ $p->name }}</span>
                             @empty
                                 <span class="text-gray-400">-</span>
                             @endforelse
@@ -120,8 +120,8 @@
 
     {{-- Dobbelsteen-opstelling (schematic) per quarter --}}
     <div class="mt-6 bg-white p-4 shadow rounded">
-        <h2 class="text-xl font-semibold mb-3">Opstelling per kwart</h2>
-        <div class="grid md:grid-cols-2 gap-4">
+        <h2 class="text-xl font-semibold mb-3 line-up-header">Opstelling per kwart</h2>
+        <div class="grid md:grid-cols-2 gap-4 line-up">
             @foreach(range(1,4) as $q)
                 @php
                     $present = $assignmentsByQuarter[$q] ?? collect();
@@ -147,10 +147,10 @@
                         }
                     }
                 @endphp
-                <div class="border rounded p-3">
-                    <div class="text-sm font-medium mb-2">Kwart {{ $q }}</div>
+                <div class="border rounded p-3 line-up-block">
+                    <div class="text-sm font-medium mb-2">Q{{ $q }}</div>
                     {{-- Simple vertical lines: Aanvaller (top), Middenvelder, Verdediger, Keeper (bottom) --}}
-                    <div class="flex flex-col gap-6 bg-emerald-50 p-3 rounded">
+                    <div class="flex flex-col gap-6 bg-emerald-50 p-3 rounded line-up-player-rows">
                         {{-- Aanvallers --}}
                         <div class="flex flex-wrap justify-center gap-16 min-h-6">
                             @foreach($attackers as $p)

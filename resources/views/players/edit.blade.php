@@ -17,6 +17,10 @@
             @endforeach
         </select>
     </div>
+    <div class="mb-3">
+        <label class="block text-sm font-medium mb-1">Fysiek</label>
+        <input type="number" name="weight" value="{{ old('name', $player->weight) }}" class="w-full border rounded p-2" required>
+    </div>
     <div class="flex gap-2">
         <button class="px-3 py-2 bg-blue-600 text-white rounded">Werk bij</button>
         <a href="{{ route('players.show', $player) }}" class="px-3 py-2 bg-gray-200 rounded">Annuleer</a>
