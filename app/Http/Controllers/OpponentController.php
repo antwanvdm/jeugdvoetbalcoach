@@ -32,11 +32,11 @@ class OpponentController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'name' => ['required','string','max:255'],
-            'location' => ['required','string','max:255'],
-            'logo' => ['nullable','string','max:255'],
-            'latitude' => ['required','numeric'],
-            'longitude' => ['required','numeric'],
+            'name' => ['required', 'string', 'max:255'],
+            'location' => ['required', 'string', 'max:255'],
+            'logo' => ['nullable', 'string', 'max:255'],
+            'latitude' => ['required', 'numeric'],
+            'longitude' => ['required', 'numeric'],
         ]);
         $opponent = Opponent::create($validated);
         return redirect()->route('opponents.show', $opponent)->with('success', 'Tegenstander aangemaakt.');
@@ -64,11 +64,11 @@ class OpponentController extends Controller
     public function update(Request $request, Opponent $opponent): RedirectResponse
     {
         $validated = $request->validate([
-            'name' => ['required','string','max:255'],
-            'location' => ['required','string','max:255'],
-            'logo' => ['nullable','string','max:255'],
-            'latitude' => ['required','numeric'],
-            'longitude' => ['required','numeric'],
+            'name' => ['required', 'string', 'max:255'],
+            'location' => ['required', 'string', 'max:255'],
+            'logo' => ['nullable', 'string', 'max:255'],
+            'latitude' => ['required', 'numeric'],
+            'longitude' => ['required', 'numeric'],
         ]);
         $opponent->update($validated);
         return redirect()->route('opponents.show', $opponent)->with('success', 'Tegenstander bijgewerkt.');

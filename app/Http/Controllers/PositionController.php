@@ -32,7 +32,7 @@ class PositionController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'name' => ['required','string','max:255'],
+            'name' => ['required', 'string', 'max:255'],
         ]);
         $position = Position::create($validated);
         return redirect()->route('positions.show', $position)->with('success', 'Positie aangemaakt.');
@@ -60,7 +60,7 @@ class PositionController extends Controller
     public function update(Request $request, Position $position): RedirectResponse
     {
         $validated = $request->validate([
-            'name' => ['required','string','max:255'],
+            'name' => ['required', 'string', 'max:255'],
         ]);
         $position->update($validated);
         return redirect()->route('positions.show', $position)->with('success', 'Positie bijgewerkt.');

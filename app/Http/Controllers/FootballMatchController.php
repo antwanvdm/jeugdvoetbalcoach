@@ -76,8 +76,7 @@ class FootballMatchController extends Controller
         // Historical keeper counts per player
         $keeperCounts = Player::query()
             ->withCount([
-                'footballMatches as keeper_count' => fn($q) =>
-                $q->where('football_match_player.position_id', $keeperPositionId)
+                'footballMatches as keeper_count' => fn($q) => $q->where('football_match_player.position_id', $keeperPositionId)
             ])
             ->pluck('keeper_count', 'id');
 

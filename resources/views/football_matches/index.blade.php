@@ -1,13 +1,13 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="flex items-center justify-between mb-4">
-    <h1 class="text-2xl font-semibold">Wedstrijden</h1>
-    <a href="{{ route('football-matches.create') }}" class="px-3 py-2 bg-blue-600 text-white rounded">Nieuwe wedstrijd</a>
-</div>
+    <div class="flex items-center justify-between mb-4">
+        <h1 class="text-2xl font-semibold">Wedstrijden</h1>
+        <a href="{{ route('football-matches.create') }}" class="px-3 py-2 bg-blue-600 text-white rounded">Nieuwe wedstrijd</a>
+    </div>
 
-<table class="min-w-full bg-white shadow rounded">
-    <thead>
+    <table class="min-w-full bg-white shadow rounded">
+        <thead>
         <tr class="border-b">
             <th class="text-left p-3">Datum</th>
             <th class="text-left p-3">Tegenstander</th>
@@ -15,8 +15,8 @@
             <th class="text-left p-3">Uitslag</th>
             <th class="text-right p-3"></th>
         </tr>
-    </thead>
-    <tbody>
+        </thead>
+        <tbody>
         @forelse($footballMatches as $match)
             <tr class="border-b">
                 <td class="p-3">{{ $match->date?->translatedFormat('d-m-Y H:i') }}</td>
@@ -45,8 +45,8 @@
                 <td colspan="5" class="p-3 text-center text-gray-500">Nog geen wedstrijden.</td>
             </tr>
         @endforelse
-    </tbody>
-</table>
+        </tbody>
+    </table>
 
-<div class="mt-4">{{ $footballMatches->links() }}</div>
+    <div class="mt-4">{{ $footballMatches->links() }}</div>
 @endsection

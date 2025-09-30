@@ -1,21 +1,21 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="flex items-center justify-between mb-4">
-    <h1 class="text-2xl font-semibold">Spelers</h1>
-    <a href="{{ route('players.create') }}" class="px-3 py-2 bg-blue-600 text-white rounded">Nieuwe speler</a>
-</div>
+    <div class="flex items-center justify-between mb-4">
+        <h1 class="text-2xl font-semibold">Spelers</h1>
+        <a href="{{ route('players.create') }}" class="px-3 py-2 bg-blue-600 text-white rounded">Nieuwe speler</a>
+    </div>
 
-<table class="min-w-full bg-white shadow rounded">
-    <thead>
+    <table class="min-w-full bg-white shadow rounded">
+        <thead>
         <tr class="border-b">
             <th class="text-left p-3">Naam</th>
             <th class="text-left p-3">Favoriete positie</th>
             <th class="text-left p-3">Fysiek</th>
             <th class="text-right p-3"></th>
         </tr>
-    </thead>
-    <tbody>
+        </thead>
+        <tbody>
         @forelse($players as $player)
             <tr class="border-b">
                 <td class="p-3">{{ $player->name }}</td>
@@ -36,8 +36,8 @@
                 <td colspan="3" class="p-3 text-center text-gray-500">Voeg eerst spelers toe.</td>
             </tr>
         @endforelse
-    </tbody>
-</table>
+        </tbody>
+    </table>
 
-<div class="mt-4">{{ $players->links() }}</div>
+    <div class="mt-4">{{ $players->links() }}</div>
 @endsection
