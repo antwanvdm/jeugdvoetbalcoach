@@ -36,79 +36,54 @@ class FootballMatchController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'opponent_id' => ['required','exists:opponents,id'],
-            'home' => ['required','boolean'],
-            'goals_scores' => ['nullable','integer','min:0'],
-            'goals_conceded' => ['nullable','integer','min:0'],
-            'date' => ['required','date'],
+            'opponent_id' => ['required', 'exists:opponents,id'],
+            'home' => ['required', 'boolean'],
+            'goals_scores' => ['nullable', 'integer', 'min:0'],
+            'goals_conceded' => ['nullable', 'integer', 'min:0'],
+            'date' => ['required', 'date'],
         ]);
         $match = FootballMatch::create($validated);
 
         // Auto-generate line-up for 4 quarters according to rules
         // 1) Pick 4 goalkeepers with least historical keeper appearances
-        $positions = Position::orderBy('name')->get();
-        // Build role buckets from position names (Dutch keywords)
-        $keeperPositionIds = [];
-        $defenderPositionIds = [];
-        $midfielderPositionIds = [];
-        $attackerPositionIds = [];
-        foreach ($positions as $pos) {
-            $n = strtolower($pos->name);
-            if (str_contains($n, 'keep') || str_contains($n, 'goal') || str_contains($n, 'doel')) {
-                $keeperPositionIds[] = $pos->id;
-            } elseif (str_contains($n, 'verded')) {
-                $defenderPositionIds[] = $pos->id;
-            } elseif (str_contains($n, 'midden')) {
-                $midfielderPositionIds[] = $pos->id;
-            } elseif (str_contains($n, 'aanv')) {
-                $attackerPositionIds[] = $pos->id;
-            }
-        }
-        $nonKeeperPositionIds = $positions->reject(function($pos) use ($keeperPositionIds){
-            return in_array($pos->id, $keeperPositionIds, true);
-        })->pluck('id')->values()->all();
-        $fallbackOutfieldPositionId = $nonKeeperPositionIds[0] ?? null;
+        $keeperPositionId = 1;
+        $defenderPositionId = 2;
+        $midfielderPositionId = 3;
+        $attackerPositionId = 4;
+
+        $nonKeeperPositionIds = [$defenderPositionId, $midfielderPositionId, $attackerPositionId];
+        $fallbackOutfieldPositionId = $nonKeeperPositionIds[0];
         $repRolePos = [
-            'keeper' => $keeperPositionIds[0] ?? null,
-            'defender' => $defenderPositionIds[0] ?? $fallbackOutfieldPositionId,
-            'midfielder' => $midfielderPositionIds[0] ?? $fallbackOutfieldPositionId,
-            'attacker' => $attackerPositionIds[0] ?? $fallbackOutfieldPositionId,
+            'keeper' => $keeperPositionId,
+            'defender' => $defenderPositionId,
+            'midfielder' => $midfielderPositionId,
+            'attacker' => $attackerPositionId,
         ];
 
-        $players = Player::orderBy('name')->get();
+        $players = Player::inRandomOrder()->get();
 
         // Helper to determine a player's favorite role
-        $positionIdToRole = function (?int $pid) use ($keeperPositionIds, $defenderPositionIds, $midfielderPositionIds, $attackerPositionIds) {
-            if (!$pid) return null;
-            if (in_array($pid, $keeperPositionIds, true)) return 'keeper';
-            if (in_array($pid, $defenderPositionIds, true)) return 'defender';
-            if (in_array($pid, $midfielderPositionIds, true)) return 'midfielder';
-            if (in_array($pid, $attackerPositionIds, true)) return 'attacker';
-            return null;
+        $positionIdToRole = function (?int $pid) use ($keeperPositionId, $defenderPositionId, $midfielderPositionId, $attackerPositionId) {
+            return match ($pid) {
+                $keeperPositionId => 'keeper',
+                $defenderPositionId => 'defender',
+                $midfielderPositionId => 'midfielder',
+                $attackerPositionId => 'attacker',
+                default => null
+            };
         };
 
         // Historical keeper counts per player
-        $keeperCounts = collect();
-        if (!empty($keeperPositionIds)) {
-            $counts = \DB::table('football_match_player')
-                ->select('player_id', \DB::raw('COUNT(*) as c'))
-                ->whereIn('position_id', $keeperPositionIds)
-                ->groupBy('player_id')
-                ->pluck('c', 'player_id');
-            $keeperCounts = collect($counts);
-        }
+        $keeperCounts = Player::query()
+            ->withCount([
+                'footballMatches as keeper_count' => fn($q) =>
+                $q->where('football_match_player.position_id', $keeperPositionId)
+            ])
+            ->pluck('keeper_count', 'id');
 
         // Choose 4 keepers with the least historical keeper counts
-        $keepers = $players->sortBy(function($p) use ($keeperCounts){
-            return [(int)$keeperCounts->get($p->id, 0), $p->name];
-        })->take(4)->values();
-
-        // Map keeper per quarter (1..4)
-        $keeperByQuarter = [];
-        foreach (range(1,4) as $i => $q) {
-            $kp = $keepers[$i] ?? null;
-            if ($kp) { $keeperByQuarter[$q] = $kp->id; }
-        }
+        $keepers = $players->sortBy(fn($p) => [(int)$keeperCounts->get($p->id, 0), $p->name])->take(4)->values();
+        $keeperByQuarter = $keepers->mapWithKeys(fn($keeper, $index) => [$index + 1 => $keeper->id])->toArray();
 
         // Bench plan per player per quarter
         $benchPlan = []; // [player_id => [quarters...]]
@@ -119,9 +94,9 @@ class FootballMatchController extends Controller
             $isSelectedKeeper = in_array($p->id, $keepers->pluck('id')->all(), true);
             if ($isSelectedKeeper) continue; // handle below
             if ($toggle) {
-                $benchPlan[$p->id] = [2,4];
+                $benchPlan[$p->id] = [2, 4];
             } else {
-                $benchPlan[$p->id] = [1,3];
+                $benchPlan[$p->id] = [1, 3];
             }
             $toggle = !$toggle;
         }
@@ -139,7 +114,7 @@ class FootballMatchController extends Controller
         }
 
         // Build attachments per quarter enforcing formation: 1 GK, 2 DEF, 1 MID, 2 ATT
-        foreach (range(1,4) as $q) {
+        foreach (range(1, 4) as $q) {
             $attach = [];
 
             // First mark benches
@@ -151,7 +126,7 @@ class FootballMatchController extends Controller
             }
 
             // Determine available players this quarter (not benched)
-            $available = $players->reject(function($p) use ($benchPlan, $q) {
+            $available = $players->reject(function ($p) use ($benchPlan, $q) {
                 return in_array($q, $benchPlan[$p->id] ?? [], true);
             })->values();
 
@@ -174,11 +149,11 @@ class FootballMatchController extends Controller
             ];
 
             // Helper: pick players matching role preference first
-            $alreadySelectedIds = function() use ($selected) {
+            $alreadySelectedIds = function () use ($selected) {
                 return $selected->keys()->all();
             };
 
-            $pickForRole = function(string $role) use (&$available, &$selected, $alreadySelectedIds, $positionIdToRole, $q, &$attach, $repRolePos) {
+            $pickForRole = function (string $role) use (&$available, &$selected, $alreadySelectedIds, $positionIdToRole, $q, &$attach, $repRolePos) {
                 foreach ($available as $p) {
                     if (in_array($p->id, $alreadySelectedIds(), true)) continue;
                     $favRole = $positionIdToRole($p->position_id);
@@ -256,7 +231,7 @@ class FootballMatchController extends Controller
         $footballMatch->load(['opponent']);
         // Fetch all pivot rows for this match and group by quarter to avoid de-duplication by player_id
         $rows = \App\Models\Player::query()
-            ->select('players.id','players.name','football_match_player.quarter','football_match_player.position_id')
+            ->select('players.id', 'players.name', 'football_match_player.quarter', 'football_match_player.position_id')
             ->join('football_match_player', 'football_match_player.player_id', '=', 'players.id')
             ->where('football_match_player.football_match_id', $footballMatch->id)
             ->orderBy('players.name')
@@ -268,7 +243,7 @@ class FootballMatchController extends Controller
         }
 
         // Map of position names by id for resolving per-quarter pivot position names
-        $positionNames = Position::pluck('name','id');
+        $positionNames = Position::pluck('name', 'id');
         return view('football_matches.show', [
             'footballMatch' => $footballMatch,
             'positionNames' => $positionNames,
@@ -282,7 +257,7 @@ class FootballMatchController extends Controller
     public function edit(FootballMatch $footballMatch): View
     {
         $opponents = Opponent::orderBy('name')->pluck('name', 'id');
-        return view('football_matches.edit', compact('footballMatch','opponents'));
+        return view('football_matches.edit', compact('footballMatch', 'opponents'));
     }
 
     /**
@@ -291,11 +266,11 @@ class FootballMatchController extends Controller
     public function update(Request $request, FootballMatch $footballMatch): RedirectResponse
     {
         $validated = $request->validate([
-            'opponent_id' => ['required','exists:opponents,id'],
-            'home' => ['required','boolean'],
-            'goals_scores' => ['nullable','integer','min:0'],
-            'goals_conceded' => ['nullable','integer','min:0'],
-            'date' => ['required','date'],
+            'opponent_id' => ['required', 'exists:opponents,id'],
+            'home' => ['required', 'boolean'],
+            'goals_scores' => ['nullable', 'integer', 'min:0'],
+            'goals_conceded' => ['nullable', 'integer', 'min:0'],
+            'date' => ['required', 'date'],
         ]);
         $footballMatch->update($validated);
         return redirect()->route('football-matches.show', $footballMatch)->with('success', 'Wedstrijd bijgewerkt.');
@@ -316,7 +291,7 @@ class FootballMatchController extends Controller
     public function lineup(FootballMatch $footballMatch): View
     {
         $players = Player::orderBy('name')->get();
-        $positions = Position::orderBy('name')->pluck('name','id');
+        $positions = Position::orderBy('name')->pluck('name', 'id');
 
         // Load existing assignments: [quarter][player_id] => position_id|null
         $existing = [];
@@ -343,7 +318,7 @@ class FootballMatchController extends Controller
         $data = $request->validate([
             'assignments' => ['array'],
             'assignments.*' => ['array'],
-            'assignments.*.*' => ['nullable','integer','exists:positions,id'],
+            'assignments.*.*' => ['nullable', 'integer', 'exists:positions,id'],
         ]);
 
         $assignments = $data['assignments'] ?? [];
@@ -353,7 +328,7 @@ class FootballMatchController extends Controller
         // Bench: pivot row with position_id = null.
         $toAttach = [];
 
-        foreach (range(1,4) as $quarter) {
+        foreach (range(1, 4) as $quarter) {
             $quarterAssignments = $assignments[$quarter] ?? [];
 
             // Detach all existing rows for this quarter; then attach the new set for that quarter
