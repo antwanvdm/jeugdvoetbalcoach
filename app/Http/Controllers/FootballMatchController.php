@@ -38,7 +38,7 @@ class FootballMatchController extends Controller
         $validated = $request->validate([
             'opponent_id' => ['required', 'exists:opponents,id'],
             'home' => ['required', 'boolean'],
-            'goals_scored' => ['nullable', 'integer', 'min:0'],
+            'goals_scores' => ['nullable', 'integer', 'min:0'],
             'goals_conceded' => ['nullable', 'integer', 'min:0'],
             'date' => ['required', 'date'],
         ]);
@@ -358,10 +358,39 @@ class FootballMatchController extends Controller
 
         // Map of position names by id for resolving per-quarter pivot position names
         $positionNames = Position::pluck('name', 'id');
+
+        // Get all players with their quarter counts for this match (only actual playing time, not bench)
+        $allPlayers = \App\Models\Player::orderBy('name')->get();
+        $playersWithQuarters = [];
+
+        foreach ($allPlayers as $player) {
+            // Only count quarters where position_id is not null (actually playing, not on bench)
+            $quartersPlayed = $rows->where('id', $player->id)->whereNotNull('position_id')->count();
+            $playersWithQuarters[] = [
+                'player' => $player,
+                'quarters_played' => $quartersPlayed
+            ];
+        }
+
+        // Sort: players with quarters played first (by quarters desc, then name), then absent players by name
+        usort($playersWithQuarters, function ($a, $b) {
+            if ($a['quarters_played'] == 0 && $b['quarters_played'] == 0) {
+                return strcmp($a['player']->name, $b['player']->name);
+            }
+            if ($a['quarters_played'] == 0) return 1;
+            if ($b['quarters_played'] == 0) return -1;
+
+            $quartersDiff = $b['quarters_played'] - $a['quarters_played'];
+            if ($quartersDiff != 0) return $quartersDiff;
+
+            return strcmp($a['player']->name, $b['player']->name);
+        });
+
         return view('football_matches.show', [
             'footballMatch' => $footballMatch,
             'positionNames' => $positionNames,
             'assignmentsByQuarter' => $assignmentsByQuarter,
+            'playersWithQuarters' => $playersWithQuarters,
         ]);
     }
 
@@ -382,7 +411,7 @@ class FootballMatchController extends Controller
         $validated = $request->validate([
             'opponent_id' => ['required', 'exists:opponents,id'],
             'home' => ['required', 'boolean'],
-            'goals_scored' => ['nullable', 'integer', 'min:0'],
+            'goals_scores' => ['nullable', 'integer', 'min:0'],
             'goals_conceded' => ['nullable', 'integer', 'min:0'],
             'date' => ['required', 'date'],
         ]);

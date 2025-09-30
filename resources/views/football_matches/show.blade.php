@@ -22,7 +22,8 @@
 
             <dt class="font-medium text-gray-600">Locatie</dt>
             <dd class="col-span-2">
-                {{ $footballMatch->home ? 'Thuis' : 'Uit' }} (<a href="{{ $footballMatch->home ? config('app.vvor.maps') : $footballMatch->opponent->location_maps_link }}" target="_blank" rel="noopener" class="text-blue-600 hover:underline">{{ $locLabel ?? 'bekijk op kaart' }}</a>)
+                {{ $footballMatch->home ? 'Thuis' : 'Uit' }} (<a href="{{ $footballMatch->home ? config('app.vvor.maps') : $footballMatch->opponent->location_maps_link }}" target="_blank" rel="noopener"
+                                                                 class="text-blue-600 hover:underline">{{ $locLabel ?? 'bekijk op kaart' }}</a>)
             </dd>
 
             <dt class="font-medium text-gray-600">Datum</dt>
@@ -172,4 +173,32 @@
         </div>
     </div>
 
+    {{-- Spelers overzicht met kwarten gespeeld --}}
+    <div class="mt-6 bg-white p-4 shadow rounded player-stats">
+        <h2 class="text-xl font-semibold mb-3">Statistieken</h2>
+        <div class="overflow-x-auto">
+            <table class="min-w-full text-sm">
+                <thead>
+                <tr class="text-left text-gray-600 border-b">
+                    <th class="py-2 pr-4">Speler</th>
+                    <th class="py-2 pr-4">Kwarten gespeeld</th>
+                </tr>
+                </thead>
+                <tbody>
+                @foreach($playersWithQuarters as $item)
+                    <tr class="border-t">
+                        <td class="py-2 pr-4 font-medium">{{ $item['player']->name }}</td>
+                        <td class="py-2 pr-4">
+                            @if($item['quarters_played'] > 0)
+                                <span class="inline-block px-2 py-1 rounded text-white bg-green-600">{{ $item['quarters_played'] }}</span>
+                            @else
+                                <span class="inline-block px-2 py-1 rounded bg-red-200 text-red-800">Afwezig</span>
+                            @endif
+                        </td>
+                    </tr>
+                @endforeach
+                </tbody>
+            </table>
+        </div>
+    </div>
 @endsection

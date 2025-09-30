@@ -42,7 +42,8 @@
 
     main.football-matches-show .top-row-actions,
     main.football-matches-show .opponent-info,
-    main.football-matches-show .line-up-header {
+    main.football-matches-show .line-up-header,
+    main.football-matches-show .player-stats {
         display: none;
     }
 
