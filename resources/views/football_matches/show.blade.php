@@ -37,11 +37,14 @@
                 @endif
             </dd>
         </dl>
-        <div class="flex-1 flex justify-center gap-8 @if(!$footballMatch->home) flex-row-reverse @endif">
-            <div class="flex-1 flex @if($footballMatch->home) justify-end @endif">
+        <div class="flex-1 flex justify-center items-center gap-4 @if(!$footballMatch->home) flex-row-reverse @endif">
+            <div class="flex-12 flex @if($footballMatch->home) justify-end @endif">
                 <img src="{{config('app.vvor.logo')}}" alt="VVOR Logo" class="h-28">
             </div>
-            <div class="flex-1 flex @if(!$footballMatch->home) justify-end @endif">
+            <div class="flex-1">
+                -
+            </div>
+            <div class="flex-12 flex @if(!$footballMatch->home) justify-end @endif">
                 <img src="{{$footballMatch->opponent->logo}}" alt="{{$footballMatch->opponent->name}} Logo" class="h-28">
             </div>
         </div>
