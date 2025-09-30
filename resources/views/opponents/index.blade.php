@@ -9,6 +9,7 @@
     <table class="min-w-full bg-white shadow rounded">
         <thead>
         <tr class="border-b">
+            <th class="text-left p-3"></th>
             <th class="text-left p-3">Naam</th>
             <th class="text-left p-3">Locatie</th>
             <th class="text-right p-3"></th>
@@ -17,19 +18,10 @@
         <tbody>
         @forelse($opponents as $opponent)
             <tr class="border-b">
+                <td class="p-3"><img src="{{ $opponent->logo }}" alt="{{ $opponent->name }} logo" class="h-8"></td>
                 <td class="p-3">{{ $opponent->name }}</td>
                 <td class="p-3">
-                    @php
-                        $hasCoords = !is_null($opponent->latitude) && !is_null($opponent->longitude);
-                        $mapsUrl = $hasCoords
-                            ? 'https://www.google.com/maps?q=' . urlencode($opponent->latitude . ',' . $opponent->longitude)
-                            : ( $opponent->location ? 'https://www.google.com/maps?q=' . urlencode($opponent->location) : null );
-                    @endphp
-                    @if($mapsUrl)
-                        <a href="{{ $mapsUrl }}" target="_blank" rel="noopener" class="text-blue-600 hover:underline">{{ $opponent->location ?: ($opponent->latitude . ', ' . $opponent->longitude) }}</a>
-                    @else
-                        <span class="text-gray-500">-</span>
-                    @endif
+                    <a href="{{ $opponent->location_maps_link }}" target="_blank" rel="noopener" class="text-blue-600 hover:underline">{{ $opponent->location }}</a>
                 </td>
                 <td class="p-3 text-right">
                     <a class="text-blue-600 mr-2" href="{{ route('opponents.show', $opponent) }}">Bekijk</a>

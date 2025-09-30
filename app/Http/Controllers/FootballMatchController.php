@@ -38,7 +38,7 @@ class FootballMatchController extends Controller
         $validated = $request->validate([
             'opponent_id' => ['required', 'exists:opponents,id'],
             'home' => ['required', 'boolean'],
-            'goals_scores' => ['nullable', 'integer', 'min:0'],
+            'goals_scored' => ['nullable', 'integer', 'min:0'],
             'goals_conceded' => ['nullable', 'integer', 'min:0'],
             'date' => ['required', 'date'],
         ]);
@@ -382,7 +382,7 @@ class FootballMatchController extends Controller
         $validated = $request->validate([
             'opponent_id' => ['required', 'exists:opponents,id'],
             'home' => ['required', 'boolean'],
-            'goals_scores' => ['nullable', 'integer', 'min:0'],
+            'goals_scored' => ['nullable', 'integer', 'min:0'],
             'goals_conceded' => ['nullable', 'integer', 'min:0'],
             'date' => ['required', 'date'],
         ]);

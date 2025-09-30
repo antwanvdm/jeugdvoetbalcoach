@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('opponent_id')->constrained()->cascadeOnDelete();
             $table->boolean('home');
-            $table->smallInteger('goals_scores')->nullable();
+            $table->smallInteger('goals_scored')->nullable();
             $table->smallInteger('goals_conceded')->nullable();
             $table->dateTime('date');
             $table->timestamps();

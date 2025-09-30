@@ -22,16 +22,15 @@
                 <td class="p-3">{{ $match->date?->translatedFormat('d-m-Y H:i') }}</td>
                 <td class="p-3">{{ $match->opponent->name ?? '-' }}</td>
                 <td class="p-3">{{ $match->home ? 'Thuis' : 'Uit' }}</td>
-                <td class="p-3">
-                    @if(!is_null($match->goals_scores) && !is_null($match->goals_conceded))
-                        {{ $match->goals_scores }} - {{ $match->goals_conceded }}
+                <td class="p-3 font-bold result-{{$match->result}}">
+                    @if($match->result !== 'O')
+                        {{ $match->goals_scored }} - {{ $match->goals_conceded }}
                     @else
                         <span class="text-gray-500">-</span>
                     @endif
                 </td>
                 <td class="p-3 text-right">
                     <a class="text-blue-600 mr-2" href="{{ route('football-matches.show', $match) }}">Bekijk</a>
-                    <a class="text-blue-600 mr-2" href="{{ route('football-matches.lineup', $match) }}">Line-up</a>
                     <a class="text-yellow-600 mr-2" href="{{ route('football-matches.edit', $match) }}">Bewerk</a>
                     <form action="{{ route('football-matches.destroy', $match) }}" method="POST" class="inline">
                         @csrf

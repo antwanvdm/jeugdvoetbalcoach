@@ -30,7 +30,7 @@
         <div class="mb-3 grid grid-cols-2 gap-3">
             <div>
                 <label class="block text-sm font-medium mb-1">Doelpunten gemaakt</label>
-                <input type="number" name="goals_scores" value="{{ old('goals_scores') }}" class="w-full border rounded p-2" min="0">
+                <input type="number" name="goals_scored" value="{{ old('goals_scored') }}" class="w-full border rounded p-2" min="0">
             </div>
             <div>
                 <label class="block text-sm font-medium mb-1">Doelpunten tegen</label>

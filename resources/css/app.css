@@ -22,6 +22,18 @@
     }
 }
 
+.result-W {
+    @apply text-green-700;
+}
+
+.result-D {
+    @apply text-amber-900;
+}
+
+.result-L {
+    @apply text-red-600;
+}
+
 @media print {
     * {
         background: white;

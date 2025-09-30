@@ -8,12 +8,14 @@
 </head>
 <body class="bg-gray-100 text-gray-900">
 <nav class="bg-white shadow mb-6">
-    <div class="max-w-5xl mx-auto px-4 py-4 flex items-center gap-4">
-        <a href="/" class="font-semibold">VVOR</a>
-        <a class="text-blue-600 hover:underline" href="{{ route('players.index') }}">Spelers</a>
-        <a class="text-blue-600 hover:underline" href="{{ route('positions.index') }}">Posities</a>
-        <a class="text-blue-600 hover:underline" href="{{ route('opponents.index') }}">Tegenstanders</a>
-        <a class="text-blue-600 hover:underline" href="{{ route('football-matches.index') }}">Wedstrijden</a>
+    <div class="max-w-5xl mx-auto px-4 py-4 flex items-center gap-12">
+        <a href="/" class="font-semibold">
+            <img src="{{config('app.vvor.logo')}}" alt="VVOR Logo" class="h-12">
+        </a>
+        <a class="text-blue-800 hover:underline" href="{{ route('players.index') }}">Spelers</a>
+        <a class="text-blue-800 hover:underline" href="{{ route('positions.index') }}">Posities</a>
+        <a class="text-blue-800 hover:underline" href="{{ route('opponents.index') }}">Tegenstanders</a>
+        <a class="text-blue-800 hover:underline" href="{{ route('football-matches.index') }}">Wedstrijden</a>
     </div>
 </nav>
 

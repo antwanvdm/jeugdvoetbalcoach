@@ -15,48 +15,36 @@
         </div>
     </div>
 
-    <div class="bg-white p-4 shadow rounded max-w-xl opponent-info">
-        <dl class="grid grid-cols-3 gap-2">
+    <div class="bg-white p-4 shadow rounded flex opponent-info">
+        <dl class="grid grid-cols-3 gap-2 flex-1">
             <dt class="font-medium text-gray-600">Tegenstander</dt>
             <dd class="col-span-2">{{ $footballMatch->opponent->name ?? '-' }}</dd>
 
             <dt class="font-medium text-gray-600">Locatie</dt>
             <dd class="col-span-2">
-                @php
-                    $label = $footballMatch->home ? 'Thuis' : 'Uit';
-                    $homeUrl = 'https://maps.app.goo.gl/oBBodGTYQJxh9iKT7';
-                    $mapsUrl = null;
-                    $locLabel = null;
-                    if ($footballMatch->home) {
-                        $mapsUrl = $homeUrl;
-                        $locLabel = 'VVOR';
-                    } else {
-                        $opp = $footballMatch->opponent;
-                        $hasCoords = $opp && !is_null($opp->latitude) && !is_null($opp->longitude);
-                        $mapsUrl = $hasCoords
-                            ? 'https://www.google.com/maps?q=' . urlencode($opp->latitude . ',' . $opp->longitude)
-                            : ($opp && $opp->location ? 'https://www.google.com/maps?q=' . urlencode($opp->location) : null);
-                        $locLabel = $opp?->location ?: ($hasCoords ? ($opp->latitude . ', ' . $opp->longitude) : null);
-                    }
-                @endphp
-                {{ $label }}
-                @if($mapsUrl)
-                    (<a href="{{ $mapsUrl }}" target="_blank" rel="noopener" class="text-blue-600 hover:underline">{{ $locLabel ?? 'bekijk op kaart' }}</a>)
-                @endif
+                {{ $footballMatch->home ? 'Thuis' : 'Uit' }} (<a href="{{ $footballMatch->home ? config('app.vvor.maps') : $footballMatch->opponent->location_maps_link }}" target="_blank" rel="noopener" class="text-blue-600 hover:underline">{{ $locLabel ?? 'bekijk op kaart' }}</a>)
             </dd>
 
             <dt class="font-medium text-gray-600">Datum</dt>
             <dd class="col-span-2">{{ $footballMatch->date?->translatedFormat('j F Y H:i') }}</dd>
 
             <dt class="font-medium text-gray-600">Uitslag</dt>
-            <dd class="col-span-2">
-                @if(!is_null($footballMatch->goals_scores) && !is_null($footballMatch->goals_conceded))
-                    {{ $footballMatch->goals_scores }} - {{ $footballMatch->goals_conceded }}
+            <dd class="col-span-2 font-bold result-{{$footballMatch->result}}">
+                @if($footballMatch->result !== 'O')
+                    {{ $footballMatch->goals_scored }} - {{ $footballMatch->goals_conceded }}
                 @else
                     <span class="text-gray-500">-</span>
                 @endif
             </dd>
         </dl>
+        <div class="flex-1 flex justify-center gap-8 @if(!$footballMatch->home) flex-row-reverse @endif">
+            <div class="flex-1 flex @if($footballMatch->home) justify-end @endif">
+                <img src="{{config('app.vvor.logo')}}" alt="VVOR Logo" class="h-28">
+            </div>
+            <div class="flex-1 flex @if(!$footballMatch->home) justify-end @endif">
+                <img src="{{$footballMatch->opponent->logo}}" alt="{{$footballMatch->opponent->name}} Logo" class="h-28">
+            </div>
+        </div>
     </div>
 
     {{-- Lineup overview table --}}
