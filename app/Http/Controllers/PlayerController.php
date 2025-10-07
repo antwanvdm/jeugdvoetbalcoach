@@ -15,7 +15,15 @@ class PlayerController extends Controller
      */
     public function index(): View
     {
-        $players = Player::with('position')->orderBy('name')->paginate(15);
+        $players = Player::with('position')
+            ->withCount([
+                'footballMatches as keeper_count' => function ($query) {
+                    $query->where('football_match_player.position_id', 1);
+                }
+            ])
+            ->orderBy('name')
+            ->paginate(15);
+
         return view('players.index', compact('players'));
     }
 

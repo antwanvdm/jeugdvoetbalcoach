@@ -12,6 +12,7 @@
             <th class="text-left p-3">Naam</th>
             <th class="text-left p-3">Favoriete positie</th>
             <th class="text-left p-3">Fysiek</th>
+            <th class="text-left p-3">Keer gekeept</th>
             <th class="text-right p-3"></th>
         </tr>
         </thead>
@@ -21,6 +22,7 @@
                 <td class="p-3">{{ $player->name }}</td>
                 <td class="p-3">{{ $player->position->name ?? '-' }}</td>
                 <td class="p-3">{{ $player->weight }}</td>
+                <td class="p-3">{{ $player->keeper_count ?? 0 }}</td>
                 <td class="p-3 text-right">
                     <a class="text-blue-600 mr-2" href="{{ route('players.show', $player) }}">Bekijk</a>
                     <a class="text-yellow-600 mr-2" href="{{ route('players.edit', $player) }}">Bewerk</a>
@@ -33,7 +35,7 @@
             </tr>
         @empty
             <tr>
-                <td colspan="3" class="p-3 text-center text-gray-500">Voeg eerst spelers toe.</td>
+                <td colspan="4" class="p-3 text-center text-gray-500">Voeg eerst spelers toe.</td>
             </tr>
         @endforelse
         </tbody>
