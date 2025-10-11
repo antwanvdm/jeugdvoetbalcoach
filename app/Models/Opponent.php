@@ -24,7 +24,7 @@ class Opponent extends Model
     protected function locationMapsLink(): Attribute
     {
         return Attribute::make(
-            get: fn (mixed $value, $attributes) => 'https://www.google.com/maps?q=' . urlencode($attributes['latitude'] . ',' . $attributes['longitude'])
+            get: fn(mixed $value, $attributes) => 'https://www.google.com/maps?q=' . urlencode($attributes['latitude'] . ',' . $attributes['longitude'])
         );
     }
 }

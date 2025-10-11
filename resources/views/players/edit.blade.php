@@ -30,7 +30,7 @@
             </select>
             <div class="text-sm text-gray-500 mt-1">Houd Cmd/Ctrl ingedrukt om meerdere seizoenen te selecteren.</div>
         </div>
-        
+
         <div class="flex gap-2">
             <button class="px-3 py-2 bg-blue-600 text-white rounded">Werk bij</button>
             <a href="{{ route('players.show', $player) }}" class="px-3 py-2 bg-gray-200 rounded">Annuleer</a>

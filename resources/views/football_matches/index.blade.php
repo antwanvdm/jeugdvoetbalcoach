@@ -8,7 +8,7 @@
                 <select name="season_id" onchange="this.form.submit()" class="border p-2 rounded">
                     <option value="">Alle seizoenen</option>
                     @foreach($seasons as $s)
-                        <option value="{{ $s->id }}" {{ (int)($seasonId ?? 0) === $s->id ? 'selected' : '' }}>{{ $s->year }}-{{ $s->part }}</option>
+                        <option value="{{ $s->id }}" {{ (int)($seasonId ?? 0) === $s->id ? 'selected' : '' }}>{{ $s->year }}-{{ $s->year + 1 }}--{{ $s->part }}</option>
                     @endforeach
                 </select>
             </form>

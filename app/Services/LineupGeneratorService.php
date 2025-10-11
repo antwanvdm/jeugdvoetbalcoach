@@ -39,7 +39,7 @@ class LineupGeneratorService
     public function generateLineup(FootballMatch $match): void
     {
         $this->loadPlayersData($match);
-        
+
         $keepers = $this->selectKeepers();
         $keeperByQuarter = $this->mapKeepersToQuarters($keepers);
         $benchPlan = $this->createBenchPlan($keepers);
@@ -53,13 +53,13 @@ class LineupGeneratorService
     private function loadPlayersData(FootballMatch $currentMatch): void
     {
         $this->players = Player::inRandomOrder()->get();
-        
+
         // Get historical keeper counts (exclude current match if it has data)
         $this->keeperCounts = Player::query()
             ->withCount([
-                'footballMatches as keeper_count' => function($q) use ($currentMatch) {
+                'footballMatches as keeper_count' => function ($q) use ($currentMatch) {
                     $q->where('football_match_player.position_id', self::KEEPER_POSITION_ID)
-                      ->where('football_match_player.football_match_id', '!=', $currentMatch->id);
+                        ->where('football_match_player.football_match_id', '!=', $currentMatch->id);
                 }
             ])
             ->pluck('keeper_count', 'id');
@@ -76,10 +76,10 @@ class LineupGeneratorService
         $lastMatch = FootballMatch::where('id', '!=', $currentMatch->id)
             ->latest('date')
             ->first();
-        
+
         $this->debugLog("Current match ID: {$currentMatch->id}");
         $this->debugLog("Last match found: " . ($lastMatch ? "ID {$lastMatch->id}, Date: {$lastMatch->date}" : "None"));
-        
+
         if (!$lastMatch) {
             return collect();
         }
@@ -89,9 +89,9 @@ class LineupGeneratorService
             ->where('football_match_player.football_match_id', $lastMatch->id)
             ->where('football_match_player.position_id', self::KEEPER_POSITION_ID)
             ->pluck('players.id');
-            
+
         $this->debugLog("Found keepers from last match:", $lastMatchKeepers->toArray());
-        
+
         return $lastMatchKeepers;
     }
 
@@ -102,18 +102,18 @@ class LineupGeneratorService
     {
         // Debug: Log last match keepers
         $this->debugLog('Last match keepers:', $this->lastMatchKeepers->toArray());
-        
-        // Sort by priority: 
+
+        // Sort by priority:
         // 1. Prefer players who didn't keep last match
         // 2. Then by historical keeper count (ascending)
         // 3. Then by name for consistency
         $sortedKeepers = $this->players->sortBy(function ($player) {
             $keptLastMatch = $this->lastMatchKeepers->contains($player->id) ? 1 : 0;
             $historicalCount = (int)$this->keeperCounts->get($player->id, 0);
-            
+
             // Debug: Log sorting criteria for each player
             $this->debugLog("Player {$player->name}: keptLastMatch={$keptLastMatch}, historicalCount={$historicalCount}");
-            
+
             return [$keptLastMatch, $historicalCount, $player->name];
         });
 
@@ -130,7 +130,7 @@ class LineupGeneratorService
         // Pick remaining 3 keepers considering weight diversity and rotation
         while ($keepers->count() < 4 && $availableKeepers->isNotEmpty()) {
             $bestCandidate = $this->findBestKeeperCandidate($keepers, $availableKeepers);
-            
+
             if ($bestCandidate !== null) {
                 $selectedKeeper = $availableKeepers->splice($bestCandidate, 1)->first();
                 $keeperNumber = $keepers->count() + 1;
@@ -146,7 +146,7 @@ class LineupGeneratorService
 
         // Final log of selected keepers
         $this->debugLog('Final selected keepers:', $keepers->pluck('name')->toArray());
-        
+
         return $keepers;
     }
 
@@ -187,11 +187,11 @@ class LineupGeneratorService
     private function createBenchPlan(Collection $keepers): array
     {
         $benchPlan = [];
-        
+
         // Non-keepers: alternate Q1+Q3 vs Q2+Q4, considering weight distribution
         $nonKeepers = $this->players->reject(fn($p) => in_array($p->id, $keepers->pluck('id')->all(), true));
         $nonKeepersSorted = $nonKeepers->sortBy(['weight', 'name']);
-        
+
         $toggle = false;
         foreach ($nonKeepersSorted as $player) {
             $benchPlan[$player->id] = $toggle ? [2, 4] : [1, 3];
@@ -215,11 +215,11 @@ class LineupGeneratorService
     {
         $candidate = ($keeperIndex % 4) + 2; // yields 2,3,4,5 -> mod 4 to 1..4
         $benchQuarter = (($candidate - 1) % 4) + 1;
-        
+
         if ($benchQuarter === $keeperQuarter) {
             $benchQuarter = ($benchQuarter % 4) + 1; // next quarter
         }
-        
+
         return $benchQuarter;
     }
 
@@ -230,7 +230,7 @@ class LineupGeneratorService
     {
         foreach (range(1, 4) as $quarter) {
             $assignments = $this->buildQuarterAssignments($quarter, $keeperByQuarter, $benchPlan);
-            
+
             if (!empty($assignments)) {
                 $match->players()->attach($assignments);
             }
@@ -243,22 +243,22 @@ class LineupGeneratorService
     private function buildQuarterAssignments(int $quarter, array $keeperByQuarter, array $benchPlan): array
     {
         $quarterData = new QuarterAssignmentData($quarter);
-        
+
         // Mark benched players
         $quarterData = $this->withBenchedPlayers($quarterData, $benchPlan);
-        
+
         // Get available players (not benched)
         $availablePlayers = $this->getAvailablePlayers($quarter, $benchPlan);
-        
+
         // Assign keeper
         $quarterData = $this->withAssignedKeeper($quarterData, $keeperByQuarter);
-        
+
         // Assign outfield players based on formation
         $quarterData = $this->withAssignedOutfieldPlayers($quarterData, $availablePlayers);
-        
+
         // Assign remaining players
         $quarterData = $this->withAssignedRemainingPlayers($quarterData, $availablePlayers);
-        
+
         return $quarterData->getAssignments();
     }
 
@@ -272,7 +272,7 @@ class LineupGeneratorService
                 $quarterData->addAssignment($player->id, null);
             }
         }
-        
+
         return $quarterData;
     }
 
@@ -296,7 +296,7 @@ class LineupGeneratorService
             $quarterData->addSelectedPlayer($keeperId, 'keeper');
             $quarterData->addAssignment($keeperId, self::KEEPER_POSITION_ID);
         }
-        
+
         return $quarterData;
     }
 
@@ -306,7 +306,7 @@ class LineupGeneratorService
     private function withAssignedOutfieldPlayers(QuarterAssignmentData $quarterData, Collection $availablePlayers): QuarterAssignmentData
     {
         $needs = self::FORMATION_NEEDS;
-        
+
         // First pass: satisfy needs with players who prefer that role
         foreach (array_keys($needs) as $role) {
             while ($needs[$role] > 0) {
@@ -319,7 +319,7 @@ class LineupGeneratorService
                 }
             }
         }
-        
+
         // Second pass: fill remaining slots with any available players
         foreach (array_keys($needs) as $role) {
             while ($needs[$role] > 0) {
@@ -332,7 +332,7 @@ class LineupGeneratorService
                 }
             }
         }
-        
+
         return $quarterData;
     }
 
@@ -342,19 +342,19 @@ class LineupGeneratorService
     private function tryAssignPlayerForRole(QuarterAssignmentData $quarterData, Collection $availablePlayers, string $role, bool $preferredRoleOnly): AssignmentResult
     {
         $candidates = $this->getCandidatesForRole($availablePlayers, $quarterData->getSelectedPlayers(), $role, $preferredRoleOnly);
-        
+
         if ($candidates->isEmpty()) {
             return AssignmentResult::failure($quarterData);
         }
-        
+
         // Sort by weight balance impact
         $bestCandidate = $this->selectBestCandidateByWeight($candidates, $quarterData->getSelectedPlayers());
-        
+
         // Assign the selected player
         $quarterData->addSelectedPlayer($bestCandidate->id, $role);
         $positionId = $this->determinePositionId($bestCandidate, $role);
         $quarterData->addAssignment($bestCandidate->id, $positionId);
-        
+
         return AssignmentResult::success($quarterData);
     }
 
@@ -367,11 +367,11 @@ class LineupGeneratorService
             if (isset($selectedPlayers[$player->id])) {
                 return false;
             }
-            
+
             if (!$preferredRoleOnly) {
                 return true;
             }
-            
+
             $favoriteRole = $this->getPlayerFavoriteRole($player->position_id);
             return $favoriteRole === $role;
         });
@@ -385,7 +385,7 @@ class LineupGeneratorService
         return $candidates->sortBy(function ($candidate) use ($selectedPlayers) {
             $currentSelectedIds = $selectedPlayers->keys()->all();
             $balanceWithCandidate = $this->calculateWeightBalance(array_merge($currentSelectedIds, [$candidate->id]));
-            
+
             // Return array for multi-level sorting: [balance_score, weight, name]
             return [$balanceWithCandidate, $candidate->weight, $candidate->name];
         })->first();
@@ -397,12 +397,12 @@ class LineupGeneratorService
     private function determinePositionId(Player $player, string $role): int
     {
         $favoriteRole = $this->getPlayerFavoriteRole($player->position_id);
-        
+
         // Use player's favorite position if it matches the role
         if ($favoriteRole === $role && $player->position_id) {
             return $player->position_id;
         }
-        
+
         // Otherwise use the representative position for the role
         return self::ROLE_POSITION_MAP[$role];
     }
@@ -416,16 +416,16 @@ class LineupGeneratorService
             if ($quarterData->isPlayerSelected($player->id) || $quarterData->isPlayerAssigned($player->id)) {
                 continue;
             }
-            
+
             // Assign their favorite non-keeper position, or fallback to defender
             $positionId = $player->position_id;
             if ($this->getPlayerFavoriteRole($positionId) === 'keeper') {
                 $positionId = self::DEFENDER_POSITION_ID;
             }
-            
+
             $quarterData->addAssignment($player->id, $positionId);
         }
-        
+
         return $quarterData;
     }
 

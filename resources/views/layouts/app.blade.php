@@ -4,12 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ config('app.name', 'VVOR') }}</title>
-    <link rel="icon" type="image/png" href="{{asset('favicons/favicon-96x96.png')}}" sizes="96x96" />
-    <link rel="icon" type="image/svg+xml" href="{{asset('favicons/favicon.svg')}}" />
-    <link rel="shortcut icon" href="{{asset('favicons/favicon.ico')}}" />
-    <link rel="apple-touch-icon" sizes="180x180" href="{{asset('favicons/apple-touch-icon.png')}}" />
-    <meta name="apple-mobile-web-app-title" content="VVOR Team" />
-    <link rel="manifest" href="{{asset('favicons/site.webmanifest')}}" />
+    <link rel="icon" type="image/png" href="{{asset('favicons/favicon-96x96.png')}}" sizes="96x96"/>
+    <link rel="icon" type="image/svg+xml" href="{{asset('favicons/favicon.svg')}}"/>
+    <link rel="shortcut icon" href="{{asset('favicons/favicon.ico')}}"/>
+    <link rel="apple-touch-icon" sizes="180x180" href="{{asset('favicons/apple-touch-icon.png')}}"/>
+    <meta name="apple-mobile-web-app-title" content="VVOR Team"/>
+    <link rel="manifest" href="{{asset('favicons/site.webmanifest')}}"/>
     @vite('resources/css/app.css')
 </head>
 <body class="bg-gray-100 text-gray-900">

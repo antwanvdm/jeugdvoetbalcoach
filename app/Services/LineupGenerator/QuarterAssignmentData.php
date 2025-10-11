@@ -7,7 +7,7 @@ use Illuminate\Support\Collection;
 /**
  * Data class to hold quarter assignment state
  */
-class QuarterAssignmentData 
+class QuarterAssignmentData
 {
     private array $assignments = [];
     private Collection $selectedPlayers;
@@ -56,7 +56,7 @@ class QuarterAssignmentData
         return isset($this->assignments[$playerId]);
     }
 
-    public function getQuarter(): int 
+    public function getQuarter(): int
     {
         return $this->quarter;
     }
