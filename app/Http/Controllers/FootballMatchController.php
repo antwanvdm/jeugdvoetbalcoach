@@ -6,6 +6,7 @@ use App\Models\FootballMatch;
 use App\Models\Opponent;
 use App\Models\Player;
 use App\Models\Position;
+use App\Models\Season;
 use App\Services\LineupGeneratorService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -16,10 +17,16 @@ class FootballMatchController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(): View
+    public function index(Request $request): View
     {
-        $footballMatches = FootballMatch::with('opponent')->orderByDesc('date')->paginate(15);
-        return view('football_matches.index', compact('footballMatches'));
+        $seasons = Season::orderByDesc('year')->orderByDesc('part')->get();
+        $activeSeason = Season::getCurrent($seasons);
+
+        $seasonId = $request->query('season_id') ?? ($activeSeason?->id ?? null);
+        $matchesQuery = FootballMatch::with('opponent')->where('season_id', $seasonId)->orderByDesc('date');
+        $footballMatches = $matchesQuery->paginate(15)->withQueryString();
+
+        return view('football_matches.index', compact('footballMatches', 'seasons', 'activeSeason', 'seasonId'));
     }
 
     /**
@@ -28,7 +35,11 @@ class FootballMatchController extends Controller
     public function create(): View
     {
         $opponents = Opponent::orderBy('name')->pluck('name', 'id');
-        return view('football_matches.create', compact('opponents'));
+        $seasons = Season::orderByDesc('year')->orderByDesc('part')->get();
+        $activeSeason = Season::getCurrent($seasons);
+        $seasonsMapped = $seasons->mapWithKeys(fn($s) => [$s->id => $s->year . '-' . $s->part]);
+
+        return view('football_matches.create', compact('opponents', 'seasonsMapped', 'activeSeason'));
     }
 
     /**
@@ -43,6 +54,9 @@ class FootballMatchController extends Controller
             'goals_conceded' => ['nullable', 'integer', 'min:0'],
             'date' => ['required', 'date'],
         ]);
+
+        $validated = array_merge($validated, $request->only('season_id'));
+        $request->validate(['season_id' => ['nullable', 'exists:seasons,id']]);
 
         $match = FootballMatch::create($validated);
 
@@ -116,7 +130,11 @@ class FootballMatchController extends Controller
     public function edit(FootballMatch $footballMatch): View
     {
         $opponents = Opponent::orderBy('name')->pluck('name', 'id');
-        return view('football_matches.edit', compact('footballMatch', 'opponents'));
+        $seasonsMapped = Season::orderByDesc('year')->orderByDesc('part')
+            ->get()
+            ->mapWithKeys(fn($s) => [$s->id => $s->year . '-' . $s->part]);
+
+        return view('football_matches.edit', compact('footballMatch', 'opponents', 'seasonsMapped'));
     }
 
     /**
@@ -131,6 +149,9 @@ class FootballMatchController extends Controller
             'goals_conceded' => ['nullable', 'integer', 'min:0'],
             'date' => ['required', 'date'],
         ]);
+        $request->validate(['season_id' => ['nullable', 'exists:seasons,id']]);
+        $validated = array_merge($validated, $request->only('season_id'));
+
         $footballMatch->update($validated);
         return redirect()->route('football-matches.show', $footballMatch)->with('success', 'Wedstrijd bijgewerkt.');
     }

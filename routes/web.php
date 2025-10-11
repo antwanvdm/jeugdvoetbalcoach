@@ -1,10 +1,11 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\SeasonController;
 use App\Http\Controllers\PlayerController;
 use App\Http\Controllers\PositionController;
 use App\Http\Controllers\OpponentController;
 use App\Http\Controllers\FootballMatchController;
+use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/players');
 
@@ -13,6 +14,7 @@ Route::post('football-matches/{footballMatch}/lineup', [FootballMatchController:
 
 Route::resources([
     'players' => PlayerController::class,
+    'seasons' => SeasonController::class,
     'positions' => PositionController::class,
     'opponents' => OpponentController::class,
     'football-matches' => FootballMatchController::class,

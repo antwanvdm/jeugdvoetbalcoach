@@ -18,6 +18,7 @@
         <a href="/" class="font-semibold">
             <img src="{{config('app.vvor.logo')}}" alt="VVOR Logo" class="h-12">
         </a>
+        <a class="text-blue-800 hover:underline" href="{{ route('seasons.index') }}">Seizoenen</a>
         <a class="text-blue-800 hover:underline" href="{{ route('players.index') }}">Spelers</a>
         <a class="text-blue-800 hover:underline" href="{{ route('positions.index') }}">Posities</a>
         <a class="text-blue-800 hover:underline" href="{{ route('opponents.index') }}">Tegenstanders</a>

@@ -3,7 +3,17 @@
 @section('content')
     <div class="flex items-center justify-between mb-4">
         <h1 class="text-2xl font-semibold">Wedstrijden</h1>
-        <a href="{{ route('football-matches.create') }}" class="px-3 py-2 bg-blue-600 text-white rounded">Nieuwe wedstrijd</a>
+        <div class="flex items-center gap-4">
+            <form method="GET" action="{{ route('football-matches.index') }}">
+                <select name="season_id" onchange="this.form.submit()" class="border p-2 rounded">
+                    <option value="">Alle seizoenen</option>
+                    @foreach($seasons as $s)
+                        <option value="{{ $s->id }}" {{ (int)($seasonId ?? 0) === $s->id ? 'selected' : '' }}>{{ $s->year }}-{{ $s->part }}</option>
+                    @endforeach
+                </select>
+            </form>
+            <a href="{{ route('football-matches.create') }}" class="px-3 py-2 bg-blue-600 text-white rounded">Nieuwe wedstrijd</a>
+        </div>
     </div>
 
     <table class="min-w-full bg-white shadow rounded">

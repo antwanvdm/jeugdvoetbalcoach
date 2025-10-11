@@ -43,6 +43,16 @@
             <input type="datetime-local" name="date" value="{{ old('date', optional($footballMatch->date)->format('Y-m-d\TH:i')) }}" class="w-full border rounded p-2" required>
         </div>
 
+        <div class="mb-3">
+            <label class="block text-sm font-medium mb-1">Seizoen</label>
+            <select name="season_id" class="w-full border rounded p-2">
+                <option value="">Standaard</option>
+                @foreach($seasonsMapped as $id => $label)
+                    <option value="{{ $id }}" {{ (old('season_id', $footballMatch->season_id) == $id) ? 'selected' : '' }}>{{ $label }}</option>
+                @endforeach
+            </select>
+        </div>
+
         <div class="flex gap-2">
             <button class="px-3 py-2 bg-blue-600 text-white rounded">Opslaan</button>
             <a href="{{ route('football-matches.show', $footballMatch) }}" class="px-3 py-2 bg-gray-200 rounded">Annuleren</a>

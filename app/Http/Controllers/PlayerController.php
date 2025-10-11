@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Player;
 use App\Models\Position;
+use App\Models\Season;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -13,18 +14,26 @@ class PlayerController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(): View
+    public function index(Request $request): View
     {
+        $seasons = Season::orderByDesc('year')->orderByDesc('part')->get();
+        $activeSeason = Season::getCurrent($seasons);
+        $seasonId = $request->query('season_id') ?? ($activeSeason?->id ?? null);
+
         $players = Player::with('position')
             ->withCount([
-                'footballMatches as keeper_count' => function ($query) {
+                'footballMatches as keeper_count' => function ($query) use ($seasonId) {
                     $query->where('football_match_player.position_id', 1);
+                    $query->where('season_id', $seasonId);
                 }
             ])
+            ->whereHas('seasons', function ($q) use ($seasonId) {
+                $q->where('seasons.id', $seasonId);
+            })
             ->orderBy('name')
-            ->paginate(15);
+            ->paginate(15)->withQueryString();
 
-        return view('players.index', compact('players'));
+        return view('players.index', compact('players', 'seasons', 'activeSeason', 'seasonId'));
     }
 
     /**
@@ -67,7 +76,8 @@ class PlayerController extends Controller
     public function edit(Player $player): View
     {
         $positions = Position::orderBy('name')->pluck('name', 'id');
-        return view('players.edit', compact('player', 'positions'));
+        $seasons = Season::orderByDesc('year')->orderByDesc('part')->get()->mapWithKeys(fn($s) => [$s->id => $s->year . '-' . $s->part]);
+        return view('players.edit', compact('player', 'positions', 'seasons'));
     }
 
     /**
@@ -82,6 +92,12 @@ class PlayerController extends Controller
         ]);
 
         $player->update($validated);
+
+        // sync seasons if provided
+        if ($request->has('seasons')) {
+            $seasonIds = array_filter((array)$request->input('seasons'));
+            $player->seasons()->sync($seasonIds);
+        }
 
         return redirect()->route('players.show', $player)->with('success', 'Speler bijgewerkt.');
     }

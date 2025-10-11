@@ -33,6 +33,11 @@ class FootballMatch extends Model
             ->withPivot(['quarter', 'position_id']);
     }
 
+    public function season(): BelongsTo
+    {
+        return $this->belongsTo(Season::class);
+    }
+
     protected function result(): Attribute
     {
         return Attribute::make(

@@ -25,4 +25,9 @@ class Player extends Model
             ->withPivot(['quarter', 'position_id'])
             ->withTimestamps();
     }
+
+    public function seasons(): BelongsToMany
+    {
+        return $this->belongsToMany(Season::class);
+    }
 }

@@ -10,40 +10,40 @@ VVOR Team Manager is ontwikkeld voor voetbalverenigingen die hun teammanagement 
 
 **🏆 Intelligente Line-up Generatie**
 
-- Automatische opstelling voor 4 kwarten per wedstrijd
-- Slimme keeper rotatie (voorkomt herhaling van vorige wedstrijd)
-- Geavanceerde spelersverdeling op basis van fysieke eigenschappen
-- Formatie: 1 Keeper, 2 Verdedigers, 1 Middenvelder, 2 Aanvallers
+-   Automatische opstelling voor 4 kwarten per wedstrijd
+-   Slimme keeper rotatie (voorkomt herhaling van vorige wedstrijd)
+-   Geavanceerde spelersverdeling op basis van fysieke eigenschappen
+-   Formatie: 1 Keeper, 2 Verdedigers, 1 Middenvelder, 2 Aanvallers
 
 **⚖️ Eerlijke Speeltijdverdeling**
 
-- Elke speler speelt exact 2 van de 4 kwarten
-- Bank-rotatie in niet-opeenvolgende kwarten (Q1+Q3 vs Q2+Q4)
-- Historische tracking van keeper-beurten
-- Weight-balancing om fysieke clustering te voorkomen
+-   Elke speler speelt exact 2 van de 4 kwarten, behalve de keepers (3 keer)
+-   Bank-rotatie in niet-opeenvolgende kwarten (Q1+Q3 vs Q2+Q4)
+-   Historische tracking van keeper-beurten
+-   Weight-balancing om fysieke clustering te voorkomen
 
 **📊 Uitgebreide Statistieken**
 
-- Keeper statistieken per speler
-- Speeltijd overzichten per wedstrijd
-- Fysieke verdeling tracking
-- Wedstrijd historie en resultaten
+-   Keeper statistieken per speler
+-   Speeltijd overzichten per wedstrijd
+-   Fysieke verdeling tracking
+-   Wedstrijd historie en resultaten
 
 **💼 Beheer & Administratie**
 
-- Spelersbeheer met posities en fysieke eigenschappen
-- Tegenstander administratie
-- Wedstrijd planning en resultaten
-- Handmatige line-up aanpassingen mogelijk
+-   Spelersbeheer met posities en fysieke eigenschappen
+-   Tegenstander administratie
+-   Wedstrijd planning en resultaten
+-   Handmatige line-up aanpassingen mogelijk
 
 ## 🚀 Aan de slag
 
 ### Vereisten
 
-- PHP 8.2 of hoger
-- Composer
-- Node.js & NPM
-- SQLite/MySQL database
+-   PHP 8.2 of hoger
+-   Composer
+-   Node.js & NPM
+-   SQLite/MySQL database
 
 ### Installatie
 
@@ -98,10 +98,11 @@ npm run build
 npm run dev
 ```
 
-7. **Start de applicatie**
+7. **Start de server**
 
 ```bash
 php artisan serve
+# Of via herd
 ```
 
 Ga naar `http://localhost:8000` om de applicatie te gebruiken.
@@ -110,49 +111,52 @@ Ga naar `http://localhost:8000` om de applicatie te gebruiken.
 
 ### Technische Stack
 
-- **Framework**: Laravel 11
-- **Frontend**: Blade templates met Tailwind CSS
-- **Database**: SQLite/MySQL met Eloquent ORM
-- **Testing**: Pest PHP
+-   **Framework**: Laravel 11
+-   **Frontend**: Blade templates met Tailwind CSS
+-   **Database**: SQLite/MySQL met Eloquent ORM
+-   **Testing**: Pest PHP
 
 ### Belangrijkste Components
 
 **LineupGeneratorService** - Kernservice voor line-up generatie
 
-- Intelligente keeper selectie algoritmes
-- Weight-balancing voor fysieke verdeling
-- Immutable data operations voor betrouwbaarheid
-- Uitgebreide logging en debugging
+-   Intelligente keeper selectie algoritmes
+-   Weight-balancing voor fysieke verdeling
+-   Immutable data operations voor betrouwbaarheid
+-   Uitgebreide logging en debugging
 
 **Models & Database**
 
-- `Player` - Spelers met posities en fysieke eigenschappen
-- `FootballMatch` - Wedstrijden met tegenstanders en resultaten
-- `Position` - Keeper, Verdediger, Middenvelder, Aanvaller
-- `Opponent` - Tegenstanders met locatie informatie
+-   `Player` - Spelers met posities en fysieke eigenschappen
+-   `FootballMatch` - Wedstrijden met tegenstanders en resultaten
+-   `Position` - Keeper, Verdediger, Middenvelder, Aanvaller
+-   `Opponent` - Tegenstanders met locatie informatie
 
 ### Code Kwaliteit
 
-- Clean Architecture principes
-- SOLID design patterns
-- Comprehensive testing suite
-- PSR-4 autoloading standaard
+-   Clean Architecture principes
+-   SOLID design patterns
+-   Comprehensive testing suite
+-   PSR-4 autoloading standaard
 
 ## 📈 Hoe het werkt
 
 ### Line-up Generatie Algoritme
 
 1. **Keeper Selectie**
+
     - Prioriteit voor spelers die vorige wedstrijd NIET hebben gekeept
     - Balanceert historische keeper-ervaring
     - Optimaliseert fysieke diversiteit
 
 2. **Bank Planning**
+
     - Niet-keepers: alternerend Q1+Q3 vs Q2+Q4 patroon
     - Keepers: 1 bank-kwart (niet hun keeper-kwart)
     - Weight-based sortering voor betere verdeling
 
 3. **Positie Toewijzing**
+
     - Eerst spelers op hun voorkeursposities
     - Daarna optimalisatie op basis van beschikbaarheid
     - Weight-balancing om clustering te voorkomen
@@ -167,22 +171,22 @@ Ga naar `http://localhost:8000` om de applicatie te gebruiken.
 **🧠 Weight Balancing**
 Voorkomt dat 5 spelers met fysiek niveau 1 tegelijk spelen door:
 
-- Penalty system voor clustering (>2 gelijk = zwaar gestraft)
-- Distributie optimalisatie over kwarten
-- Kandidaat selectie op basis van balans impact
+-   Penalty system voor clustering (>2 gelijk = zwaar gestraft)
+-   Distributie optimalisatie over kwarten
+-   Kandidaat selectie op basis van balans impact
 
 **🔄 Keeper Rotatie**
 Intelligente keeper verdeling die:
 
-- Laatste wedstrijd keepers excludeert
-- Historische counts balanceert
-- Fair play principes hanteert
+-   Laatste wedstrijd keepers excludeert
+-   Historische counts balanceert
+-   Fair play principes hanteert
 
 **📊 Real-time Monitoring**
 
-- Uitgebreide logging voor troubleshooting
-- Performance metrics en query optimalisatie
-- Debg mode voor development
+-   Uitgebreide logging voor troubleshooting
+-   Performance metrics en query optimalisatie
+-   Debg mode voor development
 
 ## 🛠️ Development
 
@@ -218,8 +222,8 @@ php artisan make:migration create_example_table
 
 ## 📝 Documentatie
 
-- [LineupGeneratorService](docs/LineupGeneratorService.md) - Uitgebreide service documentatie
-- [Database Schema](docs/database-schema.md) - Database structuur en relaties
+-   [LineupGeneratorService](docs/LineupGeneratorService.md) - Uitgebreide service documentatie
+-   [Database Schema](docs/database-schema.md) - Database structuur en relaties
 
 ## 🤝 Bijdragen
 
