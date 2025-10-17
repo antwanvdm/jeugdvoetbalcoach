@@ -20,6 +20,7 @@
         </a>
         <a class="text-blue-800 hover:underline" href="{{ route('seasons.index') }}">Seizoenen</a>
         <a class="text-blue-800 hover:underline" href="{{ route('players.index') }}">Spelers</a>
+        <a class="text-blue-800 hover:underline" href="{{ route('formations.index') }}">Formaties</a>
         <a class="text-blue-800 hover:underline" href="{{ route('positions.index') }}">Posities</a>
         <a class="text-blue-800 hover:underline" href="{{ route('opponents.index') }}">Tegenstanders</a>
         <a class="text-blue-800 hover:underline" href="{{ route('football-matches.index') }}">Wedstrijden</a>

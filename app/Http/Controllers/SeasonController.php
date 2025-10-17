@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Formation;
 use App\Models\Season;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -17,7 +18,8 @@ class SeasonController extends Controller
 
     public function create(): View
     {
-        return view('seasons.create');
+        $formations = Formation::orderBy('total_players')->get()->mapWithKeys(fn($f) => [$f->id => $f->lineup_formation . ' (' . $f->total_players . ')']);
+        return view('seasons.create', compact('formations'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -27,6 +29,7 @@ class SeasonController extends Controller
             'part' => ['required', 'integer', 'min:1'],
             'start' => ['required', 'date'],
             'end' => ['required', 'date', 'after_or_equal:start'],
+            'formation_id' => ['required', 'integer', 'exists:formations,id'],
         ]);
 
         $season = Season::create($data);
@@ -53,7 +56,8 @@ class SeasonController extends Controller
 
     public function edit(Season $season): View
     {
-        return view('seasons.edit', compact('season'));
+        $formations = Formation::orderBy('total_players')->get()->mapWithKeys(fn($f) => [$f->id => $f->lineup_formation . ' (' . $f->total_players . ')']);
+        return view('seasons.edit', compact('season', 'formations'));
     }
 
     public function update(Request $request, Season $season): RedirectResponse
@@ -63,6 +67,7 @@ class SeasonController extends Controller
             'part' => ['required', 'integer', 'min:1'],
             'start' => ['required', 'date'],
             'end' => ['required', 'date', 'after_or_equal:start'],
+            'formation_id' => ['required', 'integer', 'exists:formations,id'],
         ]);
 
         $season->update($data);

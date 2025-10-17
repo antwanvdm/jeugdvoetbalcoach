@@ -14,6 +14,7 @@
                 <th class="py-2 pr-4">Deel</th>
                 <th class="py-2 pr-4">Start</th>
                 <th class="py-2 pr-4">Eind</th>
+                <th class="py-2 pr-4">Formatie</th>
                 <th class="py-2 pr-4"></th>
             </tr>
             </thead>
@@ -24,6 +25,7 @@
                     <td class="py-2 pr-4">{{ $season->part }}</td>
                     <td class="py-2 pr-4">{{ $season->start->format('Y-m-d') }}</td>
                     <td class="py-2 pr-4">{{ $season->end->format('Y-m-d') }}</td>
+                    <td class="py-2 pr-4">{{ $season->formation?->lineup_formation ?? '' }}</td>
                     <td class="py-2 pr-4 text-right">
                         <a href="{{ route('seasons.show', $season) }}" class="text-blue-600 mr-2">Bekijk</a>
                         <a href="{{ route('seasons.edit', $season) }}" class="text-yellow-600 mr-2">Bewerk</a>

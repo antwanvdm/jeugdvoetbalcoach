@@ -28,6 +28,10 @@
                     <dt class="text-sm text-gray-600">Eind</dt>
                     <dd class="font-medium">{{ $season->end->format('Y-m-d') }}</dd>
                 </div>
+                <div>
+                    <dt class="text-sm text-gray-600">Formatie</dt>
+                    <dd class="font-medium">{{ $season->formation?->lineup_formation ?? '—' }}</dd>
+                </div>
             </dl>
         </div>
 

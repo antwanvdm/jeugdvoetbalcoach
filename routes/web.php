@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\FormationController;
 use App\Http\Controllers\SeasonController;
 use App\Http\Controllers\PlayerController;
 use App\Http\Controllers\PositionController;
@@ -15,6 +16,7 @@ Route::post('football-matches/{footballMatch}/lineup', [FootballMatchController:
 Route::resources([
     'players' => PlayerController::class,
     'seasons' => SeasonController::class,
+    'formations' => FormationController::class,
     'positions' => PositionController::class,
     'opponents' => OpponentController::class,
     'football-matches' => FootballMatchController::class,

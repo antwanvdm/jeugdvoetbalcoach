@@ -8,7 +8,7 @@ use Illuminate\Support\Carbon;
 
 class Season extends Model
 {
-    protected $fillable = ['year', 'part', 'start', 'end'];
+    protected $fillable = ['year', 'part', 'start', 'end', 'formation_id'];
     protected $casts = [
         'start' => 'date',
         'end' => 'date',
@@ -22,6 +22,11 @@ class Season extends Model
     public function footballMatches()
     {
         return $this->hasMany(FootballMatch::class);
+    }
+
+    public function formation()
+    {
+        return $this->belongsTo(Formation::class);
     }
 
     public static function getCurrent(?Collection $seasons = null): Season
