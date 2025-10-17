@@ -1,7 +1,5 @@
 
-@extends('layouts.app')
-
-@section('content')
+<x-app-layout>
     <div class="flex items-center justify-between mb-4">
         <h1 class="text-2xl font-semibold">Formatie {{ $formation->lineup_formation }}</h1>
         <div>
@@ -19,4 +17,4 @@
             <dd class="font-medium mb-2">{{ $formation->lineup_formation }}</dd>
         </dl>
     </div>
-@endsection
+</x-app-layout>

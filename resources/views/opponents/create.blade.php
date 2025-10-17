@@ -1,6 +1,4 @@
-@extends('layouts.app')
-
-@section('content')
+<x-app-layout>
     <h1 class="text-2xl font-semibold mb-4">Nieuwe tegenstander</h1>
     <form action="{{ route('opponents.store') }}" method="POST" class="bg-white p-4 shadow rounded max-w-lg">
         @csrf
@@ -31,4 +29,4 @@
             <a href="{{ route('opponents.index') }}" class="px-3 py-2 bg-gray-200 rounded">Annuleren</a>
         </div>
     </form>
-@endsection
+</x-app-layout>

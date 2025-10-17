@@ -1,11 +1,10 @@
-@extends('layouts.app')
-
-@section('content')
+<x-app-layout>
     <div class="flex items-center justify-between mb-4">
         <h1 class="text-2xl font-semibold">Posities</h1>
         <a href="{{ route('positions.create') }}" class="px-3 py-2 bg-blue-600 text-white rounded">Nieuwe positie</a>
     </div>
 
+    <div class="overflow-x-auto">
     <table class="min-w-full bg-white shadow rounded">
         <thead>
         <tr class="border-b">
@@ -34,6 +33,7 @@
         @endforelse
         </tbody>
     </table>
+    </div>
 
     <div class="mt-4">{{ $positions->links() }}</div>
-@endsection
+</x-app-layout>

@@ -10,22 +10,10 @@
     <link rel="apple-touch-icon" sizes="180x180" href="{{asset('favicons/apple-touch-icon.png')}}"/>
     <meta name="apple-mobile-web-app-title" content="VVOR Team"/>
     <link rel="manifest" href="{{asset('favicons/site.webmanifest')}}"/>
-    @vite('resources/css/app.css')
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="bg-gray-100 text-gray-900">
-<nav class="bg-white shadow mb-6">
-    <div class="max-w-5xl mx-auto px-4 py-4 flex items-center gap-12">
-        <a href="/" class="font-semibold">
-            <img src="{{config('app.vvor.logo')}}" alt="VVOR Logo" class="h-12">
-        </a>
-        <a class="text-blue-800 hover:underline" href="{{ route('seasons.index') }}">Seizoenen</a>
-        <a class="text-blue-800 hover:underline" href="{{ route('players.index') }}">Spelers</a>
-        <a class="text-blue-800 hover:underline" href="{{ route('formations.index') }}">Formaties</a>
-        <a class="text-blue-800 hover:underline" href="{{ route('positions.index') }}">Posities</a>
-        <a class="text-blue-800 hover:underline" href="{{ route('opponents.index') }}">Tegenstanders</a>
-        <a class="text-blue-800 hover:underline" href="{{ route('football-matches.index') }}">Wedstrijden</a>
-    </div>
-</nav>
+<x-nav></x-nav>
 
 <main class="max-w-5xl mx-auto px-4 mb-4 {{str_replace('.', '-', request()->route()->getName())}}">
     @if(session('success'))
@@ -45,8 +33,7 @@
         </div>
     @endif
 
-    {{ $slot ?? '' }}
-    @yield('content')
+    {{ $slot }}
 </main>
 </body>
 </html>

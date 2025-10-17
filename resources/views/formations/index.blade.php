@@ -1,13 +1,12 @@
 
-@extends('layouts.app')
-
-@section('content')
+<x-app-layout>
     <div class="flex items-center justify-between mb-4">
         <h1 class="text-2xl font-semibold">Formaties</h1>
         <a href="{{ route('formations.create') }}" class="px-3 py-2 bg-blue-600 text-white rounded">Nieuwe formatie</a>
     </div>
 
     <div class="bg-white p-4 shadow rounded">
+        <div class="overflow-x-auto">
         <table class="min-w-full text-sm">
             <thead>
             <tr class="text-left text-gray-600 border-b">
@@ -34,7 +33,8 @@
             @endforeach
             </tbody>
         </table>
+        </div>
 
         <div class="mt-4">{{ $formations->links() }}</div>
     </div>
-@endsection
+</x-app-layout>

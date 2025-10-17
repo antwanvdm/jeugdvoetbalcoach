@@ -1,7 +1,4 @@
-
-@extends('layouts.app')
-
-@section('content')
+<x-app-layout>
     <div class="max-w-5xl mx-auto">
         <h1 class="text-3xl font-semibold mb-4">{{ config('app.name') }}</h1>
 
@@ -73,4 +70,4 @@
             </div>
         </div>
     </div>
-@endsection
+</x-app-layout>

@@ -1,6 +1,4 @@
-@extends('layouts.app')
-
-@section('content')
+<x-app-layout>
     <div class="max-w-3xl mx-auto">
         <div class="flex items-center justify-between mb-4">
             <h1 class="text-2xl font-semibold">Seizoen {{ $season->year }}-{{ $season->part }}</h1>
@@ -59,4 +57,4 @@
             </div>
         </div>
     </div>
-@endsection
+</x-app-layout>

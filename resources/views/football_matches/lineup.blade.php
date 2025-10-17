@@ -1,6 +1,4 @@
-@extends('layouts.app')
-
-@section('content')
+<x-app-layout>
     <div class="flex items-center justify-between mb-4">
         <h1 class="text-2xl font-semibold">Line-up voor wedstrijd tegen {{ $footballMatch->opponent->name ?? 'Onbekend' }}</h1>
         <a href="{{ route('football-matches.show', $footballMatch) }}" class="px-3 py-2 bg-gray-200 rounded">Terug</a>
@@ -22,6 +20,7 @@
             <div class="mb-6 border rounded">
                 <div class="px-4 py-2 bg-gray-50 font-medium">Kwart {{ $q }}</div>
                 <div class="p-4 overflow-x-auto">
+                    <div class="overflow-x-auto">
                     <table class="min-w-full text-sm">
                         <thead>
                         <tr class="text-left text-gray-600">
@@ -55,6 +54,7 @@
                         @endforeach
                         </tbody>
                     </table>
+                    </div>
                 </div>
             </div>
         @endforeach
@@ -96,4 +96,4 @@
             });
         });
     </script>
-@endsection
+</x-app-layout>

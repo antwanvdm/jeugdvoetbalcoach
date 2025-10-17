@@ -1,11 +1,10 @@
-@extends('layouts.app')
-
-@section('content')
+<x-app-layout>
     <div class="flex items-center justify-between mb-4">
         <h1 class="text-2xl font-semibold">Tegenstanders</h1>
         <a href="{{ route('opponents.create') }}" class="px-3 py-2 bg-blue-600 text-white rounded">Nieuwe tegenstander</a>
     </div>
 
+    <div class="overflow-x-auto">
     <table class="min-w-full bg-white shadow rounded">
         <thead>
         <tr class="border-b">
@@ -40,6 +39,7 @@
         @endforelse
         </tbody>
     </table>
+    </div>
 
     <div class="mt-4">{{ $opponents->links() }}</div>
-@endsection
+</x-app-layout>
