@@ -74,10 +74,13 @@ class FootballMatchController extends Controller
     {
         $footballMatch->load(['opponent']);
         // Fetch all pivot rows for this match and group by quarter to avoid de-duplication by player_id
-        $rows = \App\Models\Player::query()
+        $rows = Player::query()
             ->select('players.id', 'players.name', 'players.weight', 'football_match_player.quarter', 'football_match_player.position_id')
             ->join('football_match_player', 'football_match_player.player_id', '=', 'players.id')
             ->where('football_match_player.football_match_id', $footballMatch->id)
+            ->whereHas('seasons', function ($q) use ($footballMatch) {
+                $q->where('seasons.id', $footballMatch->season_id);
+            })
             ->orderBy('players.name')
             ->get();
 
@@ -90,7 +93,9 @@ class FootballMatchController extends Controller
         $positionNames = Position::pluck('name', 'id');
 
         // Get all players with their quarter counts for this match (only actual playing time, not bench)
-        $allPlayers = \App\Models\Player::orderBy('name')->get();
+        $allPlayers = Player::orderBy('name')->whereHas('seasons', function ($q) use ($footballMatch) {
+            $q->where('seasons.id', $footballMatch->season_id);
+        })->get();
         $playersWithQuarters = [];
 
         foreach ($allPlayers as $player) {
@@ -170,7 +175,9 @@ class FootballMatchController extends Controller
      */
     public function lineup(FootballMatch $footballMatch): View
     {
-        $players = Player::orderBy('name')->get();
+        $players = Player::whereHas('seasons', function ($q) use ($footballMatch) {
+            $q->where('seasons.id', $footballMatch->season_id);
+        })->orderBy('name')->get();
         $positions = Position::orderBy('name')->pluck('name', 'id');
 
         // Load existing assignments: [quarter][player_id] => position_id|null

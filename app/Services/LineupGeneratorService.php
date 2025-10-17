@@ -31,7 +31,6 @@ class LineupGeneratorService
     private Collection $players;
     private Collection $keeperCounts;
     private Collection $lastMatchKeepers;
-    private bool $debugMode = true; // Set to false to disable logging
 
     /**
      * Generate lineup for a football match
@@ -52,7 +51,9 @@ class LineupGeneratorService
      */
     private function loadPlayersData(FootballMatch $currentMatch): void
     {
-        $this->players = Player::inRandomOrder()->get();
+        $this->players = Player::whereHas('seasons', function ($q) use ($currentMatch) {
+            $q->where('seasons.id', $currentMatch->season_id);
+        })->inRandomOrder()->get();
 
         // Get historical keeper counts (exclude current match if it has data)
         $this->keeperCounts = Player::query()
@@ -482,7 +483,7 @@ class LineupGeneratorService
      */
     private function debugLog(string $message, array $context = []): void
     {
-        if ($this->debugMode) {
+        if (config('app.debug')) {
             \Log::info($message, $context);
         }
     }

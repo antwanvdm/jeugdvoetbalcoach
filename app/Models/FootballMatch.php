@@ -15,6 +15,7 @@ class FootballMatch extends Model
         'goals_scored',
         'goals_conceded',
         'date',
+        'season_id'
     ];
 
     protected $casts = [
