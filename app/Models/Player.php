@@ -22,8 +22,7 @@ class Player extends Model
     public function footballMatches(): BelongsToMany
     {
         return $this->belongsToMany(FootballMatch::class)
-            ->withPivot(['quarter', 'position_id'])
-            ->withTimestamps();
+            ->withPivot(['quarter', 'position_id']);
     }
 
     public function seasons(): BelongsToMany

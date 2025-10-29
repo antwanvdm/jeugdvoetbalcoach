@@ -22,21 +22,23 @@ class LineupGeneratorService
         'attacker' => self::ATTACKER_POSITION_ID,
     ];
 
-    private const FORMATION_NEEDS = [
-        'defender' => 2,
-        'midfielder' => 1,
-        'attacker' => 2,
-    ];
 
     private Collection $players;
     private Collection $keeperCounts;
     private Collection $lastMatchKeepers;
+
+    // Dynamic formation context (set per match): outfield needs; total on-field count is computed dynamically
+    private array $formationNeeds = [];
+    private ?int $formationTotalPlayers = null;
 
     /**
      * Generate lineup for a football match
      */
     public function generateLineup(FootballMatch $match): void
     {
+        // Apply formation from the match's season (dynamic desired players on field and role needs)
+        $this->applyFormationFromMatch($match);
+
         $this->loadPlayersData($match);
 
         $keepers = $this->selectKeepers();
@@ -187,26 +189,132 @@ class LineupGeneratorService
      */
     private function createBenchPlan(Collection $keepers): array
     {
-        $benchPlan = [];
+        // Target: exactly desiredOnField players on the field each quarter (dynamic from formation)
+        $targetsPerQuarter = $this->computePerQuarterBenchTargets();
 
-        // Non-keepers: alternate Q1+Q3 vs Q2+Q4, considering weight distribution
-        $nonKeepers = $this->players->reject(fn($p) => in_array($p->id, $keepers->pluck('id')->all(), true));
-        $nonKeepersSorted = $nonKeepers->sortBy(['weight', 'name']);
-
-        $toggle = false;
-        foreach ($nonKeepersSorted as $player) {
-            $benchPlan[$player->id] = $toggle ? [2, 4] : [1, 3];
-            $toggle = !$toggle;
-        }
-
-        // Keepers: bench exactly once (not their keeper quarter)
+        // 1) Keepers: bench exactly once (not their keeper quarter)
+        $keeperBenchPlan = [];
         foreach ($keepers as $index => $keeper) {
             $keeperQuarter = $index + 1;
             $benchQuarter = $this->calculateKeeperBenchQuarter($index, $keeperQuarter);
-            $benchPlan[$keeper->id] = [$benchQuarter];
+            $keeperBenchPlan[$keeper->id] = [$benchQuarter];
+        }
+
+        // 2) Calculate how many benches remain per quarter after assigning keeper benches
+        $keeperBenchCounts = $this->computeKeeperBenchCounts($keeperBenchPlan);
+        $remainingPerQuarter = [];
+        foreach ([1, 2, 3, 4] as $q) {
+            $remainingPerQuarter[$q] = max(0, ($targetsPerQuarter[$q] ?? 0) - ($keeperBenchCounts[$q] ?? 0));
+        }
+
+        // 3) Distribute remaining benches among non-keepers evenly and deterministically
+        $nonKeepers = $this->players->reject(fn($p) => in_array($p->id, $keepers->pluck('id')->all(), true));
+        $nonKeeperBenchPlan = $this->distributeNonKeeperBenches($nonKeepers, $remainingPerQuarter);
+
+        // 4) Merge plans
+        $benchPlan = $nonKeeperBenchPlan + $keeperBenchPlan;
+
+        // Debug
+        $this->debugLog('Bench targets per quarter', $targetsPerQuarter);
+        $this->debugLog('Keeper bench counts per quarter', $keeperBenchCounts);
+        $this->debugLog('Remaining benches per quarter (for non-keepers)', $remainingPerQuarter);
+
+        return $benchPlan;
+    }
+
+    /**
+     * Compute per-quarter bench targets based on squad size and desired on-field count (dynamic).
+     */
+    private function computePerQuarterBenchTargets(): array
+    {
+        $totalPlayers = $this->players->count();
+        $desiredOnField = $this->getDesiredOnField(); // dynamic: computed from formation or fallback
+        $benchesPerQuarter = max(0, $totalPlayers - $desiredOnField);
+
+        return [
+            1 => $benchesPerQuarter,
+            2 => $benchesPerQuarter,
+            3 => $benchesPerQuarter,
+            4 => $benchesPerQuarter,
+        ];
+    }
+
+    /**
+     * Count how many keepers are benched per quarter from the keeper bench plan.
+     * @param array $keeperBenchPlan [playerId => [quarter]]
+     */
+    private function computeKeeperBenchCounts(array $keeperBenchPlan): array
+    {
+        $counts = [1 => 0, 2 => 0, 3 => 0, 4 => 0];
+        foreach ($keeperBenchPlan as $quarters) {
+            foreach ($quarters as $q) {
+                if (isset($counts[$q])) {
+                    $counts[$q]++;
+                }
+            }
+        }
+        return $counts;
+    }
+
+    /**
+     * Distribute remaining bench slots across non-keepers as evenly as possible.
+     */
+    private function distributeNonKeeperBenches(Collection $nonKeepers, array $remainingPerQuarter): array
+    {
+        $benchPlan = [];
+
+        // Deterministic ordering for fairness
+        $ordered = $nonKeepers->sortBy(['weight', 'name'])->values();
+
+        $totalRemaining = array_sum($remainingPerQuarter);
+        if ($totalRemaining <= 0 || $ordered->isEmpty()) {
+            return $benchPlan;
+        }
+
+        while ($totalRemaining > 0) {
+            foreach ($ordered as $player) {
+                if ($totalRemaining <= 0) {
+                    break;
+                }
+
+                $already = $benchPlan[$player->id] ?? [];
+                $quarter = $this->pickQuarterForPlayer($already, $remainingPerQuarter);
+                if ($quarter === null) {
+                    // No quarter left that this player hasn't already been assigned → skip
+                    continue;
+                }
+
+                $benchPlan[$player->id] = array_values(array_unique(array_merge($already, [$quarter])));
+                $remainingPerQuarter[$quarter]--;
+                $totalRemaining--;
+            }
         }
 
         return $benchPlan;
+    }
+
+    /**
+     * Pick the best quarter for a player to be benched next, preferring quarters with most remaining need.
+     * Avoids assigning the same quarter twice to the same player.
+     */
+    private function pickQuarterForPlayer(array $alreadyAssignedQuarters, array $remainingPerQuarter): ?int
+    {
+        // Filter quarters with remaining slots and not yet assigned to this player
+        $options = [];
+        foreach ($remainingPerQuarter as $q => $remaining) {
+            if ($remaining > 0 && !in_array($q, $alreadyAssignedQuarters, true)) {
+                $options[$q] = $remaining;
+            }
+        }
+
+        if (empty($options)) {
+            return null;
+        }
+
+        // Choose the quarter with the highest remaining; tie-breaker by quarter number
+        arsort($options); // descending by remaining
+        $bestQuarter = array_key_first($options);
+        return (int)$bestQuarter;
     }
 
     /**
@@ -306,14 +414,14 @@ class LineupGeneratorService
      */
     private function withAssignedOutfieldPlayers(QuarterAssignmentData $quarterData, Collection $availablePlayers): QuarterAssignmentData
     {
-        $needs = self::FORMATION_NEEDS;
+        $needs = $this->formationNeeds;
 
         // First pass: satisfy needs with players who prefer that role
         foreach (array_keys($needs) as $role) {
             while ($needs[$role] > 0) {
                 $result = $this->tryAssignPlayerForRole($quarterData, $availablePlayers, $role, true);
-                if ($result->wasSuccessful()) {
-                    $quarterData = $result->getQuarterData();
+                if ($result !== null) {
+                    $quarterData = $result;
                     $needs[$role]--;
                 } else {
                     break;
@@ -325,8 +433,8 @@ class LineupGeneratorService
         foreach (array_keys($needs) as $role) {
             while ($needs[$role] > 0) {
                 $result = $this->tryAssignPlayerForRole($quarterData, $availablePlayers, $role, false);
-                if ($result->wasSuccessful()) {
-                    $quarterData = $result->getQuarterData();
+                if ($result !== null) {
+                    $quarterData = $result;
                     $needs[$role]--;
                 } else {
                     break;
@@ -340,12 +448,12 @@ class LineupGeneratorService
     /**
      * Try to assign a player for a specific role
      */
-    private function tryAssignPlayerForRole(QuarterAssignmentData $quarterData, Collection $availablePlayers, string $role, bool $preferredRoleOnly): AssignmentResult
+    private function tryAssignPlayerForRole(QuarterAssignmentData $quarterData, Collection $availablePlayers, string $role, bool $preferredRoleOnly): ?QuarterAssignmentData
     {
         $candidates = $this->getCandidatesForRole($availablePlayers, $quarterData->getSelectedPlayers(), $role, $preferredRoleOnly);
 
         if ($candidates->isEmpty()) {
-            return AssignmentResult::failure($quarterData);
+            return null;
         }
 
         // Sort by weight balance impact
@@ -356,7 +464,7 @@ class LineupGeneratorService
         $positionId = $this->determinePositionId($bestCandidate, $role);
         $quarterData->addAssignment($bestCandidate->id, $positionId);
 
-        return AssignmentResult::success($quarterData);
+        return $quarterData;
     }
 
     /**
@@ -476,6 +584,97 @@ class LineupGeneratorService
         }
 
         return $penalty + ($variance * 0.5);
+    }
+
+    /**
+     * Apply formation from the match's season to set dynamic needs and desired on-field count.
+     */
+    private function applyFormationFromMatch(FootballMatch $match): void
+    {
+        $formation = optional($match->season)->formation;
+        if (!$formation) {
+            // Fallback when no formation configured on season: no specific outfield role needs
+            $this->formationNeeds = ['defender' => 0, 'midfielder' => 0, 'attacker' => 0];
+            $this->formationTotalPlayers = null;
+            $this->debugLog('No formation found on season; using generic fallback', [
+                'needs' => $this->formationNeeds,
+                'desiredOnField' => $this->getDesiredOnField(),
+            ]);
+            return;
+        }
+
+        $needs = $this->parseFormationNeeds((string) $formation->lineup_formation);
+        $this->formationNeeds = $needs;
+
+        $sumOutfield = array_sum($needs);
+        $totalPlayersFromFormation = (int) $formation->total_players;
+        $this->formationTotalPlayers = $totalPlayersFromFormation > 0 ? $totalPlayersFromFormation : null;
+
+        // Optional: log mismatch with stored total_players for visibility only
+        $expectedOutfield = $totalPlayersFromFormation > 0 ? $totalPlayersFromFormation - 1 : null;
+        $actualOutfield = $sumOutfield;
+
+        $this->debugLog('Applied formation from season', [
+            'lineup_formation' => $formation->lineup_formation,
+            'needs' => $needs,
+            'desiredOnField' => $this->getDesiredOnField(),
+            'formation_total_players' => $totalPlayersFromFormation,
+            'outfield_sum_matches_total_players_minus_keeper' => is_null($expectedOutfield) ? null : ($expectedOutfield === $actualOutfield),
+        ]);
+    }
+
+    /**
+     * Parse a lineup formation string (e.g., "2-1-2") into role needs.
+     * Supports 2 or more parts; parts after the second are summed into attackers.
+     */
+    private function parseFormationNeeds(string $lineup): array
+    {
+        $parts = array_values(array_filter(array_map('trim', explode('-', $lineup)), fn($p) => $p !== ''));
+        $nums = [];
+        foreach ($parts as $p) {
+            if (is_numeric($p)) {
+                $nums[] = max(0, (int) $p);
+            }
+        }
+
+        if (empty($nums)) {
+            // Fallback: no specific outfield needs from lineup string
+            return ['defender' => 0, 'midfielder' => 0, 'attacker' => 0];
+        }
+
+        $def = $nums[0] ?? 0;
+        $mid = $nums[1] ?? 0;
+        $att = 0;
+        if (count($nums) >= 3) {
+            $att = array_sum(array_slice($nums, 2));
+        }
+
+        return [
+            'defender' => $def,
+            'midfielder' => $mid,
+            'attacker' => $att,
+        ];
+    }
+
+    /**
+     * Compute desired number of players on the field per quarter.
+     * Priority:
+     * 1) If formationTotalPlayers is set (>0), use it.
+     * 2) Else if formationNeeds sum > 0, return 1 (keeper) + sum(needs).
+     * 3) Else fallback to classic 6.
+     */
+    private function getDesiredOnField(): int
+    {
+        if (!is_null($this->formationTotalPlayers) && $this->formationTotalPlayers > 0) {
+            return $this->formationTotalPlayers;
+        }
+
+        $sumOutfield = array_sum($this->formationNeeds);
+        if ($sumOutfield > 0) {
+            return 1 + $sumOutfield;
+        }
+
+        return 6;
     }
 
     /**

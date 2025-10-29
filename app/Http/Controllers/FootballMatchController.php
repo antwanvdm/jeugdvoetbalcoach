@@ -60,6 +60,19 @@ class FootballMatchController extends Controller
 
         $match = FootballMatch::create($validated);
 
+        //spelers ophalen huidige season blok
+        //Keepers verdelen per kwart (mag niet hebben gekeept in laatste wedstrijd, volgorde minst gekeept als eerst)
+        //Spelers verdelen per kwart over basis van gekoppelde opstelling
+        //- Fysiek eerlijk verdelen over kwart
+        //- Voorkeurspositie meenemen
+
+//        $players = Player::whereHas('seasons', function ($q) use ($match) {
+//            $q->where('seasons.id', $match->season_id);
+//        })->with('footballMatches')->inRandomOrder()->get();
+//        $formation = $match->season->formation->lineup_formation;
+//        dd($players);
+
+
         // Generate lineup using the service
         $lineupGenerator->generateLineup($match);
 
