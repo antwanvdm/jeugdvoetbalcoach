@@ -4,9 +4,8 @@ namespace Database\Seeders;
 
 use App\Models\Position;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 
-class PositionsTableSeeder extends Seeder
+class PositionsSeeder extends Seeder
 {
     public function run(): void
     {

@@ -5,7 +5,7 @@ namespace Database\Seeders;
 use App\Models\Opponent;
 use Illuminate\Database\Seeder;
 
-class OpponentsTableSeeder extends Seeder
+class OpponentsSeeder extends Seeder
 {
     public function run(): void
     {

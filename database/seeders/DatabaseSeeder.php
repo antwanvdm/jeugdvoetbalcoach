@@ -12,9 +12,10 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            PositionsTableSeeder::class,
-            FormationsTableSeeder::class,
-            OpponentsTableSeeder::class,
+            PositionsSeeder::class,
+            FormationsSeeder::class,
+            OpponentsSeeder::class,
+            SeasonsSeeder::class,
         ]);
     }
 }

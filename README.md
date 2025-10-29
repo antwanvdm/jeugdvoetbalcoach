@@ -11,16 +11,17 @@ VVOR Team Manager is ontwikkeld voor voetbalverenigingen die hun teammanagement 
 **🏆 Intelligente Line-up Generatie**
 
 -   Automatische opstelling voor 4 kwarten per wedstrijd
--   Slimme keeper rotatie (voorkomt herhaling van vorige wedstrijd)
+-   Slimme keeperrotatie (voorkomt herhaling van vorige wedstrijd)
 -   Geavanceerde spelersverdeling op basis van fysieke eigenschappen
--   Formatie: 1 Keeper, 2 Verdedigers, 1 Middenvelder, 2 Aanvallers
+-   Dynamische formatie vanuit het seizoen (bijv. 2-1-2, 3-2-2, 4-3-3) en/of `total_players`
 
 **⚖️ Eerlijke Speeltijdverdeling**
 
--   Elke speler speelt exact 2 van de 4 kwarten, behalve de keepers (3 keer)
--   Bank-rotatie in niet-opeenvolgende kwarten (Q1+Q3 vs Q2+Q4)
--   Historische tracking van keeper-beurten
--   Weight-balancing om fysieke clustering te voorkomen
+-   Per kwart exact het aantal spelers op het veld dat de formatie vereist (`desiredOnField`), zolang het teamgrootte dat toelaat
+-   Bankbehoefte per kwart: `teamSize - desiredOnField`
+-   Keepers: ieder 1x bank (niet in hun keeperkwart)
+-   Niet-keepers: resterende bankplekken evenwichtig verdeeld over de kwarten (geen hard-coded patronen)
+-   Historische tracking van keeperbeurten en weight-balancing om clustering te voorkomen
 
 **📊 Uitgebreide Statistieken**
 
@@ -40,7 +41,7 @@ VVOR Team Manager is ontwikkeld voor voetbalverenigingen die hun teammanagement 
 
 ### Vereisten
 
--   PHP 8.2 of hoger
+-   PHP 8.4 of hoger
 -   Composer
 -   Node.js & NPM
 -   SQLite/MySQL database
@@ -68,29 +69,13 @@ cp .env.example .env
 php artisan key:generate
 ```
 
-4. **Database configuratie**
+4**Database migratie en seeders**
 
 ```bash
-# Voor SQLite (standaard)
-touch database/database.sqlite
-
-# Voor MySQL pas .env aan:
-# DB_CONNECTION=mysql
-# DB_HOST=127.0.0.1
-# DB_PORT=3306
-# DB_DATABASE=vvor
-# DB_USERNAME=root
-# DB_PASSWORD=
+php artisan migrate --seed
 ```
 
-5. **Database migratie en seeders**
-
-```bash
-php artisan migrate
-php artisan db:seed
-```
-
-6. **Frontend assets**
+5**Frontend assets**
 
 ```bash
 npm run build
@@ -98,7 +83,7 @@ npm run build
 npm run dev
 ```
 
-7. **Start de server**
+8**Start de server**
 
 ```bash
 php artisan serve
@@ -106,6 +91,26 @@ php artisan serve
 ```
 
 Ga naar `http://localhost:8000` om de applicatie te gebruiken.
+
+### Vooringevulde data (seeders)
+
+Bij het seeden worden deze basisgegevens aangemaakt voor een snelle start:
+
+- Positions (met vaste IDs):
+  - 1 Keeper, 2 Verdediger, 3 Middenvelder, 4 Aanvaller
+- Formations (presets):
+  - 6 spelers: `2-1-2`
+  - 8 spelers: `3-2-2`
+  - 11 spelers: `4-3-3`
+- Opponents: 13 tegenstanders met naam, plaats, logo en GPS-coördinaten
+
+Commands:
+
+```bash
+php artisan migrate --seed
+# of
+php artisan migrate:fresh --seed
+```
 
 ## 🏗️ Architectuur
 
@@ -151,19 +156,19 @@ Ga naar `http://localhost:8000` om de applicatie te gebruiken.
 
 2. **Bank Planning**
 
-    - Niet-keepers: alternerend Q1+Q3 vs Q2+Q4 patroon
-    - Keepers: 1 bank-kwart (niet hun keeper-kwart)
-    - Weight-based sortering voor betere verdeling
+    - Bepaalt per kwart de bankbehoefte: `teamSize - desiredOnField`
+    - Keepers: ieder precies 1x bank (niet in hun keeperkwart)
+    - Niet-keepers: resterende bankplekken gelijkmatig verdeeld over de kwarten (geen vast Q1+Q3 of Q2+Q4 patroon)
 
 3. **Positie Toewijzing**
 
-    - Eerst spelers op hun voorkeursposities
-    - Daarna optimalisatie op basis van beschikbaarheid
+    - Formatiegestuurd: outfield-behoefte komt uit `Season->formation` (`lineup_formation` en/of `total_players`)
+    - Eerst spelers op hun voorkeursposities, daarna opvullen met beste kandidaten
     - Weight-balancing om clustering te voorkomen
 
 4. **Validatie & Opslag**
-    - Controle op formatie (1-2-1-2)
-    - Database opslag via pivot tables
+    - Valideert dat per kwart maximaal `desiredOnField` spelers op het veld staan
+    - Database opslag via pivot tabel met `quarter` en `position_id`
     - Real-time feedback en logging
 
 ### Slimme Features
@@ -184,9 +189,9 @@ Intelligente keeper verdeling die:
 
 **📊 Real-time Monitoring**
 
--   Uitgebreide logging voor troubleshooting
+-   Uitgebreide logging voor troubleshooting (zet `APP_DEBUG=true`)
 -   Performance metrics en query optimalisatie
--   Debg mode voor development
+-   Debug mode voor development
 
 ## 🛠️ Development
 

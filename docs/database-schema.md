@@ -10,7 +10,9 @@ De database bestaat uit de volgende hoofdtabellen:
 -   **players** - Spelers in het team
 -   **positions** - Voetbalposities (Keeper, Verdediger, etc.)
 -   **opponents** - Tegenstanders
--   **football_matches** - Wedstrijden
+-   **formations** - Formatie presets met `total_players` en `lineup_formation`
+-   **seasons** - Seizoenen die een formatie refereren
+-   **football_matches** - Wedstrijden (horen bij een seizoen)
 -   **football_match_player** - Pivot tabel voor spelers per wedstrijd/kwart
 
 ## 📊 Entity Relationship Diagram
@@ -35,17 +37,20 @@ De database bestaat uit de volgende hoofdtabellen:
 ├─────────────────┤    ├─────────────────────────────────┤
 │ id (PK)         │    │ football_match_id (FK)          │
 │ name            │    │ player_id (FK)                  │
-│ logo            │    │ quarter                         │
-│ location_maps_  │    │ position_id (FK) [nullable]     │
-│ created_at      │    │ created_at                      │
-│ updated_at      │    │ updated_at                      │
-└─────────────────┘    └─────────────────────────────────┘
-       │                                │
-       │                                │
-┌─────────────────┐                     │
-│football_matches │                     │
-├─────────────────┤                     │
-│ id (PK)         │─────────────────────┘
+│ location        │    │ quarter                         │
+│ logo            │    │ position_id (FK) [nullable]     │
+│ latitude        │    │ created_at                      │
+│ longitude       │    │ updated_at                      │
+│ created_at      │    └─────────────────────────────────┘
+│ updated_at      │
+└─────────────────┘                 │
+       │                            │
+       │                            │
+┌─────────────────┐                 │
+│football_matches │                 │
+├─────────────────┤                 │
+│ id (PK)         │─────────────────┘
+│ season_id (FK)  │
 │ opponent_id (FK)│
 │ home (boolean)  │
 │ goals_scored    │
@@ -54,6 +59,24 @@ De database bestaat uit de volgende hoofdtabellen:
 │ created_at      │
 │ updated_at      │
 └─────────────────┘
+
+┌─────────────┐
+│  seasons    │
+├─────────────┤
+│ id (PK)     │
+│ formation_id│ (FK)
+│ start/end   │
+│ year/part   │
+└─────────────┘
+       │
+       │
+┌──────────────┐
+│  formations  │
+├──────────────┤
+│ id (PK)      │
+│ total_players│
+│ lineup_form. │
+└──────────────┘
 ```
 
 ## 📋 Tabellen
@@ -140,14 +163,16 @@ Alle spelers in het team met hun eigenschappen.
 
 Tegenstanders waartegen gespeeld wordt.
 
-| Kolom                | Type            | Nullable | Default        | Beschrijving                  |
-| -------------------- | --------------- | -------- | -------------- | ----------------------------- |
-| `id`                 | bigint unsigned | NO       | AUTO_INCREMENT | Primary key                   |
-| `name`               | varchar(255)    | NO       |                | Naam van de tegenstander      |
-| `logo`               | varchar(255)    | YES      | NULL           | URL naar logo afbeelding      |
-| `location_maps_link` | text            | YES      | NULL           | Google Maps link naar locatie |
-| `created_at`         | timestamp       | YES      | NULL           | Aanmaakdatum                  |
-| `updated_at`         | timestamp       | YES      | NULL           | Laatste wijziging             |
+| Kolom        | Type            | Nullable | Default        | Beschrijving                 |
+| ------------ | --------------- | -------- | -------------- | ---------------------------- |
+| `id`         | bigint unsigned | NO       | AUTO_INCREMENT | Primary key                  |
+| `name`       | varchar(255)    | NO       |                | Naam van de tegenstander     |
+| `location`   | varchar(255)    | NO       |                | Plaatsnaam                   |
+| `logo`       | varchar(255)    | YES      | NULL           | URL naar logo afbeelding     |
+| `latitude`   | decimal(10,8)   | NO       |                | Breedtegraad                 |
+| `longitude`  | decimal(11,8)   | NO       |                | Lengtegraad                  |
+| `created_at` | timestamp       | YES      | NULL           | Aanmaakdatum                 |
+| `updated_at` | timestamp       | YES      | NULL           | Laatste wijziging            |
 
 **Indexen:**
 
