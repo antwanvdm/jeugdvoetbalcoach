@@ -59,7 +59,8 @@ De database bestaat uit de volgende hoofdtabellen:
 │ created_at      │
 │ updated_at      │
 └─────────────────┘
-
+       │
+       │
 ┌─────────────┐
 │  seasons    │
 ├─────────────┤

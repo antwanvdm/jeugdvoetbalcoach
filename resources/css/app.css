@@ -7,7 +7,7 @@
 
 @theme {
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+    'Segoe UI Symbol', 'Noto Color Emoji';
 }
 
 @layer components {
@@ -35,6 +35,10 @@
 }
 
 @media print {
+    @page {
+        size: A4 landscape;
+    }
+
     * {
         background: white;
         color: black !important;

@@ -112,7 +112,10 @@
 
     {{-- Dobbelsteen-opstelling (schematic) per quarter --}}
     <div class="mt-6 bg-white p-4 shadow rounded">
-        <h2 class="text-xl font-semibold mb-3 line-up-header">Opstelling per kwart</h2>
+        <div class="flex justify-between line-up-header mb-3">
+            <h2 class="text-xl font-semibold">Opstelling per kwart</h2>
+            <button onclick="window.print();" class="px-3 py-2 bg-indigo-600 text-white rounded">🖨️ Print</button>
+        </div>
         <div class="grid md:grid-cols-2 gap-4 line-up">
             @foreach(range(1,4) as $q)
                 @php

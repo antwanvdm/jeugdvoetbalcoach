@@ -42,7 +42,8 @@ class PlayerController extends Controller
     public function create(): View
     {
         $positions = Position::orderBy('name')->pluck('name', 'id');
-        return view('players.create', compact('positions'));
+        $seasons = Season::orderByDesc('year')->orderByDesc('part')->get()->mapWithKeys(fn($s) => [$s->id => $s->year . '-' . $s->part]);
+        return view('players.create', compact('positions', 'seasons'));
     }
 
     /**
@@ -54,9 +55,16 @@ class PlayerController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'position_id' => ['required', 'exists:positions,id'],
             'weight' => ['required', 'numeric'],
+            'seasons' => ['sometimes', 'array'],
+            'seasons.*' => ['integer', 'exists:seasons,id'],
         ]);
 
         $player = Player::create($validated);
+
+        if ($request->has('seasons')) {
+            $seasonIds = array_filter((array)$request->input('seasons'));
+            $player->seasons()->sync($seasonIds);
+        }
 
         return redirect()->route('players.show', $player)->with('success', 'Speler aangemaakt.');
     }
