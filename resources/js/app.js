@@ -38,10 +38,3 @@ document.addEventListener("keydown", function (e) {
         document.body.classList.remove("overflow-y-hidden");
     }
 });
-
-// Auto-hide success berichten
-document.addEventListener("DOMContentLoaded", function () {
-    document.querySelectorAll("[data-auto-hide]").forEach((el) => {
-        setTimeout(() => (el.style.display = "none"), 2000);
-    });
-});

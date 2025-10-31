@@ -75,10 +75,6 @@
 
         <div class="flex items-center gap-4">
             <x-primary-button>Opslaan</x-primary-button>
-
-            @if (session('status') === 'profile-updated')
-                <p data-auto-hide class="text-sm text-gray-600">Opgeslagen.</p>
-            @endif
         </div>
     </form>
 </section>
