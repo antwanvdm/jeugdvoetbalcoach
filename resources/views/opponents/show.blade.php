@@ -35,7 +35,7 @@
             <dt class="font-medium text-gray-600">Logo</dt>
             <dd class="col-span-2">
                 @if($opponent->logo)
-                    <img src="{{ $opponent->logo }}" alt="{{ $opponent->name }} logo" class="h-28">
+                    <img src="{{ asset('storage/' . $opponent->logo) }}" alt="{{ $opponent->name }} logo" class="h-28">
                 @else
                     <span class="text-gray-500">-</span>
                 @endif

@@ -44,7 +44,7 @@
                 -
             </div>
             <div class="flex-12 flex @if(!$footballMatch->home) justify-end @endif">
-                <img src="{{$footballMatch->opponent->logo}}" alt="{{$footballMatch->opponent->name}} Logo" class="h-28">
+                <img src="{{asset('storage/' . $footballMatch->opponent->logo)}}" alt="{{$footballMatch->opponent->name}} Logo" class="h-28">
             </div>
         </div>
     </div>

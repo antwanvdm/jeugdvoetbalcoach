@@ -1,6 +1,6 @@
 <x-app-layout>
     <h1 class="text-2xl font-semibold mb-4">Bewerk tegenstander</h1>
-    <form action="{{ route('opponents.update', $opponent) }}" method="POST" class="bg-white p-4 shadow rounded max-w-lg">
+    <form action="{{ route('opponents.update', $opponent) }}" method="POST" enctype="multipart/form-data" class="bg-white p-4 shadow rounded max-w-lg">
         @csrf
         @method('PUT')
         <div class="mb-3">
@@ -12,8 +12,14 @@
             <input type="text" name="location" value="{{ old('location', $opponent->location) }}" class="w-full border rounded p-2" required>
         </div>
         <div class="mb-3">
-            <label class="block text-sm font-medium mb-1">Logo URL</label>
-            <input type="text" name="logo" value="{{ old('logo', $opponent->logo) }}" class="w-full border rounded p-2">
+            <label class="block text-sm font-medium mb-1">Huidig logo</label>
+            @if($opponent->logo)
+                <img src="{{ asset('storage/' . $opponent->logo) }}" alt="{{ $opponent->name }} logo" class="h-20 mb-2">
+            @else
+                <p class="text-gray-500 text-sm mb-2">Geen logo ingesteld</p>
+            @endif
+            <label class="block text-sm font-medium mb-1">Nieuw logo uploaden (optioneel)</label>
+            <input type="file" name="logo_file" accept="image/*" class="w-full border rounded p-2">
         </div>
         <div class="mb-3 grid grid-cols-2 gap-3">
             <div>

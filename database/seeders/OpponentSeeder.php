@@ -12,6 +12,7 @@ class OpponentSeeder extends Seeder
 {
     public function run(): void
     {
+        $userId = 2; // prefix voor bestandsnaam en te koppelen user
         $opponents = [
             ['name' => 'DCV', "location" => 'Krimpen aan den IJssel', 'logo' => 'https://website.storage/Data/DCV/RTE/Afbeeldingen/MenuItem/439/badge_kleur.png?maxwidth=1200&maxheight=630', 'latitude' => 51.90894487593641, 'longitude' => 4.589017207382628],
             ['name' => 'Lekkerkerk', "location" => 'Lekkerkerk', 'logo' => 'https://website.storage/Data/Lekkerkerk/Layout/Files/SocialMediaStandaardMeta.jpg?637145275955548998&maxwidth=1200&maxheight=630', 'latitude' => 51.9020305082625, 'longitude' => 4.677412069296964],
@@ -48,19 +49,17 @@ class OpponentSeeder extends Seeder
                             default => pathinfo(parse_url($logoUrl, PHP_URL_PATH) ?? '', PATHINFO_EXTENSION) ?: 'png',
                         };
 
-                        $filename = Str::slug($opponent['name']) . '.' . $ext;
+                        $filename = $userId . '-' . Str::slug($opponent['name']) . '.' . $ext;
                         $path = 'opponents/' . $filename;
                         Storage::disk('public')->put($path, $contents);
-
-                        // Store a public URL so <img src> works directly
-                        $opponent['logo'] = Storage::url($path);
+                        $opponent['logo'] = $path;
                     }
                 } catch (\Throwable $e) {
                     // If download fails, keep original URL as fallback
                 }
             }
 
-            Opponent::create(array_merge($opponent, ['user_id' => 2]));
+            Opponent::create(array_merge($opponent, ['user_id' => $userId]));
         }
     }
 }

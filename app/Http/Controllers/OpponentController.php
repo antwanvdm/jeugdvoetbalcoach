@@ -7,6 +7,8 @@ use Gate;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class OpponentController extends Controller
 {
@@ -41,13 +43,28 @@ class OpponentController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'location' => ['required', 'string', 'max:255'],
-            'logo' => ['nullable', 'string', 'max:255'],
+            'logo_file' => ['required', 'image', 'max:4096'], // upload verplicht
             'latitude' => ['required', 'numeric'],
             'longitude' => ['required', 'numeric'],
         ]);
 
-        $validated['user_id'] = auth()->id();
-        $opponent = Opponent::create($validated);
+        // Altijd uploaden; bestandsnaam met user_id prefix
+        $file = $request->file('logo_file');
+        $ext = $file->getClientOriginalExtension() ?: $file->extension();
+        $userId = auth()->id();
+        $filename = $userId . '-' . Str::slug($validated['name']) . '-' . time() . ($ext ? ('.' . $ext) : '');
+        $storedLogo = $file->storeAs('opponents', $filename, 'public'); // relative path
+
+        $payload = [
+            'name' => $validated['name'],
+            'location' => $validated['location'],
+            'logo' => $storedLogo,
+            'latitude' => $validated['latitude'],
+            'longitude' => $validated['longitude'],
+            'user_id' => auth()->id(),
+        ];
+
+        $opponent = Opponent::create($payload);
         return redirect()->route('opponents.show', $opponent)->with('success', 'Tegenstander aangemaakt.');
     }
 
@@ -81,11 +98,36 @@ class OpponentController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'location' => ['required', 'string', 'max:255'],
-            'logo' => ['nullable', 'string', 'max:255'],
+            'logo_file' => ['nullable', 'image', 'max:4096'], // upload optioneel bij bewerken
             'latitude' => ['required', 'numeric'],
             'longitude' => ['required', 'numeric'],
         ]);
-        $opponent->update($validated);
+
+        $storedLogo = $opponent->logo; // behoud huidige als er geen nieuwe upload is
+
+        if ($request->hasFile('logo_file')) {
+            $file = $request->file('logo_file');
+            $ext = $file->getClientOriginalExtension() ?: $file->extension();
+            $userId = auth()->id();
+            $filename = $userId . '-' . Str::slug($validated['name']) . '-' . time() . ($ext ? ('.' . $ext) : '');
+            $newPath = $file->storeAs('opponents', $filename, 'public');
+
+            // verwijder oude indien lokaal opgeslagen relatief pad
+            if ($storedLogo && !str_starts_with($storedLogo, 'http') && !str_starts_with($storedLogo, '/storage/')) {
+                Storage::disk('public')->delete($storedLogo);
+            }
+            $storedLogo = $newPath;
+        }
+
+        $payload = [
+            'name' => $validated['name'],
+            'location' => $validated['location'],
+            'logo' => $storedLogo,
+            'latitude' => $validated['latitude'],
+            'longitude' => $validated['longitude'],
+        ];
+
+        $opponent->update($payload);
         return redirect()->route('opponents.show', $opponent)->with('success', 'Tegenstander bijgewerkt.');
     }
 

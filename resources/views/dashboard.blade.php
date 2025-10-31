@@ -71,7 +71,7 @@
                                 -
                             </div>
                             <div class="flex-12 flex @if(!$nextMatch->home) justify-end @endif">
-                                <img src="{{$nextMatch->opponent->logo}}" alt="{{$nextMatch->opponent->name}} Logo" class="h-28">
+                                <img src="{{asset('storage/' . $nextMatch->opponent->logo)}}" alt="{{$nextMatch->opponent->name}} Logo" class="h-28">
                             </div>
                         </div>
                         <a href="{{ route('football-matches.show', $nextMatch) }}" class="mt-2 px-3 py-2 bg-indigo-600 text-white rounded text-center">Bekijk</a>

@@ -17,7 +17,7 @@
         <tbody>
         @forelse($opponents as $opponent)
             <tr class="border-b">
-                <td class="p-3"><img src="{{ $opponent->logo }}" alt="{{ $opponent->name }} logo" class="h-8"></td>
+                <td class="p-3"><img src="{{ asset('storage/' . $opponent->logo) }}" alt="{{ $opponent->name }} logo" class="h-8"></td>
                 <td class="p-3">{{ $opponent->name }}</td>
                 <td class="p-3">
                     <a href="{{ $opponent->location_maps_link }}" target="_blank" rel="noopener" class="text-blue-600 hover:underline">{{ $opponent->location }}</a>
