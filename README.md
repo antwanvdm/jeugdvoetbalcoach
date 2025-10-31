@@ -125,7 +125,8 @@ Bij het seeden worden deze basisgegevens aangemaakt voor een snelle start:
     -   6 spelers: `2-1-2`
     -   8 spelers: `3-2-2`
     -   11 spelers: `4-3-3`
--   **Opponents**: 13 tegenstanders met naam, plaats, logo en GPS-coördinaten
+-   **Opponents**: Set aan tegenstanders met naam, plaats, logo en GPS-coördinaten
+-   **Players**: 8 fake spelers
 
 Commands:
 

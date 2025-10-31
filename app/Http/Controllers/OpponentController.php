@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Opponent;
+use Gate;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -14,6 +15,8 @@ class OpponentController extends Controller
      */
     public function index(): View
     {
+        Gate::authorize('viewAny', Opponent::class);
+
         $opponents = Opponent::orderBy('name')->paginate(15);
         return view('opponents.index', compact('opponents'));
     }
@@ -23,6 +26,8 @@ class OpponentController extends Controller
      */
     public function create(): View
     {
+        Gate::authorize('create', Opponent::class);
+
         return view('opponents.create');
     }
 
@@ -31,6 +36,8 @@ class OpponentController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        Gate::authorize('create', Opponent::class);
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'location' => ['required', 'string', 'max:255'],
@@ -49,6 +56,8 @@ class OpponentController extends Controller
      */
     public function show(Opponent $opponent): View
     {
+        Gate::authorize('view', $opponent);
+
         return view('opponents.show', compact('opponent'));
     }
 
@@ -57,6 +66,8 @@ class OpponentController extends Controller
      */
     public function edit(Opponent $opponent): View
     {
+        Gate::authorize('update', $opponent);
+
         return view('opponents.edit', compact('opponent'));
     }
 
@@ -65,6 +76,8 @@ class OpponentController extends Controller
      */
     public function update(Request $request, Opponent $opponent): RedirectResponse
     {
+        Gate::authorize('update', $opponent);
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'location' => ['required', 'string', 'max:255'],
@@ -81,6 +94,8 @@ class OpponentController extends Controller
      */
     public function destroy(Opponent $opponent): RedirectResponse
     {
+        Gate::authorize('delete', $opponent);
+
         $opponent->delete();
         return redirect()->route('opponents.index')->with('success', 'Opponent deleted.');
     }

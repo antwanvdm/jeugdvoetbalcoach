@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Formation;
 use App\Models\Season;
+use Gate;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -12,18 +13,24 @@ class SeasonController extends Controller
 {
     public function index(): View
     {
+        Gate::authorize('viewAny', Season::class);
+
         $seasons = Season::orderByDesc('year')->orderByDesc('part')->paginate(15);
         return view('seasons.index', compact('seasons'));
     }
 
     public function create(): View
     {
+        Gate::authorize('create', Season::class);
+
         $formations = Formation::orderBy('total_players')->get()->mapWithKeys(fn($f) => [$f->id => $f->lineup_formation . ' (' . $f->total_players . ')']);
         return view('seasons.create', compact('formations'));
     }
 
     public function store(Request $request): RedirectResponse
     {
+        Gate::authorize('create', Season::class);
+
         $data = $request->validate([
             'year' => ['required', 'integer'],
             'part' => ['required', 'integer', 'min:1'],
@@ -52,17 +59,23 @@ class SeasonController extends Controller
 
     public function show(Season $season): View
     {
+        Gate::authorize('view', $season);
+
         return view('seasons.show', compact('season'));
     }
 
     public function edit(Season $season): View
     {
+        Gate::authorize('update', $season);
+
         $formations = Formation::orderBy('total_players')->get()->mapWithKeys(fn($f) => [$f->id => $f->lineup_formation . ' (' . $f->total_players . ')']);
         return view('seasons.edit', compact('season', 'formations'));
     }
 
     public function update(Request $request, Season $season): RedirectResponse
     {
+        Gate::authorize('update', $season);
+
         $data = $request->validate([
             'year' => ['required', 'integer'],
             'part' => ['required', 'integer', 'min:1'],
@@ -78,6 +91,8 @@ class SeasonController extends Controller
 
     public function destroy(Season $season): RedirectResponse
     {
+        Gate::authorize('delete', $season);
+
         $season->delete();
         return redirect()->route('seasons.index')->with('success', 'Seizoen verwijderd.');
     }

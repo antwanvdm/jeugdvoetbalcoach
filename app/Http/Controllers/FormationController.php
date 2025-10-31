@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Formation;
 use App\Rules\ValidFormation;
+use Gate;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -12,17 +13,23 @@ class FormationController extends Controller
 {
     public function index(): View
     {
+        Gate::authorize('viewAny', Formation::class);
+
         $formations = Formation::with('user')->orderBy('total_players')->paginate(15);
         return view('formations.index', compact('formations'));
     }
 
     public function create(): View
     {
+        Gate::authorize('create', Formation::class);
+
         return view('formations.create');
     }
 
     public function store(Request $request): RedirectResponse
     {
+        Gate::authorize('create', Formation::class);
+
         $validated = $request->validate([
             'total_players' => ['required', 'integer', 'min:1'],
             'lineup_formation' => ['required', 'string', 'max:255', new ValidFormation((int) $request->input('total_players'))],
@@ -46,16 +53,22 @@ class FormationController extends Controller
 
     public function show(Formation $formation): View
     {
+        Gate::authorize('view', $formation);
+
         return view('formations.show', compact('formation'));
     }
 
     public function edit(Formation $formation): View
     {
+        Gate::authorize('update', $formation);
+
         return view('formations.edit', compact('formation'));
     }
 
     public function update(Request $request, Formation $formation): RedirectResponse
     {
+        Gate::authorize('update', $formation);
+
         $validated = $request->validate([
             'total_players' => ['required', 'integer', 'min:1'],
             'lineup_formation' => ['required', 'string', 'max:255', new ValidFormation((int) $request->input('total_players'))],
@@ -67,7 +80,7 @@ class FormationController extends Controller
             if (!auth()->user()->isAdmin()) {
                 abort(403, 'Only admins can modify global formation status.');
             }
-            
+
             if ($validated['is_global']) {
                 $validated['user_id'] = null;
             } elseif ($formation->is_global && !$validated['is_global']) {
@@ -83,6 +96,8 @@ class FormationController extends Controller
 
     public function destroy(Formation $formation): RedirectResponse
     {
+        Gate::authorize('delete', $formation);
+
         $formation->delete();
         return redirect()->route('formations.index')->with('success', 'Formatie verwijderd.');
     }

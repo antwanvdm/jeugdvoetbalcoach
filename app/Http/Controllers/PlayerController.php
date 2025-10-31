@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Player;
 use App\Models\Position;
 use App\Models\Season;
+use Gate;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -16,6 +17,8 @@ class PlayerController extends Controller
      */
     public function index(Request $request): View
     {
+        Gate::authorize('viewAny', Player::class);
+
         $seasons = Season::orderByDesc('year')->orderByDesc('part')->get();
         $activeSeason = Season::getCurrent($seasons);
         $seasonId = $request->query('season_id') ?? ($activeSeason?->id ?? null);
@@ -41,6 +44,8 @@ class PlayerController extends Controller
      */
     public function create(): View
     {
+        Gate::authorize('create', Player::class);
+
         $positions = Position::orderBy('name')->pluck('name', 'id');
         $seasons = Season::orderByDesc('year')->orderByDesc('part')->get()->mapWithKeys(fn($s) => [$s->id => $s->year . '-' . $s->part]);
         return view('players.create', compact('positions', 'seasons'));
@@ -51,6 +56,8 @@ class PlayerController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        Gate::authorize('create', Player::class);
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'position_id' => ['required', 'exists:positions,id'],
@@ -75,6 +82,8 @@ class PlayerController extends Controller
      */
     public function show(Player $player): View
     {
+        Gate::authorize('view', $player);
+
         $player->load('position');
         return view('players.show', compact('player'));
     }
@@ -84,6 +93,8 @@ class PlayerController extends Controller
      */
     public function edit(Player $player): View
     {
+        Gate::authorize('update', $player);
+
         $positions = Position::orderBy('name')->pluck('name', 'id');
         $seasons = Season::orderByDesc('year')->orderByDesc('part')->get()->mapWithKeys(fn($s) => [$s->id => $s->year . '-' . $s->part]);
         return view('players.edit', compact('player', 'positions', 'seasons'));
@@ -94,6 +105,8 @@ class PlayerController extends Controller
      */
     public function update(Request $request, Player $player): RedirectResponse
     {
+        Gate::authorize('update', $player);
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'position_id' => ['required', 'exists:positions,id'],
@@ -116,6 +129,8 @@ class PlayerController extends Controller
      */
     public function destroy(Player $player): RedirectResponse
     {
+        Gate::authorize('delete', $player);
+
         $player->delete();
         return redirect()->route('players.index')->with('success', 'Player deleted.');
     }

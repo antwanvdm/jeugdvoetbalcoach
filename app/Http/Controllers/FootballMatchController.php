@@ -8,6 +8,7 @@ use App\Models\Player;
 use App\Models\Position;
 use App\Models\Season;
 use App\Services\LineupGeneratorService;
+use Gate;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -19,6 +20,8 @@ class FootballMatchController extends Controller
      */
     public function index(Request $request): View
     {
+        Gate::authorize('viewAny', FootballMatch::class);
+
         $seasons = Season::orderByDesc('year')->orderByDesc('part')->get();
         $activeSeason = Season::getCurrent($seasons);
 
@@ -34,6 +37,8 @@ class FootballMatchController extends Controller
      */
     public function create(): View
     {
+        Gate::authorize('create', FootballMatch::class);
+
         $opponents = Opponent::orderBy('name')->pluck('name', 'id');
         $seasons = Season::orderByDesc('year')->orderByDesc('part')->get();
         $activeSeason = Season::getCurrent($seasons);
@@ -47,6 +52,8 @@ class FootballMatchController extends Controller
      */
     public function store(Request $request, LineupGeneratorService $lineupGenerator): RedirectResponse
     {
+        Gate::authorize('create', FootballMatch::class);
+
         $validated = $request->validate([
             'opponent_id' => ['required', 'exists:opponents,id'],
             'home' => ['required', 'boolean'],
@@ -73,6 +80,8 @@ class FootballMatchController extends Controller
      */
     public function show(FootballMatch $footballMatch): View
     {
+        Gate::authorize('view', $footballMatch);
+
         $footballMatch->load(['opponent']);
         // Fetch all pivot rows for this match and group by quarter to avoid de-duplication by player_id
         $rows = Player::query()
@@ -135,6 +144,8 @@ class FootballMatchController extends Controller
      */
     public function edit(FootballMatch $footballMatch): View
     {
+        Gate::authorize('update', $footballMatch);
+
         $opponents = Opponent::orderBy('name')->pluck('name', 'id');
         $seasonsMapped = Season::orderByDesc('year')->orderByDesc('part')
             ->get()
@@ -148,6 +159,8 @@ class FootballMatchController extends Controller
      */
     public function update(Request $request, FootballMatch $footballMatch): RedirectResponse
     {
+        Gate::authorize('update', $footballMatch);
+
         $validated = $request->validate([
             'opponent_id' => ['required', 'exists:opponents,id'],
             'home' => ['required', 'boolean'],
@@ -167,6 +180,8 @@ class FootballMatchController extends Controller
      */
     public function destroy(FootballMatch $footballMatch): RedirectResponse
     {
+        Gate::authorize('delete', $footballMatch);
+
         $footballMatch->delete();
         return redirect()->route('football-matches.index')->with('success', 'Wedstrijd verwijderd.');
     }
@@ -176,6 +191,8 @@ class FootballMatchController extends Controller
      */
     public function lineup(FootballMatch $footballMatch): View
     {
+        Gate::authorize('update', $footballMatch);
+
         $players = Player::whereHas('seasons', function ($q) use ($footballMatch) {
             $q->where('seasons.id', $footballMatch->season_id);
         })->orderBy('name')->get();
@@ -202,6 +219,8 @@ class FootballMatchController extends Controller
      */
     public function lineupUpdate(Request $request, FootballMatch $footballMatch): RedirectResponse
     {
+        Gate::authorize('update', $footballMatch);
+
         // Expect structure: assignments[quarter][player_id] = position_id or "" for bench
         $data = $request->validate([
             'assignments' => ['array'],
