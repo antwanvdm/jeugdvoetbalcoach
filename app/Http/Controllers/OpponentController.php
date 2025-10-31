@@ -138,6 +138,11 @@ class OpponentController extends Controller
     {
         Gate::authorize('delete', $opponent);
 
+        // Verwijder het logo bestand als het een lokaal opgeslagen bestand is
+        if ($opponent->logo) {
+            Storage::disk('public')->delete($opponent->logo);
+        }
+
         $opponent->delete();
         return redirect()->route('opponents.index')->with('success', 'Opponent deleted.');
     }
