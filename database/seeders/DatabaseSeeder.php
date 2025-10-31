@@ -16,8 +16,8 @@ class DatabaseSeeder extends Seeder
             PositionSeeder::class,
             FormationSeeder::class,
             OpponentSeeder::class,
-            PlayerSeeder::class,
             SeasonSeeder::class,
+            PlayerSeeder::class,
         ]);
     }
 }

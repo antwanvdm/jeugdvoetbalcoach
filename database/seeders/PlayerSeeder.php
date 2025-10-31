@@ -21,7 +21,8 @@ class PlayerSeeder extends Seeder
         ];
 
         foreach ($players as $player) {
-            Player::create(array_merge($player, ['user_id' => 2]));
+            $player = Player::create(array_merge($player, ['user_id' => 2]));
+            $player->seasons()->sync([1]);
         }
     }
 }
