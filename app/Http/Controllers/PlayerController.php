@@ -132,6 +132,6 @@ class PlayerController extends Controller
         Gate::authorize('delete', $player);
 
         $player->delete();
-        return redirect()->route('players.index')->with('success', 'Player deleted.');
+        return redirect()->route('players.index')->with('success', 'Speler verwijderd.');
     }
 }

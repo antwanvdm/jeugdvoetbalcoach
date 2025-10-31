@@ -73,6 +73,6 @@ class PositionController extends Controller
     public function destroy(Position $position): RedirectResponse
     {
         $position->delete();
-        return redirect()->route('positions.index')->with('success', 'Position deleted.');
+        return redirect()->route('positions.index')->with('success', 'Positie verwijder.');
     }
 }

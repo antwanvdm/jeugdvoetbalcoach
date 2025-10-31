@@ -144,6 +144,6 @@ class OpponentController extends Controller
         }
 
         $opponent->delete();
-        return redirect()->route('opponents.index')->with('success', 'Opponent deleted.');
+        return redirect()->route('opponents.index')->with('success', 'Tegenstander verwijderd.');
     }
 }
