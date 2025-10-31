@@ -1,7 +1,7 @@
 <x-app-layout>
     <div class="flex items-center justify-between mb-4">
         <h1 class="text-2xl font-semibold">Posities</h1>
-        <a href="{{ route('positions.create') }}" class="px-3 py-2 bg-blue-600 text-white rounded">Nieuwe positie</a>
+        <a href="{{ route('admin.positions.create') }}" class="px-3 py-2 bg-blue-600 text-white rounded">Nieuwe positie</a>
     </div>
 
     <div class="overflow-x-auto">
@@ -17,9 +17,9 @@
             <tr class="border-b">
                 <td class="p-3">{{ $position->name }}</td>
                 <td class="p-3 text-right">
-                    <a class="text-blue-600 mr-2" href="{{ route('positions.show', $position) }}">Bekijk</a>
-                    <a class="text-yellow-600 mr-2" href="{{ route('positions.edit', $position) }}">Bewerk</a>
-                    <form action="{{ route('positions.destroy', $position) }}" method="POST" class="inline">
+                    <a class="text-blue-600 mr-2" href="{{ route('admin.positions.show', $position) }}">Bekijk</a>
+                    <a class="text-yellow-600 mr-2" href="{{ route('admin.positions.edit', $position) }}">Bewerk</a>
+                    <form action="{{ route('admin.positions.destroy', $position) }}" method="POST" class="inline">
                         @csrf
                         @method('DELETE')
                         <button class="text-red-600" onclick="return confirm('Deze positie verwijderen?')">Verwijder</button>

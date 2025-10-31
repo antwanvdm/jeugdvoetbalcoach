@@ -14,7 +14,7 @@ class SeasonsSeeder extends Seeder
         ];
 
         foreach ($seasons as $season) {
-            Season::create($season);
+            Season::create(array_merge($season, ['user_id' => 2]));
         }
     }
 }

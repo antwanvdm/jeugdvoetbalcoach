@@ -3,7 +3,7 @@
         <h1 class="text-2xl font-semibold">Wedstrijden</h1>
         <div class="flex items-center gap-4">
             <form method="GET" action="{{ route('football-matches.index') }}">
-                <select name="season_id" onchange="this.form.submit()" class="border p-2 rounded">
+                <select name="season_id" onchange="this.form.submit()" class="border py-2 pl-2 pr-8 rounded">
                     <option value="">Alle seizoenen</option>
                     @foreach($seasons as $s)
                         <option value="{{ $s->id }}" {{ (int)($seasonId ?? 0) === $s->id ? 'selected' : '' }}>{{ $s->year }}-{{ $s->year + 1 }}--{{ $s->part }}</option>

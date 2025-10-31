@@ -38,6 +38,8 @@ class OpponentController extends Controller
             'latitude' => ['required', 'numeric'],
             'longitude' => ['required', 'numeric'],
         ]);
+
+        $validated['user_id'] = auth()->id();
         $opponent = Opponent::create($validated);
         return redirect()->route('opponents.show', $opponent)->with('success', 'Tegenstander aangemaakt.');
     }

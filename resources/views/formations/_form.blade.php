@@ -14,3 +14,15 @@
         <div class="text-red-600 text-sm">{{ $message }}</div>@enderror
     </div>
 </div>
+
+@if(auth()->user()->isAdmin())
+    <div class="mt-4">
+        <label class="inline-flex items-center">
+            <input type="checkbox" name="is_global" value="1" class="mr-2"
+                   {{ old('is_global', isset($formation) ? (int)$formation->is_global : 0) ? 'checked' : '' }}>
+            <span class="text-sm text-gray-700">Globale formatie (zichtbaar voor alle gebruikers)</span>
+        </label>
+        @error('is_global')
+        <div class="text-red-600 text-sm">{{ $message }}</div>@enderror
+    </div>
+@endif

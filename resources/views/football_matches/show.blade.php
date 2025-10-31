@@ -20,7 +20,7 @@
 
             <dt class="font-medium text-gray-600">Locatie</dt>
             <dd class="col-span-2">
-                {{ $footballMatch->home ? 'Thuis' : 'Uit' }} (<a href="{{ $footballMatch->home ? config('app.vvor.maps') : $footballMatch->opponent->location_maps_link }}" target="_blank" rel="noopener"
+                {{ $footballMatch->home ? 'Thuis' : 'Uit' }} (<a href="{{ $footballMatch->home ? (auth()->user()->maps_location ?? config('app.vvor.maps')) : $footballMatch->opponent->location_maps_link }}" target="_blank" rel="noopener"
                                                                  class="text-blue-600 hover:underline">{{ $locLabel ?? 'bekijk op kaart' }}</a>)
             </dd>
 
@@ -38,7 +38,7 @@
         </dl>
         <div class="flex-1 flex justify-center items-center gap-4 @if(!$footballMatch->home) flex-row-reverse @endif">
             <div class="flex-12 flex @if($footballMatch->home) justify-end @endif">
-                <img src="{{config('app.vvor.logo')}}" alt="VVOR Logo" class="h-28">
+                <img src="{{ asset('storage/' . auth()->user()->logo) }}" alt="{{ auth()->user()->team_name }} Logo" class="h-28">
             </div>
             <div class="flex-1">
                 -

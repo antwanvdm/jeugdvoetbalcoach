@@ -59,6 +59,7 @@ class PlayerController extends Controller
             'seasons.*' => ['integer', 'exists:seasons,id'],
         ]);
 
+        $validated['user_id'] = auth()->id();
         $player = Player::create($validated);
 
         if ($request->has('seasons')) {

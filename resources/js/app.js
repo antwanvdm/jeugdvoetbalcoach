@@ -1,3 +1,7 @@
+import.meta.glob([
+    '../images/**',
+]);
+
 //Nav toggle
 document.addEventListener('DOMContentLoaded', function () {
     const btn = document.getElementById('nav-toggle');

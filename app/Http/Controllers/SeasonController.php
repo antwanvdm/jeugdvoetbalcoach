@@ -32,6 +32,7 @@ class SeasonController extends Controller
             'formation_id' => ['required', 'integer', 'exists:formations,id'],
         ]);
 
+        $data['user_id'] = auth()->id();
         $season = Season::create($data);
 
         // Attach players from the most recent previous season (if any)

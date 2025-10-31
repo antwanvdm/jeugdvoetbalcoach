@@ -26,7 +26,7 @@ class OpponentsSeeder extends Seeder
         ];
 
         foreach ($opponents as $opponent) {
-            Opponent::create($opponent);
+            Opponent::create(array_merge($opponent, ['user_id' => 2]));
         }
     }
 }

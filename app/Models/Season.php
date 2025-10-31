@@ -2,17 +2,36 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 
 class Season extends Model
 {
-    protected $fillable = ['year', 'part', 'start', 'end', 'formation_id'];
+    protected $fillable = ['year', 'part', 'start', 'end', 'formation_id', 'user_id'];
     protected $casts = [
         'start' => 'date',
         'end' => 'date',
     ];
+
+    /**
+     * Boot the model.
+     */
+    protected static function booted(): void
+    {
+        static::addGlobalScope('user', function (Builder $builder) {
+            if (auth()->check()) {
+                $builder->where('seasons.user_id', auth()->id());
+            }
+        });
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
 
     public function players()
     {

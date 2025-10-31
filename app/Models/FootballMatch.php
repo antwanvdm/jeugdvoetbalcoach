@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -15,13 +16,31 @@ class FootballMatch extends Model
         'goals_scored',
         'goals_conceded',
         'date',
-        'season_id'
+        'season_id',
+        'user_id',
     ];
 
     protected $casts = [
         'home' => 'boolean',
         'date' => 'datetime',
     ];
+
+    /**
+     * Boot the model.
+     */
+    protected static function booted(): void
+    {
+        static::addGlobalScope('user', function (Builder $builder) {
+            if (auth()->check()) {
+                $builder->where('football_matches.user_id', auth()->id());
+            }
+        });
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
 
     public function opponent(): BelongsTo
     {

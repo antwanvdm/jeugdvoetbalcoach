@@ -2,9 +2,9 @@
     <div class="flex items-center justify-between mb-4">
         <h1 class="text-2xl font-semibold">Positie: {{ $position->name }}</h1>
         <div class="flex gap-2">
-            <a href="{{ route('positions.index') }}" class="px-3 py-2 bg-gray-200 rounded">Terug</a>
-            <a href="{{ route('positions.edit', $position) }}" class="px-3 py-2 bg-yellow-500 text-white rounded">Bewerk</a>
-            <form action="{{ route('positions.destroy', $position) }}" method="POST" onsubmit="return confirm('Deze positie verwijderen?')">
+            <a href="{{ route('admin.positions.index') }}" class="px-3 py-2 bg-gray-200 rounded">Terug</a>
+            <a href="{{ route('admin.positions.edit', $position) }}" class="px-3 py-2 bg-yellow-500 text-white rounded">Bewerk</a>
+            <form action="{{ route('admin.positions.destroy', $position) }}" method="POST" onsubmit="return confirm('Deze positie verwijderen?')">
                 @csrf
                 @method('DELETE')
                 <button class="px-3 py-2 bg-red-600 text-white rounded">Verwijder</button>
