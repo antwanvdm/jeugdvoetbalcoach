@@ -263,6 +263,14 @@ php artisan migrate:fresh --seed
 php artisan make:migration create_example_table
 ```
 
+## 🗺️ Roadmap
+
+- [ ] Cascade on delete als gebruiker profiel verwijderd
+- [ ] Koppelen van gebruikers aan elkaar als ze samen een Team managen
+- [ ] Formatie ook per wedstrijd kunnen aanpassen (is nu enkel per seizoensblok)
+- [ ] Tegenstanders mass import via admin, koppelen vanuit gebruikers
+- [ ] JO13+ support met 11 spelers en twee helften IPV 4 kwarten
+
 ## 📝 Documentatie
 
 -   [LineupGeneratorService](docs/LineupGeneratorService.md) - Uitgebreide service documentatie
