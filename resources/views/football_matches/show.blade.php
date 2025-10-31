@@ -114,7 +114,7 @@
     <div class="mt-6 bg-white p-4 shadow rounded">
         <div class="flex justify-between line-up-header mb-3">
             <h2 class="text-xl font-semibold">Opstelling per kwart</h2>
-            <button onclick="window.print();" class="px-3 py-2 bg-indigo-600 text-white rounded">🖨️ Print</button>
+            <button onclick="window.print();" class="px-3 py-2 bg-indigo-600 text-white rounded cursor-pointer">🖨️ Print</button>
         </div>
         <div class="grid md:grid-cols-2 gap-4 line-up">
             @foreach(range(1,4) as $q)
