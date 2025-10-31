@@ -5,7 +5,7 @@ namespace Database\Seeders;
 use App\Models\Formation;
 use Illuminate\Database\Seeder;
 
-class FormationsSeeder extends Seeder
+class FormationSeeder extends Seeder
 {
     public function run(): void
     {

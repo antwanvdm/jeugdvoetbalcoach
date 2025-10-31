@@ -6,6 +6,16 @@ Een intelligente teammanagement applicatie voor voetbalverenigingen, gebouwd met
 
 VVOR Team Manager is ontwikkeld voor voetbalverenigingen die hun teammanagement willen professionaliseren. De applicatie neemt het tijdrovende werk van het maken van line-ups uit handen en zorgt voor eerlijke rotatie en optimale teambalans.
 
+### 👥 Multi-user Support
+
+De applicatie ondersteunt meerdere teams en gebruikers met een robuust autorisatiesysteem:
+
+-   **Admin rol**: Volledig toegang, beheert globale formaties en gebruikers
+-   **User rol**: Beheert eigen team, spelers, wedstrijden en formaties
+-   **Data isolatie**: Elke gebruiker ziet alleen zijn eigen teamdata
+-   **Globale formaties**: Standaard formaties (2-1-2, 3-2-2, 4-3-3) beschikbaar voor alle gebruikers
+-   **Policy-based autorisatie**: Laravel Policies voor granulaire toegangscontrole
+
 ### ✨ Kernfunctionaliteiten
 
 **🏆 Intelligente Line-up Generatie**
@@ -32,10 +42,20 @@ VVOR Team Manager is ontwikkeld voor voetbalverenigingen die hun teammanagement 
 
 **💼 Beheer & Administratie**
 
+-   Gebruikersbeheer met rollen en teamprofielen
 -   Spelersbeheer met posities en fysieke eigenschappen
 -   Tegenstander administratie
 -   Wedstrijd planning en resultaten
 -   Handmatige line-up aanpassingen mogelijk
+-   Admin dashboard voor gebruikers- en positiebeheer
+
+**🔒 Beveiliging & Autorisatie**
+
+-   Laravel Breeze authenticatie
+-   Role-based access control (Admin/User)
+-   Policy-based autorisatie voor alle resources
+-   Data isolatie per gebruiker
+-   Actieve/inactieve gebruikers beheer
 
 ## 🚀 Aan de slag
 
@@ -67,6 +87,7 @@ npm install
 ```bash
 cp .env.example .env
 php artisan key:generate
+php artisan storage:link
 ```
 
 4**Database migratie en seeders**
@@ -83,7 +104,7 @@ npm run build
 npm run dev
 ```
 
-8**Start de server**
+6**Start de server**
 
 ```bash
 php artisan serve
@@ -96,13 +117,15 @@ Ga naar `http://localhost:8000` om de applicatie te gebruiken.
 
 Bij het seeden worden deze basisgegevens aangemaakt voor een snelle start:
 
-- Positions (met vaste IDs):
-  - 1 Keeper, 2 Verdediger, 3 Middenvelder, 4 Aanvaller
-- Formations (presets):
-  - 6 spelers: `2-1-2`
-  - 8 spelers: `3-2-2`
-  - 11 spelers: `4-3-3`
-- Opponents: 13 tegenstanders met naam, plaats, logo en GPS-coördinaten
+-   **Users** (Admin & 1 default user):
+    -   1 Keeper, 2 Verdediger, 3 Middenvelder, 4 Aanvaller
+-   **Positions** (met vaste IDs):
+    -   1 Keeper, 2 Verdediger, 3 Middenvelder, 4 Aanvaller
+-   **Formations** (globale presets):
+    -   6 spelers: `2-1-2`
+    -   8 spelers: `3-2-2`
+    -   11 spelers: `4-3-3`
+-   **Opponents**: 13 tegenstanders met naam, plaats, logo en GPS-coördinaten
 
 Commands:
 
@@ -117,8 +140,10 @@ php artisan migrate:fresh --seed
 ### Technische Stack
 
 -   **Framework**: Laravel 11
+-   **Authenticatie**: Laravel Breeze
 -   **Frontend**: Blade templates met Tailwind CSS
 -   **Database**: SQLite/MySQL met Eloquent ORM
+-   **Autorisatie**: Laravel Policies
 -   **Testing**: Pest PHP
 
 ### Belangrijkste Components
@@ -132,10 +157,22 @@ php artisan migrate:fresh --seed
 
 **Models & Database**
 
+-   `User` - Gebruikers met rollen en teamprofielen
 -   `Player` - Spelers met posities en fysieke eigenschappen
 -   `FootballMatch` - Wedstrijden met tegenstanders en resultaten
 -   `Position` - Keeper, Verdediger, Middenvelder, Aanvaller
 -   `Opponent` - Tegenstanders met locatie informatie
+-   `Formation` - Formaties (globaal of per gebruiker)
+-   `Season` - Seizoenen gekoppeld aan gebruiker en formatie
+
+**Policies & Autorisatie**
+
+-   `PlayerPolicy` - Controleert toegang tot eigen spelers
+-   `FormationPolicy` - Admin kan alles, users alleen eigen/globale formaties
+-   `SeasonPolicy` - Toegang tot eigen seizoenen
+-   `OpponentPolicy` - Toegang tot eigen tegenstanders
+-   `FootballMatchPolicy` - Toegang tot eigen wedstrijden
+-   `IsAdmin` middleware - Beschermt admin-only routes
 
 ### Code Kwaliteit
 

@@ -7,7 +7,7 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
-class AdminUserSeeder extends Seeder
+class UserSeeder extends Seeder
 {
     /**
      * Seed an initial admin user.
@@ -20,6 +20,19 @@ class AdminUserSeeder extends Seeder
                 'name' => 'Admin',
                 'password' => Hash::make("123456"),
                 'role' => 1,
+                'team_name' => '-',
+                'maps_location' => '-',
+                'logo' => null,
+                'is_active' => true,
+                'email_verified_at' => now(),
+            ]
+        );
+        User::firstOrCreate(
+            ['email' => 'user@team.nl'],
+            [
+                'name' => 'User',
+                'password' => Hash::make("testtest"),
+                'role' => 2,
                 'team_name' => '-',
                 'maps_location' => '-',
                 'logo' => null,

@@ -5,7 +5,7 @@ namespace Database\Seeders;
 use App\Models\Position;
 use Illuminate\Database\Seeder;
 
-class PositionsSeeder extends Seeder
+class PositionSeeder extends Seeder
 {
     public function run(): void
     {
