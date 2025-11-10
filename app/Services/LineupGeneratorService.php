@@ -190,13 +190,18 @@ class LineupGeneratorService
     {
         // Target: exactly desiredOnField players on the field each quarter (dynamic from formation)
         $targetsPerQuarter = $this->computePerQuarterBenchTargets();
+        
+        // Total benches needed across all quarters
+        $totalBenchesNeeded = array_sum($targetsPerQuarter);
 
-        // 1) Keepers: bench exactly once (not their keeper quarter)
+        // 1) Keepers: only bench if there are benches needed
         $keeperBenchPlan = [];
-        foreach ($keepers as $index => $keeper) {
-            $keeperQuarter = $index + 1;
-            $benchQuarter = $this->calculateKeeperBenchQuarter($index, $keeperQuarter);
-            $keeperBenchPlan[$keeper->id] = [$benchQuarter];
+        if ($totalBenchesNeeded > 0) {
+            foreach ($keepers as $index => $keeper) {
+                $keeperQuarter = $index + 1;
+                $benchQuarter = $this->calculateKeeperBenchQuarter($index, $keeperQuarter);
+                $keeperBenchPlan[$keeper->id] = [$benchQuarter];
+            }
         }
 
         // 2) Calculate how many benches remain per quarter after assigning keeper benches
@@ -215,6 +220,7 @@ class LineupGeneratorService
 
         // Debug
         $this->debugLog('Bench targets per quarter', $targetsPerQuarter);
+        $this->debugLog('Total benches needed', ['total' => $totalBenchesNeeded]);
         $this->debugLog('Keeper bench counts per quarter', $keeperBenchCounts);
         $this->debugLog('Remaining benches per quarter (for non-keepers)', $remainingPerQuarter);
 
