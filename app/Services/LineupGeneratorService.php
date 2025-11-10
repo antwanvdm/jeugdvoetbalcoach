@@ -110,14 +110,13 @@ class LineupGeneratorService
         // 1. Prefer players who didn't keep last match
         // 2. Then by historical keeper count (ascending)
         // 3. Then by name for consistency
-        $sortedKeepers = $this->players->sortBy(function ($player) {
-            $keptLastMatch = $this->lastMatchKeepers->contains($player->id) ? 1 : 0;
+        $sortedKeepers = $this->players->filter(fn($p) => !$this->lastMatchKeepers->contains($p->id))->sortBy(function ($player) {
             $historicalCount = (int)$this->keeperCounts->get($player->id, 0);
 
             // Debug: Log sorting criteria for each player
-            $this->debugLog("Player {$player->name}: keptLastMatch={$keptLastMatch}, historicalCount={$historicalCount}");
+            $this->debugLog("Player {$player->name}: historicalCount={$historicalCount}");
 
-            return [$keptLastMatch, $historicalCount, $player->name];
+            return [$historicalCount, $player->name];
         });
 
         $keepers = collect();
