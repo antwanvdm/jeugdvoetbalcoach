@@ -4,7 +4,7 @@
         <div class="flex items-center gap-4">
             <form method="GET" action="{{ route('football-matches.index') }}">
                 <select name="season_id" onchange="this.form.submit()" class="border py-2 pl-2 pr-8 rounded">
-                    <option value="">Alle seizoenen</option>
+                    <option value="all">Alle seizoenen</option>
                     @foreach($seasons as $s)
                         <option value="{{ $s->id }}" {{ (int)($seasonId ?? 0) === $s->id ? 'selected' : '' }}>{{ $s->year }}-{{ $s->year + 1 }}--{{ $s->part }}</option>
                     @endforeach
@@ -33,7 +33,11 @@
                 <td class="p-3">{{ $match->home ? 'Thuis' : 'Uit' }}</td>
                 <td class="p-3 font-bold result-{{$match->result}}">
                     @if($match->result !== 'O')
-                        {{ $match->goals_scored }} - {{ $match->goals_conceded }}
+                        @if($match->home)
+                            {{ $match->goals_scored }} - {{ $match->goals_conceded }}
+                        @else
+                            {{ $match->goals_conceded }} - {{ $match->goals_scored }}
+                        @endif
                     @else
                         <span class="text-gray-500">-</span>
                     @endif

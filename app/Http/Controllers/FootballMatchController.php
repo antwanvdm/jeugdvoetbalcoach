@@ -26,7 +26,10 @@ class FootballMatchController extends Controller
         $activeSeason = Season::getCurrent($seasons);
 
         $seasonId = $request->query('season_id') ?? ($activeSeason?->id ?? null);
-        $matchesQuery = FootballMatch::with('opponent')->where('season_id', $seasonId)->orderByDesc('date');
+        $matchesQuery = FootballMatch::with('opponent')->orderByDesc('date');
+        if($seasonId !== 'all') {
+            $matchesQuery->where('season_id', $seasonId);
+        }
         $footballMatches = $matchesQuery->paginate(15)->withQueryString();
 
         return view('football_matches.index', compact('footballMatches', 'seasons', 'activeSeason', 'seasonId'));
