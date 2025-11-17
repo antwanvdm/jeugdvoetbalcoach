@@ -32,7 +32,7 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     // Team management routes
-    Route::resource('teams', TeamController::class)->except(['show']);
+    Route::resource('teams', TeamController::class);
     Route::post('/teams/{team}/switch', [TeamController::class, 'switch'])->name('teams.switch');
     Route::post('/teams/{team}/set-default', [TeamController::class, 'setDefault'])->name('teams.set-default');
     Route::post('/teams/{team}/invite/regenerate', [TeamController::class, 'regenerateInviteCode'])->name('teams.invite.regenerate');

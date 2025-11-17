@@ -41,6 +41,24 @@ document.addEventListener("DOMContentLoaded", function () {
             e.stopPropagation();
         });
     }
+
+    // Copy to clipboard functionality
+    document.addEventListener("click", function (e) {
+        if (e.target.matches("[data-copy-to-clipboard]")) {
+            const textToCopy = e.target.getAttribute("data-copy-to-clipboard");
+            const message =
+                e.target.getAttribute("data-copy-message") || "Gekopieerd!";
+
+            navigator.clipboard
+                .writeText(textToCopy)
+                .then(() => {
+                    alert(message);
+                })
+                .catch((err) => {
+                    console.error("Kopiëren mislukt:", err);
+                });
+        }
+    });
 });
 
 // Modal functionaliteit

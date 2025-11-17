@@ -102,9 +102,12 @@ class RegisteredUserController extends Controller
             
             if ($inviteTeam && !$user->isMemberOf($inviteTeam)) {
                 // Add user as assistent to the invited team
+                // Set as default if this is their first/only team
+                $isFirstTeam = $user->teams()->count() === 0;
+                
                 $user->teams()->attach($inviteTeam->id, [
                     'role' => 2, // assistent
-                    'is_default' => false,
+                    'is_default' => $isFirstTeam,
                     'joined_at' => now(),
                 ]);
                 

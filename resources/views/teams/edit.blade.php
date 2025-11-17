@@ -47,11 +47,25 @@
 
         <div class="mb-2 flex items-center gap-2">
             <input type="text" readonly class="flex-1 border rounded p-2 bg-gray-50" value="{{ $team->invite_code }}">
-            <button type="button" class="px-3 py-2 bg-blue-600 text-white rounded" onclick="navigator.clipboard.writeText('{{ $team->invite_code }}')">Kopieer code</button>
+            <button 
+                type="button" 
+                data-copy-to-clipboard="{{ $team->invite_code }}"
+                data-copy-message="Uitnodigingscode gekopieerd!"
+                class="px-3 py-2 bg-blue-600 text-white rounded"
+            >
+                Kopieer code
+            </button>
         </div>
         <div class="mb-4 text-xs text-gray-600">
             Link: <span class="font-mono">{{ route('teams.join.show', $team->invite_code) }}</span>
-            <button type="button" class="ml-2 text-blue-600 hover:underline" onclick="navigator.clipboard.writeText('{{ route('teams.join.show', $team->invite_code) }}')">Kopieer link</button>
+            <button 
+                type="button" 
+                data-copy-to-clipboard="{{ route('teams.join.show', $team->invite_code) }}"
+                data-copy-message="Uitnodigingslink gekopieerd!"
+                class="ml-2 text-blue-600 hover:underline"
+            >
+                Kopieer link
+            </button>
         </div>
 
         <form action="{{ route('teams.invite.regenerate', $team) }}" method="POST" onsubmit="return confirm('Weet je zeker dat je een nieuwe code wilt genereren? De oude link werkt dan niet meer.');">

@@ -11,6 +11,7 @@
                     <th class="text-left p-3">Team</th>
                     <th class="text-left p-3">Rol</th>
                     <th class="text-left p-3">Leden</th>
+                    <th class="text-left p-3">Uitnodiging</th>
                     <th class="text-left p-3">Status</th>
                     <th class="text-right p-3">Acties</th>
                 </tr>
@@ -34,11 +35,24 @@
                         <td class="p-3">{{ $team['role_label'] }}</td>
                         <td class="p-3">{{ $team['users_count'] }}</td>
                         <td class="p-3">
+                            <button 
+                                type="button" 
+                                data-copy-to-clipboard="{{ route('teams.join.show', $team['invite_code']) }}"
+                                data-copy-message="Uitnodigingslink gekopieerd!"
+                                class="text-xs px-2 py-1 bg-green-100 text-green-800 rounded hover:bg-green-200"
+                                title="Kopieer uitnodigingslink"
+                            >
+                                📋 Kopieer link
+                            </button>
+                        </td>
+                        <td class="p-3">
                             @if($currentTeamId == $team['id'])
                                 <span class="px-2 py-1 text-xs bg-green-100 text-green-800 rounded">Actief</span>
                             @endif
                         </td>
                         <td class="p-3 text-right">
+                            <a href="{{ route('teams.show', $team['id']) }}" class="text-blue-600 mr-2">Details</a>
+                            
                             @if($currentTeamId != $team['id'])
                                 <form method="POST" action="{{ route('teams.switch', $team['id']) }}" class="inline">
                                     @csrf
@@ -72,7 +86,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="5" class="p-3 text-center text-gray-500">Je bent nog geen lid van een team.</td>
+                        <td colspan="6" class="p-3 text-center text-gray-500">Je bent nog geen lid van een team.</td>
                     </tr>
                 @endforelse
             </tbody>

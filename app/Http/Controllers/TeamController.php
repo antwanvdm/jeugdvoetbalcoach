@@ -25,6 +25,7 @@ class TeamController extends Controller
                     'id' => $team->id,
                     'name' => $team->name,
                     'logo' => $team->logo,
+                    'invite_code' => $team->invite_code,
                     'role' => $pivot->role,
                     'role_label' => $pivot->role === 1 ? 'Hoofdcoach' : 'Assistent',
                     'is_default' => $pivot->is_default,
@@ -44,6 +45,30 @@ class TeamController extends Controller
     public function create()
     {
         return view('teams.create');
+    }
+
+    /**
+     * Display the specified team with its members.
+     */
+    public function show(Team $team)
+    {
+        \Gate::authorize('view', $team);
+
+        $members = $team->users()
+            ->withPivot('role', 'is_default', 'joined_at')
+            ->get()
+            ->map(function ($user) {
+                return [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'role' => $user->pivot->role,
+                    'role_label' => $user->pivot->role === 1 ? 'Hoofdcoach' : 'Assistent',
+                    'joined_at' => \Carbon\Carbon::parse($user->pivot->joined_at),
+                ];
+            });
+
+        return view('teams.show', compact('team', 'members'));
     }
 
     /**
@@ -231,9 +256,12 @@ class TeamController extends Controller
         }
 
         // Add user as assistent
+        // Set as default if this is their first/only team
+        $isFirstTeam = auth()->user()->teams()->count() === 0;
+        
         auth()->user()->teams()->attach($team->id, [
             'role' => 2, // assistent
-            'is_default' => false,
+            'is_default' => $isFirstTeam,
             'joined_at' => now(),
         ]);
 
