@@ -67,6 +67,7 @@ class PlayerController extends Controller
         ]);
 
         $validated['user_id'] = auth()->id();
+        $validated['team_id'] = session('current_team_id');
         $player = Player::create($validated);
 
         if ($request->has('seasons')) {

@@ -14,7 +14,7 @@ class SeasonPolicy
 
     public function view(User $user, Season $season): bool
     {
-        return $user->is_active && $season->user_id === $user->id;
+        return $user->is_active && $user->isMemberOf($season->team);
     }
 
     public function create(User $user): bool
@@ -24,21 +24,21 @@ class SeasonPolicy
 
     public function update(User $user, Season $season): bool
     {
-        return $user->is_active && $season->user_id === $user->id;
+        return $user->is_active && $user->isMemberOf($season->team);
     }
 
     public function delete(User $user, Season $season): bool
     {
-        return $user->is_active && $season->user_id === $user->id;
+        return $user->is_active && $user->isMemberOf($season->team);
     }
 
     public function restore(User $user, Season $season): bool
     {
-        return $user->is_active && $season->user_id === $user->id;
+        return $user->is_active && $user->isMemberOf($season->team);
     }
 
     public function forceDelete(User $user, Season $season): bool
     {
-        return $user->is_active && $season->user_id === $user->id;
+        return $user->is_active && $user->isMemberOf($season->team);
     }
 }

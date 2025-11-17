@@ -2,9 +2,12 @@
 
 namespace Database\Seeders;
 
+use App\Models\Team;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class UserSeeder extends Seeder
 {
@@ -13,31 +16,44 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        $user = User::firstOrCreate(
-            ['email' => 'admin@teammanager.nl'],
-            [
-                'name' => 'Admin',
-                'password' => Hash::make("123456"),
+        DB::transaction(function () {
+            // Create admin user
+            $admin = User::firstOrCreate(
+                ['email' => 'admin@teammanager.nl'],
+                [
+                    'name' => 'Admin',
+                    'password' => Hash::make("123456"),
+                    'role' => 1,
+                    'is_active' => true,
+                    'email_verified_at' => now(),
+                ]
+            );
+
+            // Create regular user
+            $user = User::firstOrCreate(
+                ['email' => 'user@team.nl'],
+                [
+                    'name' => 'User',
+                    'password' => Hash::make("testtest"),
+                    'role' => 2,
+                    'is_active' => true,
+                    'email_verified_at' => now(),
+                ]
+            );
+
+            // Create user's team
+            $userTeam = Team::create([
+                'name' => 'Test Team',
+                'logo' => null,
+                'maps_location' => '-',
+                'invite_code' => Str::random(64),
+            ]);
+
+            $user->teams()->attach($userTeam->id, [
                 'role' => 1,
-                'team_name' => '-',
-                'maps_location' => '-',
-                'logo' => null,
-                'is_active' => true,
-                'email_verified_at' => now(),
-            ]
-        );
-        User::firstOrCreate(
-            ['email' => 'user@team.nl'],
-            [
-                'name' => 'User',
-                'password' => Hash::make("testtest"),
-                'role' => 2,
-                'team_name' => '-',
-                'maps_location' => '-',
-                'logo' => null,
-                'is_active' => true,
-                'email_verified_at' => now(),
-            ]
-        );
+                'is_default' => true,
+                'joined_at' => now(),
+            ]);
+        });
     }
 }

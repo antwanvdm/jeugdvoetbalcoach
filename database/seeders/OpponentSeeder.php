@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Opponent;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
@@ -12,7 +13,15 @@ class OpponentSeeder extends Seeder
 {
     public function run(): void
     {
-        $userId = 2; // prefix voor bestandsnaam en te koppelen user
+        // Get the test user's default team
+        $user = User::where('email', 'user@team.nl')->first();
+        if (!$user || !$user->defaultTeam()) {
+            return;
+        }
+
+        $userId = $user->id;
+        $teamId = $user->defaultTeam()->id;
+
         $opponents = [
             ['name' => 'DCV', "location" => 'Krimpen aan den IJssel', 'logo' => 'https://website.storage/Data/DCV/RTE/Afbeeldingen/MenuItem/439/badge_kleur.png?maxwidth=1200&maxheight=630', 'latitude' => 51.90894487593641, 'longitude' => 4.589017207382628],
             ['name' => 'Lekkerkerk', "location" => 'Lekkerkerk', 'logo' => 'https://website.storage/Data/Lekkerkerk/Layout/Files/SocialMediaStandaardMeta.jpg?637145275955548998&maxwidth=1200&maxheight=630', 'latitude' => 51.9020305082625, 'longitude' => 4.677412069296964],
@@ -59,7 +68,10 @@ class OpponentSeeder extends Seeder
                 }
             }
 
-            Opponent::create(array_merge($opponent, ['user_id' => $userId]));
+            Opponent::create(array_merge($opponent, [
+                'user_id' => $userId,
+                'team_id' => $teamId,
+            ]));
         }
     }
 }

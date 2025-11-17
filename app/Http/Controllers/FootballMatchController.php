@@ -69,6 +69,7 @@ class FootballMatchController extends Controller
         $request->validate(['season_id' => ['nullable', 'exists:seasons,id']]);
 
         $validated['user_id'] = auth()->id();
+        $validated['team_id'] = session('current_team_id');
         $match = FootballMatch::create($validated);
 
         // Generate lineup using the service

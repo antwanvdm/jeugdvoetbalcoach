@@ -62,6 +62,7 @@ class OpponentController extends Controller
             'latitude' => $validated['latitude'],
             'longitude' => $validated['longitude'],
             'user_id' => auth()->id(),
+            'team_id' => session('current_team_id'),
         ];
 
         $opponent = Opponent::create($payload);

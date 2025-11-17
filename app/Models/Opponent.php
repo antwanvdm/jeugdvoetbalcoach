@@ -17,6 +17,7 @@ class Opponent extends Model
         'latitude',
         'longitude',
         'user_id',
+        'team_id',
     ];
 
     /**
@@ -24,9 +25,9 @@ class Opponent extends Model
      */
     protected static function booted(): void
     {
-        static::addGlobalScope('user', function (Builder $builder) {
-            if (auth()->check()) {
-                $builder->where('opponents.user_id', auth()->id());
+        static::addGlobalScope('team', function (Builder $builder) {
+            if (auth()->check() && session('current_team_id')) {
+                $builder->where('opponents.team_id', session('current_team_id'));
             }
         });
     }
@@ -34,6 +35,11 @@ class Opponent extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function team(): BelongsTo
+    {
+        return $this->belongsTo(Team::class);
     }
 
     public function footballMatches(): HasMany

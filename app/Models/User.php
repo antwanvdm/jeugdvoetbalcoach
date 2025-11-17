@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -23,9 +24,6 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
-        'team_name',
-        'maps_location',
-        'logo',
         'is_active',
     ];
 
@@ -60,6 +58,43 @@ class User extends Authenticatable
     public function isAdmin(): bool
     {
         return $this->role === 1;
+    }
+
+    /**
+     * Get the teams that the user belongs to.
+     */
+    public function teams(): BelongsToMany
+    {
+        return $this->belongsToMany(Team::class)
+            ->withPivot('role', 'is_default', 'joined_at')
+            ->orderByPivot('joined_at', 'asc');
+    }
+
+    /**
+     * Get the default team for the user.
+     */
+    public function defaultTeam(): ?Team
+    {
+        return $this->teams()->wherePivot('is_default', true)->first();
+    }
+
+    /**
+     * Check if the user is a member of the given team.
+     */
+    public function isMemberOf(Team $team): bool
+    {
+        return $this->teams()->where('teams.id', $team->id)->exists();
+    }
+
+    /**
+     * Check if the user is the hoofdcoach of the given team.
+     */
+    public function isHoofdcoachOf(Team $team): bool
+    {
+        return $this->teams()
+            ->where('teams.id', $team->id)
+            ->wherePivot('role', 1)
+            ->exists();
     }
 
     /**

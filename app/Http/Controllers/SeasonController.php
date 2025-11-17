@@ -40,6 +40,7 @@ class SeasonController extends Controller
         ]);
 
         $data['user_id'] = auth()->id();
+        $data['team_id'] = session('current_team_id');
         $season = Season::create($data);
 
         // Attach players from the most recent previous season (if any)

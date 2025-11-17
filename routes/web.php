@@ -9,6 +9,7 @@ use App\Http\Controllers\OpponentController;
 use App\Http\Controllers\PlayerController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SeasonController;
+use App\Http\Controllers\TeamController;
 use Illuminate\Support\Facades\Route;
 
 // Public home page
@@ -25,6 +26,15 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // Team management routes
+    Route::resource('teams', TeamController::class)->except(['show']);
+    Route::post('/teams/{team}/switch', [TeamController::class, 'switch'])->name('teams.switch');
+    Route::post('/teams/{team}/set-default', [TeamController::class, 'setDefault'])->name('teams.set-default');
+    Route::post('/teams/{team}/invite/regenerate', [TeamController::class, 'regenerateInviteCode'])->name('teams.invite.regenerate');
+    Route::get('/teams/join/{inviteCode}', [TeamController::class, 'showJoin'])->name('teams.join.show');
+    Route::post('/teams/join/{inviteCode}', [TeamController::class, 'join'])->name('teams.join');
+    Route::delete('/teams/{team}/leave', [TeamController::class, 'leave'])->name('teams.leave');
 
     // Football match lineup routes
     Route::get('football-matches/{footballMatch}/lineup', [FootballMatchController::class, 'lineup'])->name('football-matches.lineup');

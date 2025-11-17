@@ -14,6 +14,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'admin' => \App\Http\Middleware\IsAdmin::class,
         ]);
+        
+        // Ensure authenticated users always have an active team in session
+        $middleware->appendToGroup('web', \App\Http\Middleware\EnsureUserHasActiveTeam::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

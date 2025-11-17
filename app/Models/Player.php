@@ -14,6 +14,7 @@ class Player extends Model
         'position_id',
         'weight',
         'user_id',
+        'team_id',
     ];
 
     /**
@@ -21,9 +22,9 @@ class Player extends Model
      */
     protected static function booted(): void
     {
-        static::addGlobalScope('user', function (Builder $builder) {
-            if (auth()->check()) {
-                $builder->where('players.user_id', auth()->id());
+        static::addGlobalScope('team', function (Builder $builder) {
+            if (auth()->check() && session('current_team_id')) {
+                $builder->where('players.team_id', session('current_team_id'));
             }
         });
     }
@@ -31,6 +32,11 @@ class Player extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function team(): BelongsTo
+    {
+        return $this->belongsTo(Team::class);
     }
 
     public function position(): BelongsTo

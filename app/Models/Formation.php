@@ -12,6 +12,7 @@ class Formation extends Model
         'total_players',
         'lineup_formation',
         'user_id',
+        'team_id',
         'is_global',
     ];
 
@@ -24,7 +25,7 @@ class Formation extends Model
      */
     protected static function booted(): void
     {
-        // Formations are either global (is_global=true) or belong to the current user
+        // Formations are either global (is_global=true) or belong to the current team
         static::addGlobalScope('available', function (Builder $builder) {
             if (auth()->check()) {
                 // Admins can see all formations; skip limiting scope for them
@@ -33,7 +34,7 @@ class Formation extends Model
                 }
                 $builder->where(function ($query) {
                     $query->where('is_global', true)
-                          ->orWhere('formations.user_id', auth()->id());
+                          ->orWhere('formations.team_id', session('current_team_id'));
                 });
             }
         });
@@ -42,5 +43,10 @@ class Formation extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function team(): BelongsTo
+    {
+        return $this->belongsTo(Team::class);
     }
 }

@@ -3,12 +3,15 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\Team;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
 
@@ -41,16 +44,34 @@ class RegisteredUserController extends Controller
         // Store the logo
         $logoPath = $request->file('logo')->store('logos', 'public');
 
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'team_name' => $request->team_name,
-            'maps_location' => $request->maps_location,
-            'logo' => $logoPath,
-            'role' => 2, // Default to regular user
-            'is_active' => true,
-        ]);
+        DB::transaction(function () use ($request, $logoPath, &$user) {
+            // Create user with invite code
+            $user = User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+                'role' => 2, // Default to regular user
+                'is_active' => true,
+            ]);
+
+            // Create team
+            $team = Team::create([
+                'name' => $request->team_name,
+                'maps_location' => $request->maps_location,
+                'logo' => $logoPath,
+                'invite_code' => Str::random(64),
+            ]);
+
+            // Attach user to team as hoofdcoach with default flag
+            $user->teams()->attach($team->id, [
+                'role' => 1, // hoofdcoach
+                'is_default' => true,
+                'joined_at' => now(),
+            ]);
+
+            // Set team in session
+            session(['current_team_id' => $team->id]);
+        });
 
         event(new Registered($user));
 

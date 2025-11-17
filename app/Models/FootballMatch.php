@@ -18,6 +18,7 @@ class FootballMatch extends Model
         'date',
         'season_id',
         'user_id',
+        'team_id',
     ];
 
     protected $casts = [
@@ -30,9 +31,9 @@ class FootballMatch extends Model
      */
     protected static function booted(): void
     {
-        static::addGlobalScope('user', function (Builder $builder) {
-            if (auth()->check()) {
-                $builder->where('football_matches.user_id', auth()->id());
+        static::addGlobalScope('team', function (Builder $builder) {
+            if (auth()->check() && session('current_team_id')) {
+                $builder->where('football_matches.team_id', session('current_team_id'));
             }
         });
     }
@@ -40,6 +41,11 @@ class FootballMatch extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function team(): BelongsTo
+    {
+        return $this->belongsTo(Team::class);
     }
 
     public function opponent(): BelongsTo

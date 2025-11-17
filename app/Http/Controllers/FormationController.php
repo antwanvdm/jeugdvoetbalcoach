@@ -42,8 +42,10 @@ class FormationController extends Controller
                 abort(403, 'Only admins can create global formations.');
             }
             $validated['user_id'] = null; // Global formations don't belong to a specific user
+            $validated['team_id'] = null; // Global formations don't belong to a specific team
         } else {
             $validated['user_id'] = auth()->id();
+            $validated['team_id'] = session('current_team_id');
             $validated['is_global'] = false;
         }
 

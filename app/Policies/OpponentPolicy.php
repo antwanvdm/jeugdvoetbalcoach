@@ -14,7 +14,7 @@ class OpponentPolicy
 
     public function view(User $user, Opponent $opponent): bool
     {
-        return $user->is_active && $opponent->user_id === $user->id;
+        return $user->is_active && $user->isMemberOf($opponent->team);
     }
 
     public function create(User $user): bool
@@ -24,21 +24,21 @@ class OpponentPolicy
 
     public function update(User $user, Opponent $opponent): bool
     {
-        return $user->is_active && $opponent->user_id === $user->id;
+        return $user->is_active && $user->isMemberOf($opponent->team);
     }
 
     public function delete(User $user, Opponent $opponent): bool
     {
-        return $user->is_active && $opponent->user_id === $user->id;
+        return $user->is_active && $user->isMemberOf($opponent->team);
     }
 
     public function restore(User $user, Opponent $opponent): bool
     {
-        return $user->is_active && $opponent->user_id === $user->id;
+        return $user->is_active && $user->isMemberOf($opponent->team);
     }
 
     public function forceDelete(User $user, Opponent $opponent): bool
     {
-        return $user->is_active && $opponent->user_id === $user->id;
+        return $user->is_active && $user->isMemberOf($opponent->team);
     }
 }

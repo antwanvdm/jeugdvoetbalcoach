@@ -35,11 +35,6 @@ return new class extends Migration
         Schema::table('formations', function (Blueprint $table) {
             $table->foreignId('user_id')->nullable()->after('id')->constrained()->nullOnDelete();
         });
-
-        // Add user_id to football_match_player pivot table
-        Schema::table('football_match_player', function (Blueprint $table) {
-            $table->foreignId('user_id')->nullable()->after('football_match_id')->constrained()->nullOnDelete();
-        });
     }
 
     /**
@@ -68,11 +63,6 @@ return new class extends Migration
         });
 
         Schema::table('formations', function (Blueprint $table) {
-            $table->dropForeign(['user_id']);
-            $table->dropColumn('user_id');
-        });
-
-        Schema::table('football_match_player', function (Blueprint $table) {
             $table->dropForeign(['user_id']);
             $table->dropColumn('user_id');
         });

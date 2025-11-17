@@ -14,7 +14,7 @@ class FootballMatchPolicy
 
     public function view(User $user, FootballMatch $footballMatch): bool
     {
-        return $user->is_active && $footballMatch->user_id === $user->id;
+        return $user->is_active && $user->isMemberOf($footballMatch->team);
     }
 
     public function create(User $user): bool
@@ -24,21 +24,21 @@ class FootballMatchPolicy
 
     public function update(User $user, FootballMatch $footballMatch): bool
     {
-        return $user->is_active && $footballMatch->user_id === $user->id;
+        return $user->is_active && $user->isMemberOf($footballMatch->team);
     }
 
     public function delete(User $user, FootballMatch $footballMatch): bool
     {
-        return $user->is_active && $footballMatch->user_id === $user->id;
+        return $user->is_active && $user->isMemberOf($footballMatch->team);
     }
 
     public function restore(User $user, FootballMatch $footballMatch): bool
     {
-        return $user->is_active && $footballMatch->user_id === $user->id;
+        return $user->is_active && $user->isMemberOf($footballMatch->team);
     }
 
     public function forceDelete(User $user, FootballMatch $footballMatch): bool
     {
-        return $user->is_active && $footballMatch->user_id === $user->id;
+        return $user->is_active && $user->isMemberOf($footballMatch->team);
     }
 }

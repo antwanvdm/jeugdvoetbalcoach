@@ -29,17 +29,6 @@ class ProfileController extends Controller
         $user = $request->user();
         $user->fill($request->validated());
 
-        // Handle logo upload
-        if ($request->hasFile('logo')) {
-            // Delete old logo if exists
-            if ($user->logo && \Storage::disk('public')->exists($user->logo)) {
-                \Storage::disk('public')->delete($user->logo);
-            }
-            
-            $logoPath = $request->file('logo')->store('logos', 'public');
-            $user->logo = $logoPath;
-        }
-
         if ($user->isDirty('email')) {
             $user->email_verified_at = null;
         }

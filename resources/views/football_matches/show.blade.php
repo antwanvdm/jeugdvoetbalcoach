@@ -38,7 +38,7 @@
         </dl>
         <div class="flex-1 flex justify-center items-center gap-4 @if(!$footballMatch->home) flex-row-reverse @endif">
             <div class="flex-12 flex @if($footballMatch->home) justify-end @endif">
-                <img src="{{ asset('storage/' . auth()->user()->logo) }}" alt="{{ auth()->user()->team_name }} Logo" class="h-28">
+                <img src="{{ asset('storage/' . $footballMatch->team->logo) }}" alt="{{ $footballMatch->team->name }} Logo" class="h-28">
             </div>
             <div class="flex-1">
                 -

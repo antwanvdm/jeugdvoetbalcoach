@@ -21,7 +21,7 @@ class PlayerPolicy
      */
     public function view(User $user, Player $player): bool
     {
-        return $user->is_active && $player->user_id === $user->id;
+        return $user->is_active && $user->isMemberOf($player->team);
     }
 
     /**
@@ -37,7 +37,7 @@ class PlayerPolicy
      */
     public function update(User $user, Player $player): bool
     {
-        return $user->is_active && $player->user_id === $user->id;
+        return $user->is_active && $user->isMemberOf($player->team);
     }
 
     /**
@@ -45,7 +45,7 @@ class PlayerPolicy
      */
     public function delete(User $user, Player $player): bool
     {
-        return $user->is_active && $player->user_id === $user->id;
+        return $user->is_active && $user->isMemberOf($player->team);
     }
 
     /**
@@ -53,7 +53,7 @@ class PlayerPolicy
      */
     public function restore(User $user, Player $player): bool
     {
-        return $user->is_active && $player->user_id === $user->id;
+        return $user->is_active && $user->isMemberOf($player->team);
     }
 
     /**
@@ -61,6 +61,6 @@ class PlayerPolicy
      */
     public function forceDelete(User $user, Player $player): bool
     {
-        return $user->is_active && $player->user_id === $user->id;
+        return $user->is_active && $user->isMemberOf($player->team);
     }
 }
