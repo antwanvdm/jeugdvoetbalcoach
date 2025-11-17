@@ -27,7 +27,7 @@ class TeamController extends Controller
                     'logo' => $team->logo,
                     'invite_code' => $team->invite_code,
                     'role' => $pivot->role,
-                    'role_label' => $pivot->role === 1 ? 'Hoofdcoach' : 'Assistent',
+                    'role_label' => 'Coach', //$pivot->role === 1 ? 'Hoofdcoach' : 'Assistent',
                     'is_default' => $pivot->is_default,
                     'users_count' => $team->users_count,
                     'joined_at' => $pivot->joined_at,
@@ -63,7 +63,7 @@ class TeamController extends Controller
                     'name' => $user->name,
                     'email' => $user->email,
                     'role' => $user->pivot->role,
-                    'role_label' => $user->pivot->role === 1 ? 'Hoofdcoach' : 'Assistent',
+                    'role_label' => 'Coach', //$user->pivot->role === 1 ? 'Hoofdcoach' : 'Assistent',
                     'joined_at' => \Carbon\Carbon::parse($user->pivot->joined_at),
                 ];
             });
