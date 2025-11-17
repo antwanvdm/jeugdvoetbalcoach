@@ -8,7 +8,7 @@
                 <div>
                     <h1 class="text-3xl font-bold">{{ $team->name }}</h1>
                     @if($team->maps_location)
-                        <p class="text-gray-600 mt-1">📍 {{ $team->maps_location }}</p>
+                        <p class="text-gray-600 mt-1">📍 <a class="text-blue-600 hover:underline" target="_blank" href="{{ $team->maps_location }}">Google Maps</a></p>
                     @endif
                 </div>
             </div>
@@ -54,35 +54,32 @@
         <div class="bg-white rounded-lg shadow p-6">
             <h2 class="text-xl font-semibold mb-4">Uitnodiging</h2>
             <p class="text-sm text-gray-600 mb-4">Deel deze link om nieuwe coaches uit te nodigen voor dit team.</p>
-            
+
             <div class="bg-gray-50 rounded-lg p-4">
-                <div class="flex items-center gap-2 mb-2">
-                    <input 
-                        type="text" 
-                        readonly 
-                        value="{{ route('teams.join.show', $team->invite_code) }}" 
+                <div class="flex items-center gap-2">
+                    <input
+                        type="text"
+                        readonly
+                        value="{{ route('teams.join.show', $team->invite_code) }}"
                         class="flex-1 border rounded p-2 bg-white text-sm"
                         id="invite-link-{{ $team->id }}"
                     >
-                    <button 
-                        type="button" 
+                    <button
+                        type="button"
                         data-copy-to-clipboard="{{ route('teams.join.show', $team->invite_code) }}"
                         data-copy-message="Uitnodigingslink gekopieerd!"
-                        class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 whitespace-nowrap"
+                        class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 whitespace-nowrap cursor-pointer"
                     >
                         📋 Kopieer link
                     </button>
                 </div>
-                <p class="text-xs text-gray-500">
-                    Code: <code class="bg-white px-2 py-1 rounded">{{ $team->invite_code }}</code>
-                </p>
             </div>
 
             @can('update', $team)
                 <div class="mt-4 pt-4 border-t">
                     <form method="POST" action="{{ route('teams.invite.regenerate', $team) }}" onsubmit="return confirm('Weet je zeker dat je een nieuwe uitnodigingscode wilt genereren? De oude link werkt dan niet meer.');">
                         @csrf
-                        <button type="submit" class="text-sm text-red-600 hover:text-red-800 underline">
+                        <button type="submit" class="text-sm text-red-600 hover:text-red-800 underline cursor-pointer">
                             🔄 Nieuwe uitnodigingscode genereren
                         </button>
                         <p class="text-xs text-gray-500 mt-1">Genereer een nieuwe code als de oude link op straat is beland.</p>
@@ -95,7 +92,7 @@
         @can('update', $team)
             <div class="mt-6">
                 <a href="{{ route('teams.edit', $team) }}" class="px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700">
-                    ✏️ Team Bewerken
+                    Team Bewerken
                 </a>
             </div>
         @endcan

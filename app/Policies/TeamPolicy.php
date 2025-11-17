@@ -50,7 +50,7 @@ class TeamPolicy
             return false;
         }
 
-        return $user->isHoofdcoachOf($team);
+        return $user->isHeadCoach($team);
     }
 
     /**
@@ -64,7 +64,7 @@ class TeamPolicy
         }
 
         // If user is hoofdcoach, check if there's at least one assistent
-        if ($user->isHoofdcoachOf($team)) {
+        if ($user->isHeadCoach($team)) {
             $assistentenCount = DB::table('team_user')
                 ->where('team_id', $team->id)
                 ->where('role', 2)

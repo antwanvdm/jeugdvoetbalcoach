@@ -258,7 +258,7 @@ class TeamController extends Controller
         // Add user as assistent
         // Set as default if this is their first/only team
         $isFirstTeam = auth()->user()->teams()->count() === 0;
-        
+
         auth()->user()->teams()->attach($team->id, [
             'role' => 2, // assistent
             'is_default' => $isFirstTeam,
@@ -294,7 +294,7 @@ class TeamController extends Controller
         \Gate::authorize('leave', $team);
 
         DB::transaction(function () use ($team) {
-            $isHoofdcoach = auth()->user()->isHoofdcoachOf($team);
+            $isHoofdcoach = auth()->user()->isHeadCoach($team);
 
             if ($isHoofdcoach) {
                 // Promote first assistent to hoofdcoach

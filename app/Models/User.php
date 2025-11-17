@@ -89,7 +89,7 @@ class User extends Authenticatable
     /**
      * Check if the user is the hoofdcoach of the given team.
      */
-    public function isHoofdcoachOf(Team $team): bool
+    public function isHeadCoach(Team $team): bool
     {
         return $this->teams()
             ->where('teams.id', $team->id)
