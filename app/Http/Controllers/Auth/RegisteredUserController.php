@@ -32,20 +32,35 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        $request->validate([
+        // Check if user has a pending team invite
+        $hasPendingInvite = session()->has('pending_team_invite');
+        
+        $rules = [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'team_name' => ['required', 'string', 'max:255'],
-            'maps_location' => ['required', 'string', 'max:2048'],
-            'logo' => ['required', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
-        ]);
+        ];
+        
+        // Only require team fields if not joining via invite
+        if (!$hasPendingInvite) {
+            $rules['team_name'] = ['required', 'string', 'max:255'];
+            $rules['maps_location'] = ['required', 'string', 'max:2048'];
+            $rules['logo'] = ['required', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'];
+        }
+        
+        $request->validate($rules);
 
-        // Store the logo
-        $logoPath = $request->file('logo')->store('logos', 'public');
+        // Check if registering via invite
+        $hasPendingInvite = session()->has('pending_team_invite');
+        $logoPath = null;
+        
+        // Only process logo if provided
+        if ($request->hasFile('logo')) {
+            $logoPath = $request->file('logo')->store('logos', 'public');
+        }
 
-        DB::transaction(function () use ($request, $logoPath, &$user) {
-            // Create user with invite code
+        DB::transaction(function () use ($request, $logoPath, $hasPendingInvite, &$user) {
+            // Create user
             $user = User::create([
                 'name' => $request->name,
                 'email' => $request->email,
@@ -54,28 +69,52 @@ class RegisteredUserController extends Controller
                 'is_active' => true,
             ]);
 
-            // Create team
-            $team = Team::create([
-                'name' => $request->team_name,
-                'maps_location' => $request->maps_location,
-                'logo' => $logoPath,
-                'invite_code' => Str::random(64),
-            ]);
+            // Only create own team if not joining via invite
+            if (!$hasPendingInvite) {
+                // Create team
+                $team = Team::create([
+                    'name' => $request->team_name,
+                    'maps_location' => $request->maps_location,
+                    'logo' => $logoPath,
+                    'invite_code' => Str::random(64),
+                ]);
 
-            // Attach user to team as hoofdcoach with default flag
-            $user->teams()->attach($team->id, [
-                'role' => 1, // hoofdcoach
-                'is_default' => true,
-                'joined_at' => now(),
-            ]);
+                // Attach user to team as hoofdcoach with default flag
+                $user->teams()->attach($team->id, [
+                    'role' => 1, // hoofdcoach
+                    'is_default' => true,
+                    'joined_at' => now(),
+                ]);
 
-            // Set team in session
-            session(['current_team_id' => $team->id]);
+                // Set team in session
+                session(['current_team_id' => $team->id]);
+            }
         });
 
         event(new Registered($user));
 
         Auth::login($user);
+
+        // Check if user has a pending team invite
+        if (session()->has('pending_team_invite')) {
+            $inviteCode = session()->pull('pending_team_invite');
+            $inviteTeam = Team::where('invite_code', $inviteCode)->first();
+            
+            if ($inviteTeam && !$user->isMemberOf($inviteTeam)) {
+                // Add user as assistent to the invited team
+                $user->teams()->attach($inviteTeam->id, [
+                    'role' => 2, // assistent
+                    'is_default' => false,
+                    'joined_at' => now(),
+                ]);
+                
+                // Switch to the invited team
+                session(['current_team_id' => $inviteTeam->id]);
+                
+                return redirect(route('dashboard', absolute: false))
+                    ->with('success', "Welkom! Je bent toegevoegd aan {$inviteTeam->name}.");
+            }
+        }
 
         return redirect(route('dashboard', absolute: false));
     }

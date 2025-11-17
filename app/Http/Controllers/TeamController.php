@@ -195,6 +195,19 @@ class TeamController extends Controller
     {
         $team = Team::where('invite_code', $inviteCode)->firstOrFail();
 
+        // Store invite code in session
+        session(['pending_team_invite' => $inviteCode]);
+
+        // If user is not authenticated, redirect to register with team info
+        if (!auth()->check()) {
+            return redirect()->route('register')
+                ->with('team_invite', [
+                    'code' => $inviteCode,
+                    'team_name' => $team->name,
+                    'team_logo' => $team->logo,
+                ]);
+        }
+
         // Check if user is already a member
         if (auth()->user()->isMemberOf($team)) {
             return redirect()->route('teams.index')

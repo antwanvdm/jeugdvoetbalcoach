@@ -17,6 +17,10 @@ Route::get('/', function () {
     return view('home');
 })->name('home');
 
+// Public team join routes (accessible without authentication)
+Route::get('/teams/join/{inviteCode}', [TeamController::class, 'showJoin'])->name('teams.join.show');
+Route::post('/teams/join/{inviteCode}', [TeamController::class, 'join'])->middleware('auth')->name('teams.join');
+
 // Protected routes - require authentication
 Route::middleware(['auth'])->group(function () {
     // Dashboard (renamed from home)
@@ -32,8 +36,6 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/teams/{team}/switch', [TeamController::class, 'switch'])->name('teams.switch');
     Route::post('/teams/{team}/set-default', [TeamController::class, 'setDefault'])->name('teams.set-default');
     Route::post('/teams/{team}/invite/regenerate', [TeamController::class, 'regenerateInviteCode'])->name('teams.invite.regenerate');
-    Route::get('/teams/join/{inviteCode}', [TeamController::class, 'showJoin'])->name('teams.join.show');
-    Route::post('/teams/join/{inviteCode}', [TeamController::class, 'join'])->name('teams.join');
     Route::delete('/teams/{team}/leave', [TeamController::class, 'leave'])->name('teams.leave');
 
     // Football match lineup routes

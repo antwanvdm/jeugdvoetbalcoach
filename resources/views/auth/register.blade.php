@@ -1,6 +1,21 @@
 <x-app-layout>
     <h1 class="text-2xl font-semibold mb-2">Registreren</h1>
-    <p class="text-sm text-gray-600 mb-6">Maak een account aan voor je team. Teamnaam en logo zijn verplicht.</p>
+    
+    @if(session('team_invite'))
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+            <div class="flex items-center gap-3">
+                @if(session('team_invite')['team_logo'])
+                    <img src="{{ asset('storage/' . session('team_invite')['team_logo']) }}" alt="Team" class="h-12 w-12 object-contain">
+                @endif
+                <div>
+                    <p class="font-semibold text-blue-900">Je bent uitgenodigd voor {{ session('team_invite')['team_name'] }}</p>
+                    <p class="text-sm text-blue-700">Maak een account aan om lid te worden van dit team.</p>
+                </div>
+            </div>
+        </div>
+    @else
+        <p class="text-sm text-gray-600 mb-6">Maak een account aan voor je team. Teamnaam en logo zijn verplicht.</p>
+    @endif
 
     <form method="POST" action="{{ route('register') }}" enctype="multipart/form-data" class="space-y-4">
         @csrf
@@ -19,26 +34,28 @@
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
         </div>
 
-        <!-- Team Name -->
-        <div>
-            <x-input-label for="team_name" value="Team Naam" />
-            <x-text-input id="team_name" class="block mt-1 w-full" type="text" name="team_name" :value="old('team_name')" required />
-            <x-input-error :messages="$errors->get('team_name')" class="mt-2" />
-        </div>
+        @unless(session('team_invite'))
+            <!-- Team Name -->
+            <div>
+                <x-input-label for="team_name" value="Team Naam" />
+                <x-text-input id="team_name" class="block mt-1 w-full" type="text" name="team_name" :value="old('team_name')" required />
+                <x-input-error :messages="$errors->get('team_name')" class="mt-2" />
+            </div>
 
-        <!-- Maps locatie (thuis) -->
-        <div>
-            <x-input-label for="maps_location" value="Maps locatie (thuis)" />
-            <x-text-input id="maps_location" class="block mt-1 w-full" type="text" name="maps_location" :value="old('maps_location')" required />
-            <x-input-error :messages="$errors->get('maps_location')" class="mt-2" />
-        </div>
+            <!-- Maps locatie (thuis) -->
+            <div>
+                <x-input-label for="maps_location" value="Maps locatie (thuis)" />
+                <x-text-input id="maps_location" class="block mt-1 w-full" type="text" name="maps_location" :value="old('maps_location')" required />
+                <x-input-error :messages="$errors->get('maps_location')" class="mt-2" />
+            </div>
 
-        <!-- Logo -->
-        <div>
-            <x-input-label for="logo" value="Team Logo" />
-            <input id="logo" class="block mt-1 w-full border-gray-300 rounded-md shadow-sm" type="file" name="logo" required accept="image/*" />
-            <x-input-error :messages="$errors->get('logo')" class="mt-2" />
-        </div>
+            <!-- Logo -->
+            <div>
+                <x-input-label for="logo" value="Team Logo" />
+                <input id="logo" class="block mt-1 w-full border-gray-300 rounded-md shadow-sm" type="file" name="logo" required accept="image/*" />
+                <x-input-error :messages="$errors->get('logo')" class="mt-2" />
+            </div>
+        @endunless
 
         <!-- Wachtwoord -->
         <div>
