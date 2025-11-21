@@ -4,15 +4,17 @@ Een intelligente teammanagement applicatie voor voetbalverenigingen, gebouwd met
 
 ## 🎯 Over dit project
 
-VVOR Team Manager is ontwikkeld voor voetbalverenigingen die hun teammanagement willen professionaliseren. De applicatie neemt het tijdrovende werk van het maken van line-ups uit handen en zorgt voor eerlijke rotatie en optimale teambalans.
+VVOR Team Manager is ontwikkeld voor voetbalverenigingen die hun teammanagement willen professionaliseren. De applicatie neemt het tijdrovende werk van het maken van line-ups uit handen en zorgt voor eerlijke rotatie en optimale teambalans. Met de recente multi-team uitbreidingen kun je nu meerdere coaches aan één team koppelen en werken met uitnodigingscodes.
 
-### 👥 Multi-user Support
+### 👥 Multi-user & Multi-Team Support
 
 De applicatie ondersteunt meerdere teams en gebruikers met een robuust autorisatiesysteem:
 
 -   **Admin rol**: Volledig toegang, beheert globale formaties en gebruikers
--   **User rol**: Beheert eigen team, spelers, wedstrijden en formaties
--   **Data isolatie**: Elke gebruiker ziet alleen zijn eigen teamdata
+-   **Hoofdcoach / Assistent**: Teamrollen via pivot (`team_user`) met autorisatie
+-   **Invite codes**: Teams genereren een unieke `invite_code` waarmee andere coaches kunnen joinen
+-   **Data isolatie**: Elke gebruiker ziet alleen data van zijn teams
+-   **Meerdere teams**: Gebruikers kunnen aan meerdere teams gekoppeld worden en een standaard team instellen
 -   **Globale formaties**: Standaard formaties (2-1-2, 3-2-2, 4-3-3) beschikbaar voor alle gebruikers
 -   **Policy-based autorisatie**: Laravel Policies voor granulaire toegangscontrole
 
@@ -42,12 +44,14 @@ De applicatie ondersteunt meerdere teams en gebruikers met een robuust autorisat
 
 **💼 Beheer & Administratie**
 
+-   Multi-team structuur met rolverdeling (hoofdcoach/assistent)
 -   Gebruikersbeheer met rollen en teamprofielen
 -   Spelersbeheer met posities en fysieke eigenschappen
 -   Tegenstander administratie
 -   Wedstrijd planning en resultaten
 -   Handmatige line-up aanpassingen mogelijk
--   Admin dashboard voor gebruikers- en positiebeheer
+-   Admin dashboard voor gebruikers-, positie- en globale formatiebeheer
+-   Uitnodigingscodes voor snelle teamtoetreding
 
 **🔒 Beveiliging & Autorisatie**
 
@@ -90,13 +94,13 @@ php artisan key:generate
 php artisan storage:link
 ```
 
-4**Database migratie en seeders**
+4. **Database migratie en seeders**
 
 ```bash
 php artisan migrate --seed
 ```
 
-5**Frontend assets**
+5. **Frontend assets**
 
 ```bash
 npm run build
@@ -104,7 +108,7 @@ npm run build
 npm run dev
 ```
 
-6**Start de server**
+6. **Start de server**
 
 ```bash
 php artisan serve
@@ -142,7 +146,7 @@ php artisan migrate:fresh --seed
 
 -   **Framework**: Laravel 11
 -   **Authenticatie**: Laravel Breeze
--   **Frontend**: Blade templates met Tailwind CSS
+-   **Frontend**: Blade templates met Tailwind CSS (Vite + Tailwind v4)
 -   **Database**: SQLite/MySQL met Eloquent ORM
 -   **Autorisatie**: Laravel Policies
 -   **Testing**: Pest PHP
@@ -158,13 +162,14 @@ php artisan migrate:fresh --seed
 
 **Models & Database**
 
--   `User` - Gebruikers met rollen en teamprofielen
--   `Player` - Spelers met posities en fysieke eigenschappen
+-   `Team` - Teams met invite code, logo, location (meerdere coaches)
+-   `User` - Gebruikers met rollen en teamprofielen (koppeling via `team_user`)
+-   `Player` - Spelers met posities en fysieke eigenschappen (per team)
 -   `FootballMatch` - Wedstrijden met tegenstanders en resultaten
 -   `Position` - Keeper, Verdediger, Middenvelder, Aanvaller
 -   `Opponent` - Tegenstanders met locatie informatie
--   `Formation` - Formaties (globaal of per gebruiker)
--   `Season` - Seizoenen gekoppeld aan gebruiker en formatie
+-   `Formation` - Formaties (globaal of per gebruiker / team)
+-   `Season` - Seizoenen gekoppeld aan team en formatie
 
 **Policies & Autorisatie**
 
@@ -266,15 +271,43 @@ php artisan make:migration create_example_table
 ## 🗺️ Roadmap
 
 - [ ] Cascade on delete als gebruiker profiel verwijderd
-- [ ] Koppelen van gebruikers aan elkaar als ze samen een Team managen
+- [x] Multi-team support & koppelen van coaches (pivot + invite codes)
 - [ ] Formatie ook per wedstrijd kunnen aanpassen (is nu enkel per seizoensblok)
 - [ ] Tegenstanders mass import via admin, koppelen vanuit gebruikers
-- [ ] JO13+ support met 11 spelers en twee helften IPV 4 kwarten
+- [ ] JO13+ support met 11 spelers en twee helften i.p.v. 4 kwarten
+- [ ] Visuele statistieken dashboard (grafieken) voor spelers & keeperrotatie
+- [ ] Export van line-ups naar PDF met verbeterde layout
 
 ## 📝 Documentatie
 
 -   [LineupGeneratorService](docs/LineupGeneratorService.md) - Uitgebreide service documentatie
 -   [Database Schema](docs/database-schema.md) - Database structuur en relaties
+-   Publieke homepage layout & component structuur (zie sectie hieronder)
+
+## 🌐 Publieke Homepage
+
+De publieke homepage is gemoderniseerd met een hero sectie (full-width background image + gradient overlay), een features grid, "Hoe het werkt" stappen, een voorbeeld (screenshot placeholder) en een duidelijke call-to-action. Alle secties zijn opgebouwd met Tailwind utility classes voor snelle aanpasbaarheid.
+
+### Secties
+
+1. Hero: Titel, korte pitch, primaire CTA (Registreren) + secundaire (Inloggen).
+2. Features Grid: Kernfunctionaliteiten (line-up generatie, multi-team, seizoenen, statistieken, autorisatie).
+3. Hoe het werkt: 4 stappen (Account → Team → Spelers → Wedstrijd & Line-up).
+4. Voorbeeld/Screenshot: Placeholder container waar later een echte screenshot / video embed kan komen.
+5. CTA Footer: Extra oproep om te starten.
+
+### Aanpasbare onderdelen
+
+- Achtergrondafbeelding aanpasbaar via inline style of via een class in `app.css`.
+- Iconen kunnen vervangen worden door SVG's in `resources/views/components`.
+- Extra secties kunnen eenvoudig toegevoegd worden als nieuwe `<section>` blokken.
+
+### Toekomstige uitbreidingen
+
+- Dynamische testimonials (JSON feed / database)
+- Live statistiek preview (keeperrotatie / speeltijd grafiek)
+- Interactie animaties (Framer Motion via React/Vite optioneel)
+
 
 ## 🤝 Bijdragen
 

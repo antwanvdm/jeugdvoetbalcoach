@@ -260,6 +260,6 @@ class FootballMatchController extends Controller
             }
         }
 
-        return redirect()->route('football-matches.lineup', $footballMatch)->with('success', 'Line-up opgeslagen.');
+        return redirect()->route('football-matches.show', $footballMatch)->with('success', 'Line-up opgeslagen.');
     }
 }

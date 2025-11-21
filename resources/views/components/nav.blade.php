@@ -1,4 +1,4 @@
-<nav class="bg-white shadow mb-6">
+<nav class="bg-white shadow">
     <div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between md:block">
         <div class="flex items-center justify-between gap-4">
             <a href="{{ auth()->check() ? route('dashboard') : route('home') }}" class="font-semibold">
@@ -50,7 +50,7 @@
                             </div>
                         </div>
                     @endif
-                    
+
                     <nav class="flex items-center gap-2">
                         @if(auth()->user()->isAdmin())
                             <a href="{{ route('formations.index') }}"

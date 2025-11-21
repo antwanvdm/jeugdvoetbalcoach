@@ -90,6 +90,45 @@ De database bestaat uit de volgende hoofdtabellen:
 
 ## 📋 Tabellen
 
+### teams
+
+Teams vormen de centrale entiteit voor samenwerking tussen meerdere coaches.
+
+| Kolom           | Type            | Nullable | Default        | Beschrijving                      |
+| --------------- | --------------- | -------- | -------------- | --------------------------------- |
+| `id`            | bigint unsigned | NO       | AUTO_INCREMENT | Primary key                       |
+| `name`          | varchar(255)    | NO       |                | Teamnaam                          |
+| `logo`          | varchar(255)    | YES      | NULL           | Logo URL                          |
+| `maps_location` | varchar(255)    | YES      | NULL           | Locatie / adres / coördinaten     |
+| `invite_code`   | varchar(64)     | YES      | NULL           | Unieke code om team te joinen     |
+| `created_at`    | timestamp       | YES      | NULL           | Aanmaakdatum                      |
+| `updated_at`    | timestamp       | YES      | NULL           | Laatste wijziging                 |
+
+**Invite Code**: Wordt gegenereerd per team en kan opnieuw aangemaakt worden. Maakt het mogelijk dat andere coaches via een publieke route (`/teams/join/{inviteCode}`) deelnemen.
+
+**Relaties**:
+
+-   Heeft meerdere `players`, `seasons`, `opponents`, `football_matches`, `formations`.
+-   Heeft meerdere `users` via pivot `team_user`.
+
+### team_user (pivot)
+
+Koppelt gebruikers aan teams met rol, standaardstatus en join datum.
+
+| Kolom        | Type            | Nullable | Default            | Beschrijving                          |
+| ------------ | --------------- | -------- | ------------------ | ------------------------------------- |
+| `team_id`    | bigint unsigned | NO       |                    | Verwijst naar team                    |
+| `user_id`    | bigint unsigned | NO       |                    | Verwijst naar gebruiker               |
+| `role`       | tinyint         | NO       |                    | 1 = hoofdcoach, 2 = assistent         |
+| `is_default` | boolean         | NO       | false              | Of dit het standaard team is          |
+| `joined_at`  | timestamp       | NO       | CURRENT_TIMESTAMP  | Tijdstip van toetreding               |
+
+**Primary Key**: Composite (`team_id`, `user_id`).
+
+**Indexen**: Impliciet via primary key; extra indexen kunnen later worden toegevoegd voor filtering op rol / default status.
+
+**Autorisatie**: Policies gebruiken de pivot-rol om toegangsrechten binnen een team te bepalen (bijv. hoofdcoach kan formatie wijzigen, assistent read-only op bepaalde onderdelen - afhankelijk van implementatie).
+
 ### users
 
 Gebruikers van het systeem met rollen en teamprofielen.
@@ -292,7 +331,7 @@ Wedstrijden per gebruiker met resultaten en metadata.
 | `opponent_id`    | bigint unsigned | NO       |                | Tegenstander            |
 | `home`           | tinyint(1)      | NO       |                | Thuis (1) of uit (0)    |
 | `goals_scored`   | int unsigned    | YES      | NULL           | Doelpunten gescoord     |
-| `goals_conceded` | int unsigned    | YES      | NULL           | Doelpunten tegengekrgen |
+| `goals_conceded` | int unsigned    | YES      | NULL           | Doelpunten tegengekregen |
 | `date`           | datetime        | NO       |                | Wedstrijddatum en tijd  |
 | `created_at`     | timestamp       | YES      | NULL           | Aanmaakdatum            |
 | `updated_at`     | timestamp       | YES      | NULL           | Laatste wijziging       |

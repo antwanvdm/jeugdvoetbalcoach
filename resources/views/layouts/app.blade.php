@@ -15,7 +15,7 @@
 <body class="bg-gray-100 text-gray-900">
 <x-nav></x-nav>
 
-<main class="max-w-5xl mx-auto px-4 mb-4 {{str_replace('.', '-', request()->route()->getName())}}">
+<main class="@if(request()->route()->getName() !== 'home') max-w-5xl px-4 mb-4 mt-6 @endif mx-auto {{str_replace('.', '-', request()->route()->getName())}}">
     @if(session('success'))
         <div class="mb-4 p-3 rounded bg-green-100 text-green-800">
             {{ session('success') }}
