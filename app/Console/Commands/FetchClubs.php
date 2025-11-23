@@ -41,12 +41,10 @@ class FetchClubs extends Command
 
         // Gebruik ; als delimiter (clubs.csv is nu ; gescheiden). Fallback als fgetcsv niets splitst.
         while (($row = fgetcsv($handle, 0, ';')) !== false) {
-            $row = $this->stripBom($row);
-
             [$name, $location, $kitRef] = array_pad($row, 3, null);
-            $name = trim($name ?? '');
-            $location = trim($location ?? '');
-            $kitRef = trim($kitRef ?? '');
+            $name = trim($this->stripBom($name) ?? '');
+            $location = trim($this->stripBom($location) ?? '');
+            $kitRef = trim($this->stripBom($kitRef) ?? '');
 
             $slug = Str::slug($name . '-' . $location);
 
