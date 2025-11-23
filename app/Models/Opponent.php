@@ -16,31 +16,8 @@ class Opponent extends Model
         'logo',
         'latitude',
         'longitude',
-        'user_id',
-        'team_id',
+        'kit_reference'
     ];
-
-    /**
-     * Boot the model.
-     */
-    protected static function booted(): void
-    {
-        static::addGlobalScope('team', function (Builder $builder) {
-            if (auth()->check() && session('current_team_id')) {
-                $builder->where('opponents.team_id', session('current_team_id'));
-            }
-        });
-    }
-
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class);
-    }
-
-    public function team(): BelongsTo
-    {
-        return $this->belongsTo(Team::class);
-    }
 
     public function footballMatches(): HasMany
     {

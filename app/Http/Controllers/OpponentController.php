@@ -48,11 +48,9 @@ class OpponentController extends Controller
             'longitude' => ['required', 'numeric'],
         ]);
 
-        // Altijd uploaden; bestandsnaam met user_id prefix
         $file = $request->file('logo_file');
         $ext = $file->getClientOriginalExtension() ?: $file->extension();
-        $userId = auth()->id();
-        $filename = $userId . '-' . Str::slug($validated['name']) . '-' . time() . ($ext ? ('.' . $ext) : '');
+        $filename = Str::slug($validated['name']) . '-' . time() . ($ext ? ('.' . $ext) : '');
         $storedLogo = $file->storeAs('opponents', $filename, 'public'); // relative path
 
         $payload = [
@@ -60,9 +58,7 @@ class OpponentController extends Controller
             'location' => $validated['location'],
             'logo' => $storedLogo,
             'latitude' => $validated['latitude'],
-            'longitude' => $validated['longitude'],
-            'user_id' => auth()->id(),
-            'team_id' => session('current_team_id'),
+            'longitude' => $validated['longitude']
         ];
 
         $opponent = Opponent::create($payload);
@@ -104,13 +100,12 @@ class OpponentController extends Controller
             'longitude' => ['required', 'numeric'],
         ]);
 
-        $storedLogo = $opponent->logo; // behoud huidige als er geen nieuwe upload is
+        $storedLogo = $opponent->logo; //keep current logo when no new has been added
 
         if ($request->hasFile('logo_file')) {
             $file = $request->file('logo_file');
             $ext = $file->getClientOriginalExtension() ?: $file->extension();
-            $userId = auth()->id();
-            $filename = $userId . '-' . Str::slug($validated['name']) . '-' . time() . ($ext ? ('.' . $ext) : '');
+            $filename = Str::slug($validated['name']) . '-' . time() . ($ext ? ('.' . $ext) : '');
             $newPath = $file->storeAs('opponents', $filename, 'public');
 
             // verwijder oude indien lokaal opgeslagen relatief pad

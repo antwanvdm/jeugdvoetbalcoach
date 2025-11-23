@@ -270,13 +270,13 @@ php artisan make:migration create_example_table
 
 ## 🗺️ Roadmap
 
-- [ ] Cascade on delete als gebruiker profiel verwijderd
-- [x] Multi-team support & koppelen van coaches (pivot + invite codes)
-- [ ] Formatie ook per wedstrijd kunnen aanpassen (is nu enkel per seizoensblok)
-- [ ] Tegenstanders mass import via admin, koppelen vanuit gebruikers
-- [ ] JO13+ support met 11 spelers en twee helften i.p.v. 4 kwarten
-- [ ] Visuele statistieken dashboard (grafieken) voor spelers & keeperrotatie
-- [ ] Export van line-ups naar PDF met verbeterde layout
+-   [ ] Cascade on delete als gebruiker profiel verwijderd
+-   [x] Multi-team support & koppelen van coaches (pivot + invite codes)
+-   [ ] Formatie ook per wedstrijd kunnen aanpassen (is nu enkel per seizoensblok)
+-   [ ] Tegenstanders mass import via admin, koppelen vanuit gebruikers
+-   [ ] JO13+ support met 11 spelers en twee helften i.p.v. 4 kwarten
+-   [ ] Visuele statistieken dashboard (grafieken) voor spelers & keeperrotatie
+-   [ ] Export van line-ups naar PDF met verbeterde layout
 
 ## 📝 Documentatie
 
@@ -298,16 +298,15 @@ De publieke homepage is gemoderniseerd met een hero sectie (full-width backgroun
 
 ### Aanpasbare onderdelen
 
-- Achtergrondafbeelding aanpasbaar via inline style of via een class in `app.css`.
-- Iconen kunnen vervangen worden door SVG's in `resources/views/components`.
-- Extra secties kunnen eenvoudig toegevoegd worden als nieuwe `<section>` blokken.
+-   Achtergrondafbeelding aanpasbaar via inline style of via een class in `app.css`.
+-   Iconen kunnen vervangen worden door SVG's in `resources/views/components`.
+-   Extra secties kunnen eenvoudig toegevoegd worden als nieuwe `<section>` blokken.
 
 ### Toekomstige uitbreidingen
 
-- Dynamische testimonials (JSON feed / database)
-- Live statistiek preview (keeperrotatie / speeltijd grafiek)
-- Interactie animaties (Framer Motion via React/Vite optioneel)
-
+-   Dynamische testimonials (JSON feed / database)
+-   Live statistiek preview (keeperrotatie / speeltijd grafiek)
+-   Interactie animaties (Framer Motion via React/Vite optioneel)
 
 ## 🤝 Bijdragen
 

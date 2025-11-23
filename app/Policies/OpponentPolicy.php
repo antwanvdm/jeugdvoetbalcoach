@@ -19,26 +19,26 @@ class OpponentPolicy
 
     public function create(User $user): bool
     {
-        return $user->is_active;
+        return $user->isAdmin();
     }
 
     public function update(User $user, Opponent $opponent): bool
     {
-        return $user->is_active && $user->isMemberOf($opponent->team);
+        return $user->isAdmin();
     }
 
     public function delete(User $user, Opponent $opponent): bool
     {
-        return $user->is_active && $user->isMemberOf($opponent->team);
+        return $user->isAdmin();
     }
 
     public function restore(User $user, Opponent $opponent): bool
     {
-        return $user->is_active && $user->isMemberOf($opponent->team);
+        return $user->isAdmin();
     }
 
     public function forceDelete(User $user, Opponent $opponent): bool
     {
-        return $user->is_active && $user->isMemberOf($opponent->team);
+        return $user->isAdmin();
     }
 }

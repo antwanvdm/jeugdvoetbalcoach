@@ -94,15 +94,15 @@ De database bestaat uit de volgende hoofdtabellen:
 
 Teams vormen de centrale entiteit voor samenwerking tussen meerdere coaches.
 
-| Kolom           | Type            | Nullable | Default        | Beschrijving                      |
-| --------------- | --------------- | -------- | -------------- | --------------------------------- |
-| `id`            | bigint unsigned | NO       | AUTO_INCREMENT | Primary key                       |
-| `name`          | varchar(255)    | NO       |                | Teamnaam                          |
-| `logo`          | varchar(255)    | YES      | NULL           | Logo URL                          |
-| `maps_location` | varchar(255)    | YES      | NULL           | Locatie / adres / coördinaten     |
-| `invite_code`   | varchar(64)     | YES      | NULL           | Unieke code om team te joinen     |
-| `created_at`    | timestamp       | YES      | NULL           | Aanmaakdatum                      |
-| `updated_at`    | timestamp       | YES      | NULL           | Laatste wijziging                 |
+| Kolom           | Type            | Nullable | Default        | Beschrijving                  |
+| --------------- | --------------- | -------- | -------------- | ----------------------------- |
+| `id`            | bigint unsigned | NO       | AUTO_INCREMENT | Primary key                   |
+| `name`          | varchar(255)    | NO       |                | Teamnaam                      |
+| `logo`          | varchar(255)    | YES      | NULL           | Logo URL                      |
+| `maps_location` | varchar(255)    | YES      | NULL           | Locatie / adres / coördinaten |
+| `invite_code`   | varchar(64)     | YES      | NULL           | Unieke code om team te joinen |
+| `created_at`    | timestamp       | YES      | NULL           | Aanmaakdatum                  |
+| `updated_at`    | timestamp       | YES      | NULL           | Laatste wijziging             |
 
 **Invite Code**: Wordt gegenereerd per team en kan opnieuw aangemaakt worden. Maakt het mogelijk dat andere coaches via een publieke route (`/teams/join/{inviteCode}`) deelnemen.
 
@@ -115,13 +115,13 @@ Teams vormen de centrale entiteit voor samenwerking tussen meerdere coaches.
 
 Koppelt gebruikers aan teams met rol, standaardstatus en join datum.
 
-| Kolom        | Type            | Nullable | Default            | Beschrijving                          |
-| ------------ | --------------- | -------- | ------------------ | ------------------------------------- |
-| `team_id`    | bigint unsigned | NO       |                    | Verwijst naar team                    |
-| `user_id`    | bigint unsigned | NO       |                    | Verwijst naar gebruiker               |
-| `role`       | tinyint         | NO       |                    | 1 = hoofdcoach, 2 = assistent         |
-| `is_default` | boolean         | NO       | false              | Of dit het standaard team is          |
-| `joined_at`  | timestamp       | NO       | CURRENT_TIMESTAMP  | Tijdstip van toetreding               |
+| Kolom        | Type            | Nullable | Default           | Beschrijving                  |
+| ------------ | --------------- | -------- | ----------------- | ----------------------------- |
+| `team_id`    | bigint unsigned | NO       |                   | Verwijst naar team            |
+| `user_id`    | bigint unsigned | NO       |                   | Verwijst naar gebruiker       |
+| `role`       | tinyint         | NO       |                   | 1 = hoofdcoach, 2 = assistent |
+| `is_default` | boolean         | NO       | false             | Of dit het standaard team is  |
+| `joined_at`  | timestamp       | NO       | CURRENT_TIMESTAMP | Tijdstip van toetreding       |
 
 **Primary Key**: Composite (`team_id`, `user_id`).
 
@@ -323,18 +323,18 @@ Seizoenen per gebruiker.
 
 Wedstrijden per gebruiker met resultaten en metadata.
 
-| Kolom            | Type            | Nullable | Default        | Beschrijving            |
-| ---------------- | --------------- | -------- | -------------- | ----------------------- |
-| `id`             | bigint unsigned | NO       | AUTO_INCREMENT | Primary key             |
-| `user_id`        | bigint unsigned | YES      | NULL           | Eigenaar (gebruiker)    |
-| `season_id`      | bigint unsigned | NO       |                | Seizoen referentie      |
-| `opponent_id`    | bigint unsigned | NO       |                | Tegenstander            |
-| `home`           | tinyint(1)      | NO       |                | Thuis (1) of uit (0)    |
-| `goals_scored`   | int unsigned    | YES      | NULL           | Doelpunten gescoord     |
+| Kolom            | Type            | Nullable | Default        | Beschrijving             |
+| ---------------- | --------------- | -------- | -------------- | ------------------------ |
+| `id`             | bigint unsigned | NO       | AUTO_INCREMENT | Primary key              |
+| `user_id`        | bigint unsigned | YES      | NULL           | Eigenaar (gebruiker)     |
+| `season_id`      | bigint unsigned | NO       |                | Seizoen referentie       |
+| `opponent_id`    | bigint unsigned | NO       |                | Tegenstander             |
+| `home`           | tinyint(1)      | NO       |                | Thuis (1) of uit (0)     |
+| `goals_scored`   | int unsigned    | YES      | NULL           | Doelpunten gescoord      |
 | `goals_conceded` | int unsigned    | YES      | NULL           | Doelpunten tegengekregen |
-| `date`           | datetime        | NO       |                | Wedstrijddatum en tijd  |
-| `created_at`     | timestamp       | YES      | NULL           | Aanmaakdatum            |
-| `updated_at`     | timestamp       | YES      | NULL           | Laatste wijziging       |
+| `date`           | datetime        | NO       |                | Wedstrijddatum en tijd   |
+| `created_at`     | timestamp       | YES      | NULL           | Aanmaakdatum             |
+| `updated_at`     | timestamp       | YES      | NULL           | Laatste wijziging        |
 
 **Computed properties:**
 

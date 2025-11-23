@@ -126,5 +126,9 @@ return [
     'vvor' => [
         'maps' => 'https://maps.app.goo.gl/oBBodGTYQJxh9iKT7',
         'logo' => 'https://www.vvor.nl/wp-content/uploads/2015/05/vvor_logo1-188x200.png',
+    ],
+
+    'apiKeys' => [
+        'googlePlaces' => env('GOOGLE_PLACES_API_KEY')
     ]
 ];

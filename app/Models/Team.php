@@ -17,9 +17,7 @@ class Team extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'name',
-        'logo',
-        'maps_location',
+        'opponent_id',
         'invite_code',
     ];
 
@@ -68,9 +66,12 @@ class Team extends Model
     /**
      * Get the opponents for the team.
      */
-    public function opponents(): HasMany
+    /**
+     * Gekoppelde club (opponent) record.
+     */
+    public function opponent(): BelongsTo
     {
-        return $this->hasMany(Opponent::class);
+        return $this->belongsTo(Opponent::class);
     }
 
     /**

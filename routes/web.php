@@ -7,6 +7,7 @@ use App\Http\Controllers\FootballMatchController;
 use App\Http\Controllers\FormationController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\OpponentController;
+use App\Http\Controllers\Api\OpponentSearchController;
 use App\Http\Controllers\PlayerController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SeasonController;
@@ -15,6 +16,9 @@ use Illuminate\Support\Facades\Route;
 
 // Public home page
 Route::get('/', [HomeController::class, 'show'])->name('home');
+
+// Public opponents search (autocomplete endpoint)
+Route::get('/api/opponents', OpponentSearchController::class)->name('api.opponents');
 
 // Public team join routes (accessible without authentication)
 Route::get('/teams/join/{inviteCode}', [TeamController::class, 'showJoin'])->name('teams.join.show');
