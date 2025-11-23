@@ -41,29 +41,14 @@ class FetchClubs extends Command
         $skipped = 0;
         $lineNo = 0;
 
-        while (($row = fgetcsv($handle, 0, ',')) !== false) {
+        // Gebruik ; als delimiter (clubs.csv is nu ; gescheiden). Fallback als fgetcsv niets splitst.
+        while (($row = fgetcsv($handle, 0, ';')) !== false) {
             $lineNo++;
-            // Skip lege regels
-            if (count($row) < 2) {
-                $skipped++;
-                continue;
-            }
-            // Optioneel: header detectie
-            if ($lineNo === 1 && str_contains(strtolower(implode('|', $row)), 'club')) {
-                // Waarschijnlijk header
-                $this->line('Header gedetecteerd, overslaan.');
-                continue;
-            }
 
             [$name, $location, $kitRef] = array_pad($row, 3, null);
             $name = trim($name ?? '');
             $location = trim($location ?? '');
             $kitRef = trim($kitRef ?? '');
-
-            if ($name === '' || $location === '') {
-                $skipped++;
-                continue;
-            }
 
             $slug = Str::slug($name . '-' . $location);
 
@@ -85,6 +70,8 @@ class FetchClubs extends Command
                         $geo = $detailsResp->json('result.geometry.location');
                         $website = $detailsResp->json('result.website');
                     }
+                }else {
+                    $this->warn($query);
                 }
             } catch (\Throwable $e) {
                 $this->warn("[$slug] Fout bij Places API: " . $e->getMessage());
