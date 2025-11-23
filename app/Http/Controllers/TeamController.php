@@ -17,14 +17,15 @@ class TeamController extends Controller
     public function index()
     {
         $teams = auth()->user()->teams()
+            ->with(['opponent'])
             ->withCount('users')
             ->get()
             ->map(function ($team) {
                 $pivot = $team->pivot;
                 return [
                     'id' => $team->id,
-                    'name' => $team->name,
-                    'logo' => $team->logo,
+                    'name' => $team->opponent?->name,
+                    'logo' => $team->opponent?->logo,
                     'invite_code' => $team->invite_code,
                     'role' => $pivot->role,
                     'role_label' => 'Coach', //$pivot->role === 1 ? 'Hoofdcoach' : 'Assistent',
@@ -77,34 +78,18 @@ class TeamController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => [
-                'required',
-                'string',
-                'max:255',
-                function ($attribute, $value, $fail) {
-                    // Check if user is already member of a team with this name
-                    $exists = auth()->user()->teams()
-                        ->where('teams.name', $value)
-                        ->exists();
-
-                    if ($exists) {
-                        $fail('Je bent al lid van een team met deze naam.');
-                    }
-                },
-            ],
-            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'maps_location' => 'nullable|string|max:255',
+            'opponent_id' => ['required', 'integer', 'exists:opponents,id', function ($attribute, $value, $fail) {
+                $exists = auth()->user()->teams()->where('teams.opponent_id', $value)->exists();
+                if ($exists) {
+                    $fail('Je bent al lid van een team voor deze club.');
+                }
+            }],
         ]);
 
-        // Handle logo upload
-        if ($request->hasFile('logo')) {
-            $validated['logo'] = $request->file('logo')->store('logos', 'public');
-        }
-
-        // Generate invite code for team
-        $validated['invite_code'] = Str::random(64);
-
-        $team = Team::create($validated);
+        $team = Team::create([
+            'opponent_id' => $validated['opponent_id'],
+            'invite_code' => Str::random(64),
+        ]);
 
         // Attach user as hoofdcoach
         // If this is user's first team, make it default
@@ -141,36 +126,18 @@ class TeamController extends Controller
         \Gate::authorize('update', $team);
 
         $validated = $request->validate([
-            'name' => [
-                'required',
-                'string',
-                'max:255',
-                function ($attribute, $value, $fail) use ($team) {
-                    // Check if user is already member of a team with this name (excluding current team)
-                    $exists = auth()->user()->teams()
-                        ->where('teams.name', $value)
-                        ->where('teams.id', '!=', $team->id)
-                        ->exists();
-
-                    if ($exists) {
-                        $fail('Je bent al lid van een team met deze naam.');
-                    }
-                },
-            ],
-            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'maps_location' => 'nullable|string|max:255',
+            'opponent_id' => ['required', 'integer', 'exists:opponents,id', function ($attribute, $value, $fail) use ($team) {
+                $exists = auth()->user()->teams()
+                    ->where('teams.opponent_id', $value)
+                    ->where('teams.id', '!=', $team->id)
+                    ->exists();
+                if ($exists) {
+                    $fail('Je bent al lid van een team voor deze club.');
+                }
+            }],
         ]);
 
-        // Handle logo upload
-        if ($request->hasFile('logo')) {
-            // Delete old logo if exists
-            if ($team->logo) {
-                \Storage::disk('public')->delete($team->logo);
-            }
-            $validated['logo'] = $request->file('logo')->store('logos', 'public');
-        }
-
-        $team->update($validated);
+        $team->update(['opponent_id' => $validated['opponent_id']]);
 
         return redirect()->route('teams.index')
             ->with('success', 'Team succesvol bijgewerkt!');
@@ -186,7 +153,7 @@ class TeamController extends Controller
         session(['current_team_id' => $team->id]);
 
         return redirect()->back()
-            ->with('success', "Je werkt nu in team: {$team->name}");
+            ->with('success', "Je werkt nu in team: {$team->opponent?->name}");
     }
 
     /**
@@ -210,7 +177,7 @@ class TeamController extends Controller
         });
 
         return redirect()->route('teams.index')
-            ->with('success', "{$team->name} is nu je standaard team.");
+            ->with('success', "{$team->opponent?->name} is nu je standaard team.");
     }
 
     /**
@@ -228,15 +195,15 @@ class TeamController extends Controller
             return redirect()->route('register')
                 ->with('team_invite', [
                     'code' => $inviteCode,
-                    'team_name' => $team->name,
-                    'team_logo' => $team->logo,
+                    'team_name' => $team->opponent?->name,
+                    'team_logo' => $team->opponent?->logo,
                 ]);
         }
 
         // Check if user is already a member
         if (auth()->user()->isMemberOf($team)) {
             return redirect()->route('teams.index')
-                ->with('info', "Je bent al lid van {$team->name}.");
+                ->with('info', "Je bent al lid van {$team->opponent?->name}.");
         }
 
         return view('teams.join', compact('team', 'inviteCode'));
@@ -269,7 +236,7 @@ class TeamController extends Controller
         session(['current_team_id' => $team->id]);
 
         return redirect()->route('teams.index')
-            ->with('success', "Je bent nu lid van {$team->name}!");
+            ->with('success', "Je bent nu lid van {$team->opponent?->name}!");
     }
 
     /**

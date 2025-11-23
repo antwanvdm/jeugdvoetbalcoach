@@ -40,29 +40,7 @@
                 <x-input-label for="club_search" value="Zoek club (autocomplete)" />
                 <input id="club_search" data-opponent-autocomplete data-target-hidden="opponent_id" type="text" class="block mt-1 w-full border-gray-300 rounded-md shadow-sm" placeholder="Begin te typen..." autocomplete="off">
                 <input type="hidden" name="opponent_id" id="opponent_id" value="{{ old('opponent_id') }}">
-                <p class="mt-2 text-xs text-gray-500">Selecteer een bestaande club uit de landelijke database. (Velden Team Naam / Locatie / Logo verdwijnen na migratie)</p>
                 <x-input-error :messages="$errors->get('opponent_id')" class="mt-2" />
-            </div>
-
-            <!-- Team Naam (legacy totdat migratie actief is) -->
-            <div>
-                <x-input-label for="team_name" value="Team Naam (legacy)" />
-                <x-text-input id="team_name" class="block mt-1 w-full" type="text" name="team_name" :value="old('team_name')" />
-                <x-input-error :messages="$errors->get('team_name')" class="mt-2" />
-            </div>
-
-            <!-- Maps locatie (legacy) -->
-            <div>
-                <x-input-label for="maps_location" value="Maps locatie (legacy)" />
-                <x-text-input id="maps_location" class="block mt-1 w-full" type="text" name="maps_location" :value="old('maps_location')" />
-                <x-input-error :messages="$errors->get('maps_location')" class="mt-2" />
-            </div>
-
-            <!-- Logo (legacy) -->
-            <div>
-                <x-input-label for="logo" value="Team Logo (legacy)" />
-                <input id="logo" class="block mt-1 w-full border-gray-300 rounded-md shadow-sm" type="file" name="logo" accept="image/*" />
-                <x-input-error :messages="$errors->get('logo')" class="mt-2" />
             </div>
         @endunless
 

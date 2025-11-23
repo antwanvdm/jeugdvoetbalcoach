@@ -43,23 +43,15 @@ class RegisteredUserController extends Controller
         
         // Only require team fields if not joining via invite
         if (!$hasPendingInvite) {
-            $rules['team_name'] = ['required', 'string', 'max:255'];
-            $rules['maps_location'] = ['required', 'string', 'max:2048'];
-            $rules['logo'] = ['required', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'];
+            $rules['opponent_id'] = ['required', 'integer', 'exists:opponents,id'];
         }
         
         $request->validate($rules);
 
         // Check if registering via invite
         $hasPendingInvite = session()->has('pending_team_invite');
-        $logoPath = null;
-        
-        // Only process logo if provided
-        if ($request->hasFile('logo')) {
-            $logoPath = $request->file('logo')->store('logos', 'public');
-        }
 
-        DB::transaction(function () use ($request, $logoPath, $hasPendingInvite, &$user) {
+        DB::transaction(function () use ($request, $hasPendingInvite, &$user) {
             // Create user
             $user = User::create([
                 'name' => $request->name,
@@ -73,9 +65,7 @@ class RegisteredUserController extends Controller
             if (!$hasPendingInvite) {
                 // Create team
                 $team = Team::create([
-                    'name' => $request->team_name,
-                    'maps_location' => $request->maps_location,
-                    'logo' => $logoPath,
+                    'opponent_id' => (int) $request->opponent_id,
                     'invite_code' => Str::random(64),
                 ]);
 

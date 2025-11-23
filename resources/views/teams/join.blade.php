@@ -11,13 +11,13 @@
                 <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
                     <div class="flex items-center justify-between">
                         <div>
-                            <h2 class="text-2xl font-semibold text-blue-900">{{ $team->name }}</h2>
-                            @if($team->maps_location)
-                                <p class="text-sm text-blue-700 mt-1">{{ $team->maps_location }}</p>
+                            <h2 class="text-2xl font-semibold text-blue-900">{{ $team->opponent?->name }}</h2>
+                            @if($team->opponent?->location)
+                                <p class="text-sm text-blue-700 mt-1">{{ $team->opponent->location }}</p>
                             @endif
                         </div>
-                        @if($team->logo)
-                            <img src="{{ asset('storage/' . $team->logo) }}" alt="{{ $team->name }}" class="h-16 w-16 object-contain">
+                        @if($team->opponent?->logo)
+                            <img src="{{ asset('storage/' . $team->opponent->logo) }}" alt="{{ $team->opponent->name }}" class="h-16 w-16 object-contain">
                         @endif
                     </div>
                 </div>

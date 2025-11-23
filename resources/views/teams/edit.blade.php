@@ -1,36 +1,25 @@
 <x-app-layout>
     <h1 class="text-2xl font-semibold mb-4">Team Bewerken</h1>
-    <form action="{{ route('teams.update', $team) }}" method="POST" enctype="multipart/form-data" class="bg-white p-4 shadow rounded max-w-lg">
+    <form action="{{ route('teams.update', $team) }}" method="POST" class="bg-white p-4 shadow rounded max-w-lg">
         @csrf
         @method('PUT')
 
         <div class="mb-3">
-            <label class="block text-sm font-medium mb-1">Team Naam</label>
-            <input type="text" name="name" value="{{ old('name', $team->name) }}" class="w-full border rounded p-2" required>
-            @error('name')
-                <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-            @enderror
-        </div>
-
-        <div class="mb-3">
-            <label class="block text-sm font-medium mb-1">Logo</label>
-            @if($team->logo)
-                <div class="mb-2">
-                    <img src="{{ asset('storage/' . $team->logo) }}" alt="{{ $team->name }}" class="h-20 w-20 object-contain">
-                    <p class="text-xs text-gray-600 mt-1">Huidig logo</p>
+            <label class="block text-sm font-medium mb-1">Gekoppelde Club</label>
+            <div class="flex items-center gap-3 mb-2">
+                @if($team->opponent?->logo)
+                    <img src="{{ asset('storage/' . $team->opponent->logo) }}" alt="{{ $team->opponent->name }}" class="h-10 w-10 object-contain">
+                @endif
+                <div>
+                    <div class="font-semibold">{{ $team->opponent?->name ?? '—' }}</div>
+                    @if($team->opponent?->location)
+                        <div class="text-xs text-gray-600">{{ $team->opponent->location }}</div>
+                    @endif
                 </div>
-            @endif
-            <input type="file" name="logo" accept="image/*" class="w-full border rounded p-2">
-            <p class="text-xs text-gray-600 mt-1">Laat leeg om het huidige logo te behouden</p>
-            @error('logo')
-                <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-            @enderror
-        </div>
-
-        <div class="mb-3">
-            <label class="block text-sm font-medium mb-1">Locatie</label>
-            <input type="text" name="maps_location" value="{{ old('maps_location', $team->maps_location) }}" class="w-full border rounded p-2">
-            @error('maps_location')
+            </div>
+            <input type="text" data-opponent-autocomplete data-target-hidden="opponent_id" class="w-full border rounded p-2" placeholder="Zoek en kies een andere club..." autocomplete="off">
+            <input type="hidden" name="opponent_id" id="opponent_id" value="{{ old('opponent_id', $team->opponent_id) }}">
+            @error('opponent_id')
                 <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
             @enderror
         </div>

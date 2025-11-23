@@ -65,7 +65,7 @@
                         <time class="text-sm">{{ $nextMatch->date?->translatedFormat('j F Y H:i') }}</time>
                         <div class="mt-2 flex-1 flex justify-center items-center gap-4 @if(!$nextMatch->home) flex-row-reverse @endif">
                             <div class="flex-12 flex @if($nextMatch->home) justify-end @endif">
-                                <img src="{{ asset('storage/' . $nextMatch->team->logo) }}" alt="{{ $nextMatch->team->name }} Logo" class="h-28">
+                                <img src="{{ asset('storage/' . $nextMatch->team->opponent->logo) }}" alt="{{ $nextMatch->team->name }} Logo" class="h-28">
                             </div>
                             <div class="flex-1">
                                 -

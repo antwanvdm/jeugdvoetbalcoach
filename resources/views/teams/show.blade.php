@@ -2,13 +2,13 @@
     <div class="max-w-4xl">
         <div class="flex items-center justify-between mb-6">
             <div class="flex items-center gap-4">
-                @if($team->logo)
-                    <img src="{{ asset('storage/' . $team->logo) }}" alt="{{ $team->name }}" class="h-16 w-16 object-contain">
+                @if($team->opponent?->logo)
+                    <img src="{{ asset('storage/' . $team->opponent->logo) }}" alt="{{ $team->opponent->name }}" class="h-16 w-16 object-contain">
                 @endif
                 <div>
-                    <h1 class="text-3xl font-bold">{{ $team->name }}</h1>
-                    @if($team->maps_location)
-                        <p class="text-gray-600 mt-1">📍 <a class="text-blue-600 hover:underline" target="_blank" href="{{ $team->maps_location }}">Google Maps</a></p>
+                    <h1 class="text-3xl font-bold">{{ $team->opponent?->name }}</h1>
+                    @if($team->opponent)
+                        <p class="text-gray-600 mt-1">📍 <a class="text-blue-600 hover:underline" target="_blank" href="{{ $team->opponent->location_maps_link }}">Google Maps</a></p>
                     @endif
                 </div>
             </div>
