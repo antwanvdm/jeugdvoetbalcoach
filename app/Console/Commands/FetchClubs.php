@@ -38,12 +38,10 @@ class FetchClubs extends Command
 
         $inserted = 0;
         $updated = 0;
-        $skipped = 0;
-        $lineNo = 0;
 
         // Gebruik ; als delimiter (clubs.csv is nu ; gescheiden). Fallback als fgetcsv niets splitst.
         while (($row = fgetcsv($handle, 0, ';')) !== false) {
-            $lineNo++;
+            $row = $this->stripBom($row);
 
             [$name, $location, $kitRef] = array_pad($row, 3, null);
             $name = trim($name ?? '');
@@ -77,8 +75,8 @@ class FetchClubs extends Command
                 $this->warn("[$slug] Fout bij Places API: " . $e->getMessage());
             }
 
-            $latitude = $geo['lat'] ?? null;
-            $longitude = $geo['lng'] ?? null;
+            $latitude = $geo['lat'] ?? 0.0;
+            $longitude = $geo['lng'] ?? 0.0;
 
             // Logo scraping
             $logoPathRelative = null;
@@ -132,7 +130,7 @@ class FetchClubs extends Command
 
         fclose($handle);
 
-        $this->info("Klaar. Nieuw: $inserted | Bijgewerkt: $updated | Overgeslagen: $skipped");
+        $this->info("Klaar. Nieuw: $inserted | Bijgewerkt: $updated");
         return self::SUCCESS;
     }
 
@@ -206,5 +204,15 @@ class FetchClubs extends Command
             return strtolower($m[1] === 'jpeg' ? 'jpg' : $m[1]);
         }
         return 'png';
+    }
+
+    private function stripBom(?string $value): ?string
+    {
+        if ($value === null) return null;
+        // UTF-8 BOM bytes EF BB BF
+        if (str_starts_with($value, "\xEF\xBB\xBF")) {
+            return substr($value, 3);
+        }
+        return $value;
     }
 }
