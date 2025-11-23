@@ -6,8 +6,8 @@
                     @php
                         $currentTeam = \App\Models\Team::find(session('current_team_id'));
                     @endphp
-                    @if($currentTeam && $currentTeam->logo)
-                        <img src="{{ asset('storage/' . $currentTeam->logo) }}" alt="{{ $currentTeam->name }} Logo" class="h-12">
+                    @if($currentTeam && $currentTeam->opponent->logo)
+                        <img src="{{ asset('storage/' . $currentTeam->opponent->logo) }}" alt="{{ $currentTeam->opponent->name }} Logo" class="h-12">
                     @else
                         <img src="{{Vite::asset('resources/images/logo.jpg')}}" alt="Logo" class="h-12">
                     @endif
@@ -24,7 +24,7 @@
                                 @php
                                     $currentTeam = \App\Models\Team::find(session('current_team_id'));
                                 @endphp
-                                <span>{{ $currentTeam ? $currentTeam->name : 'Selecteer team' }}</span>
+                                <span>{{ $currentTeam ? $currentTeam->opponent->name : 'Selecteer team' }}</span>
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                                 </svg>
@@ -35,7 +35,7 @@
                                         <form method="POST" action="{{ route('teams.switch', $team) }}">
                                             @csrf
                                             <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {{ session('current_team_id') == $team->id ? 'bg-gray-50 font-semibold' : '' }}">
-                                                {{ $team->name }}
+                                                {{ $team->opponent->name }}
                                                 @if(session('current_team_id') == $team->id)
                                                     <span class="text-indigo-600">✓</span>
                                                 @endif
@@ -109,7 +109,7 @@
                         <form method="POST" action="{{ route('teams.switch', $team) }}">
                             @csrf
                             <button type="submit" class="block w-full text-left py-1.5 px-2 rounded-md text-sm {{ session('current_team_id') == $team->id ? 'bg-indigo-50 text-indigo-700 font-semibold' : 'text-gray-700 hover:bg-gray-100' }}">
-                                {{ $team->name }}
+                                {{ $team->opponent->name }}
                                 @if(session('current_team_id') == $team->id)
                                     <span class="text-indigo-600">✓</span>
                                 @endif
