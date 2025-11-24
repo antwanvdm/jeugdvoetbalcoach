@@ -8,16 +8,6 @@
             <input type="text" id="opponent_search" data-opponent-autocomplete data-target-hidden="opponent_id" class="w-full border rounded p-2" placeholder="Typ clubnaam..." autocomplete="off">
             <input type="hidden" name="opponent_id" id="opponent_id" value="{{ old('opponent_id') }}">
             <p class="mt-1 text-xs text-gray-500">Begin te typen om een club uit de landelijke database te selecteren.</p>
-            <noscript class="text-xs text-red-600">Javascript uitgeschakeld: gebruik de fallback-select hieronder.</noscript>
-        </div>
-        <div class="mb-3" id="opponent-select-fallback">
-            <label class="block text-sm font-medium mb-1">Tegenstander (fallback)</label>
-            <select name="opponent_id_fallback" class="w-full border rounded p-2">
-                <option value="">-- Kies tegenstander --</option>
-                @foreach($opponents as $id => $name)
-                    <option value="{{ $id }}" @selected(old('opponent_id')==$id)>{{ $name }}</option>
-                @endforeach
-            </select>
         </div>
 
         <div class="mb-3">
