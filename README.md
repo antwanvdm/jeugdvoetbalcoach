@@ -4,71 +4,72 @@ Een intelligente teammanagement applicatie voor voetbalverenigingen, gebouwd met
 
 ## 🎯 Over dit project
 
-VVOR Team Manager is ontwikkeld voor voetbalverenigingen die hun teammanagement willen professionaliseren. De applicatie neemt het tijdrovende werk van het maken van line-ups uit handen en zorgt voor eerlijke rotatie en optimale teambalans. Met de recente multi-team uitbreidingen kun je nu meerdere coaches aan één team koppelen en werken met uitnodigingscodes.
+VVOR Team Manager is ontwikkeld voor voetbalverenigingen die hun teammanagement willen professionaliseren. De applicatie neemt het tijdrovende werk van het maken van line-ups uit handen en zorgt voor eerlijke rotatie en optimale teambalans. Met de
+recente multi-team uitbreidingen kun je nu meerdere coaches aan één team koppelen en werken met uitnodigingscodes.
 
 ### 👥 Multi-user & Multi-Team Support
 
 De applicatie ondersteunt meerdere teams en gebruikers met een robuust autorisatiesysteem:
 
--   **Admin rol**: Volledig toegang, beheert globale formaties en gebruikers
--   **Hoofdcoach / Assistent**: Teamrollen via pivot (`team_user`) met autorisatie
--   **Invite codes**: Teams genereren een unieke `invite_code` waarmee andere coaches kunnen joinen
--   **Data isolatie**: Elke gebruiker ziet alleen data van zijn teams
--   **Meerdere teams**: Gebruikers kunnen aan meerdere teams gekoppeld worden en een standaard team instellen
--   **Globale formaties**: Standaard formaties (2-1-2, 3-2-2, 4-3-3) beschikbaar voor alle gebruikers
--   **Policy-based autorisatie**: Laravel Policies voor granulaire toegangscontrole
+- **Admin rol**: Volledig toegang, beheert globale formaties en gebruikers
+- **Hoofdcoach / Assistent**: Teamrollen via pivot (`team_user`) met autorisatie
+- **Invite codes**: Teams genereren een unieke `invite_code` waarmee andere coaches kunnen joinen
+- **Data isolatie**: Elke gebruiker ziet alleen data van zijn teams
+- **Meerdere teams**: Gebruikers kunnen aan meerdere teams gekoppeld worden en een standaard team instellen
+- **Globale formaties**: Standaard formaties (2-1-2, 3-2-2, 4-3-3) beschikbaar voor alle gebruikers
+- **Policy-based autorisatie**: Laravel Policies voor granulaire toegangscontrole
 
 ### ✨ Kernfunctionaliteiten
 
 **🏆 Intelligente Line-up Generatie**
 
--   Automatische opstelling voor 4 kwarten per wedstrijd
--   Slimme keeperrotatie (voorkomt herhaling van vorige wedstrijd)
--   Geavanceerde spelersverdeling op basis van fysieke eigenschappen
--   Dynamische formatie vanuit het seizoen (bijv. 2-1-2, 3-2-2, 4-3-3) en/of `total_players`
+- Automatische opstelling voor 4 kwarten per wedstrijd
+- Slimme keeperrotatie (voorkomt herhaling van vorige wedstrijd)
+- Geavanceerde spelersverdeling op basis van fysieke eigenschappen
+- Dynamische formatie vanuit het seizoen (bijv. 2-1-2, 3-2-2, 4-3-3) en/of `total_players`
 
 **⚖️ Eerlijke Speeltijdverdeling**
 
--   Per kwart exact het aantal spelers op het veld dat de formatie vereist (`desiredOnField`), zolang het teamgrootte dat toelaat
--   Bankbehoefte per kwart: `teamSize - desiredOnField`
--   Keepers: ieder 1x bank (niet in hun keeperkwart)
--   Niet-keepers: resterende bankplekken evenwichtig verdeeld over de kwarten (geen hard-coded patronen)
--   Historische tracking van keeperbeurten en weight-balancing om clustering te voorkomen
+- Per kwart exact het aantal spelers op het veld dat de formatie vereist (`desiredOnField`), zolang het teamgrootte dat toelaat
+- Bankbehoefte per kwart: `teamSize - desiredOnField`
+- Keepers: ieder 1x bank (niet in hun keeperkwart)
+- Niet-keepers: resterende bankplekken evenwichtig verdeeld over de kwarten (geen hard-coded patronen)
+- Historische tracking van keeperbeurten en weight-balancing om clustering te voorkomen
 
 **📊 Uitgebreide Statistieken**
 
--   Keeper statistieken per speler
--   Speeltijd overzichten per wedstrijd
--   Fysieke verdeling tracking
--   Wedstrijd historie en resultaten
+- Keeper statistieken per speler
+- Speeltijd overzichten per wedstrijd
+- Fysieke verdeling tracking
+- Wedstrijd historie en resultaten
 
 **💼 Beheer & Administratie**
 
--   Multi-team structuur met rolverdeling (hoofdcoach/assistent)
--   Gebruikersbeheer met rollen en teamprofielen
--   Spelersbeheer met posities en fysieke eigenschappen
--   Tegenstander administratie
--   Wedstrijd planning en resultaten
--   Handmatige line-up aanpassingen mogelijk
--   Admin dashboard voor gebruikers-, positie- en globale formatiebeheer
--   Uitnodigingscodes voor snelle teamtoetreding
+- Multi-team structuur met rolverdeling (hoofdcoach/assistent)
+- Gebruikersbeheer met rollen en teamprofielen
+- Spelersbeheer met posities en fysieke eigenschappen
+- Tegenstander administratie
+- Wedstrijd planning en resultaten
+- Handmatige line-up aanpassingen mogelijk
+- Admin dashboard voor gebruikers-, positie- en globale formatiebeheer
+- Uitnodigingscodes voor snelle teamtoetreding
 
 **🔒 Beveiliging & Autorisatie**
 
--   Laravel Breeze authenticatie
--   Role-based access control (Admin/User)
--   Policy-based autorisatie voor alle resources
--   Data isolatie per gebruiker
--   Actieve/inactieve gebruikers beheer
+- Laravel Breeze authenticatie
+- Role-based access control (Admin/User)
+- Policy-based autorisatie voor alle resources
+- Data isolatie per gebruiker
+- Actieve/inactieve gebruikers beheer
 
 ## 🚀 Aan de slag
 
 ### Vereisten
 
--   PHP 8.4 of hoger
--   Composer
--   Node.js & NPM
--   SQLite/MySQL database
+- PHP 8.4 of hoger
+- Composer
+- Node.js & NPM
+- SQLite/MySQL database
 
 ### Installatie
 
@@ -121,16 +122,16 @@ Ga naar `http://localhost:8000` om de applicatie te gebruiken.
 
 Bij het seeden worden deze basisgegevens aangemaakt voor een snelle start:
 
--   **Users** (Admin & 1 default user):
-    -   1 Keeper, 2 Verdediger, 3 Middenvelder, 4 Aanvaller
--   **Positions** (met vaste IDs):
-    -   1 Keeper, 2 Verdediger, 3 Middenvelder, 4 Aanvaller
--   **Formations** (globale presets):
-    -   6 spelers: `2-1-2`
-    -   8 spelers: `3-2-2`
-    -   11 spelers: `4-3-3`
--   **Opponents**: Globale tegenstanders (gedeeld tussen alle teams)
--   **Players**: 8 fake spelers
+- **Users** (Admin & 1 default user):
+    - 1 Keeper, 2 Verdediger, 3 Middenvelder, 4 Aanvaller
+- **Positions** (met vaste IDs):
+    - 1 Keeper, 2 Verdediger, 3 Middenvelder, 4 Aanvaller
+- **Formations** (globale presets):
+    - 6 spelers: `2-1-2`
+    - 8 spelers: `3-2-2`
+    - 11 spelers: `4-3-3`
+- **Opponents**: Globale tegenstanders (gedeeld tussen alle teams)
+- **Players**: 8 fake spelers
 
 Commands:
 
@@ -147,48 +148,48 @@ php artisan clubs:fetch
 
 ### Technische Stack
 
--   **Framework**: Laravel 11
--   **Authenticatie**: Laravel Breeze
--   **Frontend**: Blade templates met Tailwind CSS (Vite + Tailwind v4)
--   **Database**: SQLite/MySQL met Eloquent ORM
--   **Autorisatie**: Laravel Policies
--   **Testing**: Pest PHP
+- **Framework**: Laravel 11
+- **Authenticatie**: Laravel Breeze
+- **Frontend**: Blade templates met Tailwind CSS (Vite + Tailwind v4)
+- **Database**: SQLite/MySQL met Eloquent ORM
+- **Autorisatie**: Laravel Policies
+- **Testing**: Pest PHP
 
 ### Belangrijkste Components
 
 **LineupGeneratorService** - Kernservice voor line-up generatie
 
--   Intelligente keeper selectie algoritmes
--   Weight-balancing voor fysieke verdeling
--   Immutable data operations voor betrouwbaarheid
--   Uitgebreide logging en debugging
+- Intelligente keeper selectie algoritmes
+- Weight-balancing voor fysieke verdeling
+- Immutable data operations voor betrouwbaarheid
+- Uitgebreide logging en debugging
 
 **Models & Database**
 
--   `Team` - Teams met invite code en opponent koppeling (meerdere coaches via pivot)
--   `User` - Gebruikers met rollen (admin/user), gekoppeld aan teams via `team_user`
--   `Player` - Spelers met posities en fysieke eigenschappen (per team)
--   `FootballMatch` - Wedstrijden met tegenstanders en resultaten
--   `Position` - Keeper, Verdediger, Middenvelder, Aanvaller (globaal)
--   `Opponent` - Globale tegenstanders met naam, locatie, logo, coördinaten en kit referentie
--   `Formation` - Formaties (globaal of per team)
--   `Season` - Seizoenen gekoppeld aan team en formatie
+- `Team` - Teams met invite code en opponent koppeling (meerdere coaches via pivot)
+- `User` - Gebruikers met rollen (admin/user), gekoppeld aan teams via `team_user`
+- `Player` - Spelers met posities en fysieke eigenschappen (per team)
+- `FootballMatch` - Wedstrijden met tegenstanders en resultaten
+- `Position` - Keeper, Verdediger, Middenvelder, Aanvaller (globaal)
+- `Opponent` - Globale tegenstanders met naam, locatie, logo, coördinaten en kit referentie
+- `Formation` - Formaties (globaal of per team)
+- `Season` - Seizoenen gekoppeld aan team en formatie
 
 **Policies & Autorisatie**
 
--   `PlayerPolicy` - Controleert toegang tot eigen spelers
--   `FormationPolicy` - Admin kan alles, users alleen eigen/globale formaties
--   `SeasonPolicy` - Toegang tot eigen seizoenen
--   `OpponentPolicy` - Toegang tot eigen tegenstanders
--   `FootballMatchPolicy` - Toegang tot eigen wedstrijden
--   `IsAdmin` middleware - Beschermt admin-only routes
+- `PlayerPolicy` - Controleert toegang tot eigen spelers
+- `FormationPolicy` - Admin kan alles, users alleen eigen/globale formaties
+- `SeasonPolicy` - Toegang tot eigen seizoenen
+- `OpponentPolicy` - Toegang tot eigen tegenstanders
+- `FootballMatchPolicy` - Toegang tot eigen wedstrijden
+- `IsAdmin` middleware - Beschermt admin-only routes
 
 ### Code Kwaliteit
 
--   Clean Architecture principes
--   SOLID design patterns
--   Comprehensive testing suite
--   PSR-4 autoloading standaard
+- Clean Architecture principes
+- SOLID design patterns
+- Comprehensive testing suite
+- PSR-4 autoloading standaard
 
 ## 📈 Hoe het werkt
 
@@ -222,22 +223,22 @@ php artisan clubs:fetch
 **🧠 Weight Balancing**
 Voorkomt dat 5 spelers met fysiek niveau 1 tegelijk spelen door:
 
--   Penalty system voor clustering (>2 gelijk = zwaar gestraft)
--   Distributie optimalisatie over kwarten
--   Kandidaat selectie op basis van balans impact
+- Penalty system voor clustering (>2 gelijk = zwaar gestraft)
+- Distributie optimalisatie over kwarten
+- Kandidaat selectie op basis van balans impact
 
 **🔄 Keeper Rotatie**
 Intelligente keeper verdeling die:
 
--   Laatste wedstrijd keepers excludeert
--   Historische counts balanceert
--   Fair play principes hanteert
+- Laatste wedstrijd keepers excludeert
+- Historische counts balanceert
+- Fair play principes hanteert
 
 **📊 Real-time Monitoring**
 
--   Uitgebreide logging voor troubleshooting (zet `APP_DEBUG=true`)
--   Performance metrics en query optimalisatie
--   Debug mode voor development
+- Uitgebreide logging voor troubleshooting (zet `APP_DEBUG=true`)
+- Performance metrics en query optimalisatie
+- Debug mode voor development
 
 ## 🛠️ Development
 
@@ -282,13 +283,14 @@ php artisan make:migration create_example_table
 
 ## 📝 Documentatie
 
--   [LineupGeneratorService](docs/LineupGeneratorService.md) - Uitgebreide service documentatie
--   [Database Schema](docs/database-schema.md) - Database structuur en relaties
--   Publieke homepage layout & component structuur (zie sectie hieronder)
+- [LineupGeneratorService](docs/LineupGeneratorService.md) - Uitgebreide service documentatie
+- [Database Schema](docs/database-schema.md) - Database structuur en relaties
+- Publieke homepage layout & component structuur (zie sectie hieronder)
 
 ## 🌐 Publieke Homepage
 
-De publieke homepage is gemoderniseerd met een hero sectie (full-width background image + gradient overlay), een features grid, "Hoe het werkt" stappen, een voorbeeld (screenshot placeholder) en een duidelijke call-to-action. Alle secties zijn opgebouwd met Tailwind utility classes voor snelle aanpasbaarheid.
+De publieke homepage is gemoderniseerd met een hero sectie (full-width background image + gradient overlay), een features grid, "Hoe het werkt" stappen, een voorbeeld (screenshot placeholder) en een duidelijke call-to-action. Alle secties zijn
+opgebouwd met Tailwind utility classes voor snelle aanpasbaarheid.
 
 ### Secties
 
@@ -300,15 +302,15 @@ De publieke homepage is gemoderniseerd met een hero sectie (full-width backgroun
 
 ### Aanpasbare onderdelen
 
--   Achtergrondafbeelding aanpasbaar via inline style of via een class in `app.css`.
--   Iconen kunnen vervangen worden door SVG's in `resources/views/components`.
--   Extra secties kunnen eenvoudig toegevoegd worden als nieuwe `<section>` blokken.
+- Achtergrondafbeelding aanpasbaar via inline style of via een class in `app.css`.
+- Iconen kunnen vervangen worden door SVG's in `resources/views/components`.
+- Extra secties kunnen eenvoudig toegevoegd worden als nieuwe `<section>` blokken.
 
 ### Toekomstige uitbreidingen
 
--   Dynamische testimonials (JSON feed / database)
--   Live statistiek preview (keeperrotatie / speeltijd grafiek)
--   Interactie animaties (Framer Motion via React/Vite optioneel)
+- Dynamische testimonials (JSON feed / database)
+- Live statistiek preview (keeperrotatie / speeltijd grafiek)
+- Interactie animaties (Framer Motion via React/Vite optioneel)
 
 ## 🤝 Bijdragen
 
