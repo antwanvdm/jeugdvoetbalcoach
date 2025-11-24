@@ -12,28 +12,32 @@
     <link rel="manifest" href="{{asset('favicons/site.webmanifest')}}"/>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="bg-gray-100 text-gray-900">
+<body class="bg-gray-100 text-gray-900 flex flex-col min-h-screen">
 <x-nav></x-nav>
 
-<main class="@if(request()->route()->getName() !== 'home') max-w-5xl px-4 mb-4 mt-6 @endif mx-auto {{str_replace('.', '-', request()->route()->getName())}}">
-    @if(session('success'))
-        <div class="mb-4 p-3 rounded bg-green-100 text-green-800">
-            {{ session('success') }}
-        </div>
-    @endif
+<div class="flex-grow mb-4">
+    <main class="@if(request()->route()->getName() !== 'home') max-w-5xl px-4 mb-4 mt-6 @else w-full @endif mx-auto {{str_replace('.', '-', request()->route()->getName())}}">
+        @if(session('success'))
+            <div class="mb-4 p-3 rounded bg-green-100 text-green-800">
+                {{ session('success') }}
+            </div>
+        @endif
 
-    @if ($errors->any())
-        <div class="mb-4 p-3 rounded bg-red-100 text-red-800">
-            <div class="font-semibold mb-2">Er zijn problemen met je invoer:</div>
-            <ul class="list-disc list-inside">
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
+        @if ($errors->any())
+            <div class="mb-4 p-3 rounded bg-red-100 text-red-800">
+                <div class="font-semibold mb-2">Er zijn problemen met je invoer:</div>
+                <ul class="list-disc list-inside">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
 
-    {{ $slot }}
-</main>
+        {{ $slot }}
+    </main>
+</div>
+
+<x-footer></x-footer>
 </body>
 </html>

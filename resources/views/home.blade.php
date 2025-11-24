@@ -84,7 +84,7 @@
         </div>
     </section>
 
-    <!-- Call To Action Footer -->
+    <!-- Call To Action -->
     <section class="mx-auto bg-blue-600 px-8 py-10 text-center shadow-md">
         <h2 class="text-2xl font-bold text-white mb-3">Start vandaag nog</h2>
         <p class="text-blue-100 mb-6 max-w-xl mx-auto">Maak gratis een account aan, nodig assistent-coaches uit en ervaar directe structuur in je wedstrijdvoorbereiding.</p>
