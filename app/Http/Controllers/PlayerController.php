@@ -20,6 +20,12 @@ class PlayerController extends Controller
         Gate::authorize('viewAny', Player::class);
 
         $seasons = Season::orderByDesc('year')->orderByDesc('part')->get();
+
+        // Check if there are any seasons
+        if ($seasons->isEmpty()) {
+            return view('players.no-season');
+        }
+
         $activeSeason = Season::getCurrent($seasons);
         $seasonId = $request->query('season_id') ?? ($activeSeason?->id ?? null);
 
@@ -75,7 +81,7 @@ class PlayerController extends Controller
             $player->seasons()->sync($seasonIds);
         }
 
-        return redirect()->route('players.show', $player)->with('success', 'Speler aangemaakt.');
+        return redirect()->route('players.index')->with('success', 'Speler aangemaakt.');
     }
 
     /**

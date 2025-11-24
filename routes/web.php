@@ -6,6 +6,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FootballMatchController;
 use App\Http\Controllers\FormationController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\OpponentController;
 use App\Http\Controllers\Api\OpponentSearchController;
 use App\Http\Controllers\PlayerController;
@@ -28,6 +29,11 @@ Route::post('/teams/join/{inviteCode}', [TeamController::class, 'join'])->middle
 Route::middleware(['auth'])->group(function () {
     // Dashboard (renamed from home)
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Onboarding wizard
+    Route::get('/onboarding', [OnboardingController::class, 'index'])->name('onboarding.index');
+    Route::post('/onboarding/complete', [OnboardingController::class, 'complete'])->name('onboarding.complete');
+    Route::post('/onboarding/skip', [OnboardingController::class, 'skip'])->name('onboarding.skip');
 
     // Profile routes
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

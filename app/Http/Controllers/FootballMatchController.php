@@ -23,6 +23,12 @@ class FootballMatchController extends Controller
         Gate::authorize('viewAny', FootballMatch::class);
 
         $seasons = Season::orderByDesc('year')->orderByDesc('part')->get();
+        
+        // Check if there are any seasons
+        if ($seasons->isEmpty()) {
+            return view('football_matches.no-season');
+        }
+        
         $activeSeason = Season::getCurrent($seasons);
 
         $seasonId = $request->query('season_id') ?? ($activeSeason?->id ?? null);
@@ -41,6 +47,11 @@ class FootballMatchController extends Controller
     public function create(): View
     {
         Gate::authorize('create', FootballMatch::class);
+
+        // Require at least one player in the current team before creating a match
+        if (!Player::exists()) {
+            return view('football_matches.no-players');
+        }
 
         $opponents = Opponent::orderBy('name')->pluck('name', 'id');
         $seasons = Season::orderByDesc('year')->orderByDesc('part')->get();
