@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\FootballMatch;
+use App\Models\Team;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
@@ -13,8 +14,10 @@ class DashboardController extends Controller
             return view('admin.dashboard');
         }
 
-        $recentMatches = FootballMatch::with('opponent')->whereNotNull('goals_scored')->orderByDesc('date')->take(3)->get();
-        $nextMatch = FootballMatch::with('opponent')->where('date', '>', now())->get()->first();
-        return view('dashboard', compact('recentMatches', 'nextMatch'));
+        $currentTeamId = session('current_team_id');
+        $currentTeam = Team::find($currentTeamId);
+        $recentMatches = $currentTeam->footballMatches()->whereNotNull('goals_scored')->orderByDesc('date')->take(3)->get();
+        $nextMatch = $currentTeam->footballMatches()->where('date', '>', now())->get()->first();
+        return view('dashboard', compact('recentMatches', 'nextMatch', 'currentTeam'));
     }
 }

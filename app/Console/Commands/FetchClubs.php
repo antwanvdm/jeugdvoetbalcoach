@@ -52,62 +52,67 @@ class FetchClubs extends Command
             $opponent = Opponent::where('name', $name)->where('location', $location)->first();
 
             // Verrijk via Google Places
-            $geo = null;
-            $website = null;
+//            $geo = null;
+//            try {
+//                $query = urlencode($name . ' ' . $location . ' Netherlands');
+//                $searchUrl = 'https://maps.googleapis.com/maps/api/place/textsearch/json?query=' . $query . '&key=' . $apiKey;
+//                $searchResp = Http::timeout(10)->get($searchUrl);
+//                if ($searchResp->ok() && ($searchResp->json('results.0.place_id'))) {
+//                    $placeId = $searchResp->json('results.0.place_id');
+//                    $detailsUrl = 'https://maps.googleapis.com/maps/api/place/details/json?place_id=' . $placeId . '&fields=geometry&key=' . $apiKey;
+//                    $detailsResp = Http::timeout(10)->get($detailsUrl);
+//                    if ($detailsResp->ok()) {
+//                        $geo = $detailsResp->json('result.geometry.location');
+//                    }
+//                }else {
+//                    $this->warn($query);
+//                }
+//            } catch (\Throwable $e) {
+//                $this->warn("[$slug] Fout bij Places API: " . $e->getMessage());
+//            }
+//
+//            $latitude = $geo['lat'] ?? 0.0;
+//            $longitude = $geo['lng'] ?? 0.0;
+
+            // Logo scraping van Hollandse Velden website
+            $logoPathRelative = null;
             try {
-                $query = urlencode($name . ' ' . $location . ' Netherlands');
-                $searchUrl = 'https://maps.googleapis.com/maps/api/place/textsearch/json?query=' . $query . '&key=' . $apiKey;
-                $searchResp = Http::timeout(10)->get($searchUrl);
-                if ($searchResp->ok() && ($searchResp->json('results.0.place_id'))) {
-                    $placeId = $searchResp->json('results.0.place_id');
-                    $detailsUrl = 'https://maps.googleapis.com/maps/api/place/details/json?place_id=' . $placeId . '&fields=website,geometry&key=' . $apiKey;
-                    $detailsResp = Http::timeout(10)->get($detailsUrl);
-                    if ($detailsResp->ok()) {
-                        $geo = $detailsResp->json('result.geometry.location');
-                        $website = $detailsResp->json('result.website');
+                // Bouw de club URL op basis van eerste letter van de teamnaam
+                $teamSlug = Str::slug($name);
+                $firstLetter = strtolower(substr($teamSlug, 0, 1));
+                $clubUrl = "https://www.hollandsevelden.nl/clubs/{$firstLetter}/{$teamSlug}/";
+
+                $htmlResp = Http::timeout(10)->withHeaders([
+                    'User-Agent' => 'Mozilla/5.0 (compatible; VVORBot/1.0; +https://example.com/bot)'
+                ])->get($clubUrl);
+
+                if ($htmlResp->ok()) {
+                    $crawler = new Crawler($htmlResp->body(), $clubUrl);
+                    $logoUrl = $this->extractHollandseVeldenLogo($crawler, $clubUrl);
+                    if ($logoUrl) {
+                        $logoContentResp = Http::timeout(15)->get($logoUrl);
+                        if ($logoContentResp->ok()) {
+                            $finalFilename = $slug . '.webp';
+                            $diskPath = 'logos/' . $finalFilename;
+                            Storage::disk('public')->put($diskPath, $logoContentResp->body());
+                            $logoPathRelative = $diskPath;
+                            $this->info("[$slug] Logo opgeslagen: $diskPath");
+                        }
+                    } else {
+                        $this->warn("[$slug] Geen logo gevonden op Hollandse Velden pagina");
                     }
-                }else {
-                    $this->warn($query);
+                } else {
+                    $this->warn("[$slug] Hollandse Velden pagina niet bereikbaar: $clubUrl");
                 }
             } catch (\Throwable $e) {
-                $this->warn("[$slug] Fout bij Places API: " . $e->getMessage());
-            }
-
-            $latitude = $geo['lat'] ?? 0.0;
-            $longitude = $geo['lng'] ?? 0.0;
-
-            // Logo scraping
-            $logoPathRelative = null;
-            if ($website) {
-                try {
-                    $htmlResp = Http::timeout(10)->withHeaders([
-                        'User-Agent' => 'Mozilla/5.0 (compatible; VVORBot/1.0; +https://example.com/bot)'
-                    ])->get($website);
-                    if ($htmlResp->ok()) {
-                        $crawler = new Crawler($htmlResp->body(), $website);
-                        $logoUrl = $this->extractLogoUrl($crawler, $website);
-                        if ($logoUrl) {
-                            $logoContentResp = Http::timeout(15)->get($logoUrl);
-                            if ($logoContentResp->ok()) {
-                                $mime = $logoContentResp->header('Content-Type');
-                                $ext = $this->determineExtension($logoUrl, $mime);
-                                $finalFilename = $slug . ($ext ? '.' . $ext : '.png');
-                                $diskPath = 'logos/' . $finalFilename;
-                                Storage::disk('public')->put($diskPath, $logoContentResp->body());
-                                $logoPathRelative = $diskPath;
-                            }
-                        }
-                    }
-                } catch (\Throwable $e) {
-                    $this->warn("[$slug] Logo scraping mislukt: " . $e->getMessage());
-                }
+                $this->warn("[$slug] Logo scraping mislukt: " . $e->getMessage());
             }
 
             $data = [
                 'name' => $name,
                 'location' => $location,
-                'latitude' => $latitude,
-                'longitude' => $longitude,
+                'latitude' => $latitude ?? $opponent?->latitude,
+                'longitude' => $longitude ?? $opponent?->longitude,
                 'logo' => $logoPathRelative ?? $opponent?->logo,
                 'kit_reference' => $kitRef !== '' ? $kitRef : ($opponent?->kit_reference ?? null),
             ];
@@ -132,37 +137,27 @@ class FetchClubs extends Command
         return self::SUCCESS;
     }
 
-    private function extractLogoUrl(Crawler $crawler, string $baseUrl): ?string
+    private function extractHollandseVeldenLogo(Crawler $crawler, string $baseUrl): ?string
     {
-        // 1. img met class/id/alt/title bevat 'logo'
-        $img = $crawler->filter('img')->reduce(function (Crawler $node) {
-            $haystack = strtolower($node->attr('class') . ' ' . $node->attr('id') . ' ' . $node->attr('alt') . ' ' . $node->attr('title'));
-            return str_contains($haystack, 'logo');
-        })->first();
-        if ($img->count()) {
-            return $this->absoluteUrl($img->attr('src'), $baseUrl);
-        }
-        // 2. link rel icon
-        $icon = $crawler->filter('link[rel*="icon"]')->first();
-        if ($icon->count()) {
-            return $this->absoluteUrl($icon->attr('href'), $baseUrl);
-        }
-        // 3. grootste img in header/nav
-        $headerImgs = $crawler->filter('header img, nav img');
-        $best = null;
-        $bestSize = 0;
-        foreach ($headerImgs as $node) {
-            $src = $node->getAttribute('src');
-            if (!$src) continue;
-            $sizeGuess = strlen($src); // simpele heuristiek
-            if ($sizeGuess > $bestSize) {
-                $bestSize = $sizeGuess;
-                $best = $src;
+        // Zoek naar <p class="logo"> met daarin een <picture> element met <source> webp
+        try {
+            $logoP = $crawler->filter('p.logo')->first();
+            if ($logoP->count()) {
+                $source = $logoP->filter('picture source[type="image/webp"]')->first();
+                if ($source->count()) {
+                    $srcset = $source->attr('srcset');
+                    if ($srcset) {
+                        // srcset kan meerdere URLs bevatten, neem de eerste
+                        $url = explode(' ', trim($srcset))[0];
+                        return $this->absoluteUrl($url, $baseUrl);
+                    }
+                }
             }
+        } catch (\Throwable $e) {
+            // Als de specifieke selector faalt, return null
+            return null;
         }
-        if ($best) {
-            return $this->absoluteUrl($best, $baseUrl);
-        }
+
         return null;
     }
 
@@ -184,24 +179,6 @@ class FetchClubs extends Command
         // trim possible path
         $path = isset($baseParts['path']) ? rtrim(dirname($baseParts['path']), '/\\') : '';
         return $host . ($path ? '/' . $path : '') . '/' . $src;
-    }
-
-    private function determineExtension(string $url, ?string $mime): string
-    {
-        if ($mime) {
-            return match ($mime) {
-                'image/svg+xml' => 'svg',
-                'image/png' => 'png',
-                'image/jpeg', 'image/jpg' => 'jpg',
-                'image/gif' => 'gif',
-                default => 'png'
-            };
-        }
-        $path = parse_url($url, PHP_URL_PATH);
-        if ($path && preg_match('/\.(svg|png|jpe?g|gif)$/i', $path, $m)) {
-            return strtolower($m[1] === 'jpeg' ? 'jpg' : $m[1]);
-        }
-        return 'png';
     }
 
     private function stripBom(?string $value): ?string

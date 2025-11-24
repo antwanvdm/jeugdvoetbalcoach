@@ -129,7 +129,7 @@ Bij het seeden worden deze basisgegevens aangemaakt voor een snelle start:
     -   6 spelers: `2-1-2`
     -   8 spelers: `3-2-2`
     -   11 spelers: `4-3-3`
--   **Opponents**: Set aan tegenstanders met naam, plaats, logo en GPS-coördinaten
+-   **Opponents**: Globale tegenstanders (gedeeld tussen alle teams)
 -   **Players**: 8 fake spelers
 
 Commands:
@@ -138,6 +138,9 @@ Commands:
 php artisan migrate --seed
 # of
 php artisan migrate:fresh --seed
+
+# Importeer tegenstanders van Hollandse Velden (met logo's)
+php artisan clubs:fetch
 ```
 
 ## 🏗️ Architectuur
@@ -162,13 +165,13 @@ php artisan migrate:fresh --seed
 
 **Models & Database**
 
--   `Team` - Teams met invite code, logo, location (meerdere coaches)
--   `User` - Gebruikers met rollen en teamprofielen (koppeling via `team_user`)
+-   `Team` - Teams met invite code en opponent koppeling (meerdere coaches via pivot)
+-   `User` - Gebruikers met rollen (admin/user), gekoppeld aan teams via `team_user`
 -   `Player` - Spelers met posities en fysieke eigenschappen (per team)
 -   `FootballMatch` - Wedstrijden met tegenstanders en resultaten
--   `Position` - Keeper, Verdediger, Middenvelder, Aanvaller
--   `Opponent` - Tegenstanders met locatie informatie
--   `Formation` - Formaties (globaal of per gebruiker / team)
+-   `Position` - Keeper, Verdediger, Middenvelder, Aanvaller (globaal)
+-   `Opponent` - Globale tegenstanders met naam, locatie, logo, coördinaten en kit referentie
+-   `Formation` - Formaties (globaal of per team)
 -   `Season` - Seizoenen gekoppeld aan team en formatie
 
 **Policies & Autorisatie**
@@ -272,11 +275,10 @@ php artisan make:migration create_example_table
 
 -   [ ] Cascade on delete als gebruiker profiel verwijderd
 -   [x] Multi-team support & koppelen van coaches (pivot + invite codes)
--   [ ] Formatie ook per wedstrijd kunnen aanpassen (is nu enkel per seizoensblok)
--   [ ] Tegenstanders mass import via admin, koppelen vanuit gebruikers
+-   [x] Formatie ook per wedstrijd kunnen aanpassen (is nu enkel per seizoensblok)
+-   [x] Tegenstanders mass import via admin, koppelen vanuit gebruikers
 -   [ ] JO13+ support met 11 spelers en twee helften i.p.v. 4 kwarten
--   [ ] Visuele statistieken dashboard (grafieken) voor spelers & keeperrotatie
--   [ ] Export van line-ups naar PDF met verbeterde layout
+-   [ ] Deelbare view met unieke link voor niet ingelogde gebruikers van losse wedstrijden
 
 ## 📝 Documentatie
 

@@ -66,8 +66,6 @@
                                class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-200 {{ request()->routeIs('players.*') ? 'bg-gray-100' : '' }}">Spelers</a>
                             <a href="{{ route('formations.index') }}"
                                class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-200 {{ request()->routeIs('formations.*') ? 'bg-gray-100' : '' }}">Formaties</a>
-                            <a href="{{ route('opponents.index') }}"
-                               class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-200 {{ request()->routeIs('opponents.*') ? 'bg-gray-100' : '' }}">Tegenstanders</a>
                             <a href="{{ route('football-matches.index') }}"
                                class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-200 {{ request()->routeIs('football-matches.*') ? 'bg-gray-100' : '' }}">Wedstrijden</a>
                             <a href="{{ route('profile.edit') }}"
@@ -122,7 +120,6 @@
                 <a class="block py-2 px-3 rounded-md text-gray-700 hover:bg-gray-100 {{ request()->routeIs('seasons.*') ? 'bg-gray-100' : '' }}" href="{{ route('seasons.index') }}">Seizoenen</a>
                 <a class="block py-2 px-3 rounded-md text-gray-700 hover:bg-gray-100 {{ request()->routeIs('players.*') ? 'bg-gray-100' : '' }}" href="{{ route('players.index') }}">Spelers</a>
                 <a class="block py-2 px-3 rounded-md text-gray-700 hover:bg-gray-100 {{ request()->routeIs('formations.*') ? 'bg-gray-100' : '' }}" href="{{ route('formations.index') }}">Formaties</a>
-                <a class="block py-2 px-3 rounded-md text-gray-700 hover:bg-gray-100 {{ request()->routeIs('opponents.*') ? 'bg-gray-100' : '' }}" href="{{ route('opponents.index') }}">Tegenstanders</a>
                 <a class="block py-2 px-3 rounded-md text-gray-700 hover:bg-gray-100 {{ request()->routeIs('football-matches.*') ? 'bg-gray-100' : '' }}" href="{{ route('football-matches.index') }}">Wedstrijden</a>
                 <a class="block py-2 px-3 rounded-md text-gray-700 hover:bg-gray-100 {{ request()->routeIs('profile.*') ? 'bg-gray-100' : '' }}" href="{{ route('profile.edit') }}">Profiel</a>
             @endif

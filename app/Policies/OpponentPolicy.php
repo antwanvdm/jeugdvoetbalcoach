@@ -14,7 +14,7 @@ class OpponentPolicy
 
     public function view(User $user, Opponent $opponent): bool
     {
-        return $user->is_active && $user->isMemberOf($opponent->team);
+        return $user->is_active;
     }
 
     public function create(User $user): bool

@@ -1,6 +1,6 @@
 <x-app-layout>
     <div class="max-w-5xl mx-auto">
-        <h1 class="text-3xl font-semibold mb-4">{{ config('app.name') }}: {{auth()->user()->team_name}}</h1>
+        <h1 class="text-3xl font-semibold mb-4">{{ config('app.name') }}: {{$currentTeam->opponent->name}}</h1>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div class="md:col-span-2">
@@ -27,13 +27,6 @@
                         <span class="text-lg font-medium">Formaties</span>
                     </a>
 
-                    <a href="{{ route('opponents.index') }}" class="flex items-center gap-4 p-4 bg-white rounded shadow hover:shadow-md">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8a9 9 0 11-9-9"/>
-                        </svg>
-                        <span class="text-lg font-medium">Tegenstanders</span>
-                    </a>
-
                     <a href="{{ route('football-matches.index') }}" class="flex items-center gap-4 p-4 bg-white rounded shadow hover:shadow-md">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6h13M9 6L5 3v18"/>
@@ -48,6 +41,14 @@
                         </svg>
                         <span class="text-lg font-medium">Profiel</span>
                     </a>
+
+                    <a href="{{ route('teams.index') }}" class="flex items-center gap-4 p-4 bg-white rounded shadow hover:shadow-md">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8a9 9 0 11-9-9"/>
+                        </svg>
+                        <span class="text-lg font-medium">Al mijn Teams</span>
+                    </a>
+
                 </div>
 
                 <div class="bg-white p-4 shadow rounded mt-4">

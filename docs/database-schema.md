@@ -4,88 +4,98 @@ Dit document beschrijft de database structuur van de VVOR Team Manager applicati
 
 ## Overzicht
 
-De database ondersteunt een **multi-user architectuur** waarbij elke gebruiker zijn eigen team beheert. Admins hebben volledige toegang, reguliere gebruikers zien alleen hun eigen data.
+De database ondersteunt een **multi-team architectuur** waarbij meerdere coaches aan één team kunnen werken. Admins hebben volledige toegang, reguliere gebruikers zien alleen data van hun teams.
 
 De database bestaat uit de volgende hoofdtabellen:
 
--   **users** - Gebruikers met rollen (admin/user) en teamprofielen
--   **players** - Spelers per gebruiker
+-   **teams** - Teams gekoppeld aan opponent (voor team info)
+-   **users** - Gebruikers met rollen (admin/user)
+-   **team_user** - Pivot tabel die users aan teams koppelt met rol (hoofdcoach/assistent)
+-   **players** - Spelers per team
 -   **positions** - Voetbalposities (globaal, gedeeld)
--   **opponents** - Tegenstanders per gebruiker
--   **formations** - Formatie presets (globaal of per gebruiker)
--   **seasons** - Seizoenen per gebruiker
--   **football_matches** - Wedstrijden per gebruiker
+-   **opponents** - Globale tegenstanders (gedeeld tussen alle teams)
+-   **formations** - Formatie presets (globaal of per team)
+-   **seasons** - Seizoenen per team
+-   **football_matches** - Wedstrijden per team
 -   **football_match_player** - Pivot tabel voor line-ups
 
 ## 📊 Entity Relationship Diagram
 
 ```
-┌─────────────────┐
-│     users       │
-├─────────────────┤
-│ id (PK)         │
-│ name            │
-│ email           │
-│ password        │
-│ role            │ (1=admin, 2=user)
-│ team_name       │
-│ maps_location   │
-│ logo            │
-│ is_active       │
-└─────────────────┘
-        │
-        │ (owns multiple)
-        ├─────────────────────┬──────────────────┬───────────────┐
-        │                     │                  │               │
-        ▼                     ▼                  ▼               ▼
-┌─────────────────┐   ┌─────────────┐   ┌──────────────┐  ┌─────────────┐
-│    players      │   │  opponents  │   │  formations  │  │   seasons   │
-├─────────────────┤   ├─────────────┤   ├──────────────┤  ├─────────────┤
-│ id (PK)         │   │ id (PK)     │   │ id (PK)      │  │ id (PK)     │
-│ user_id (FK)    │   │ user_id (FK)│   │ user_id (FK) │  │ user_id (FK)│
-│ name            │   │ name        │   │ total_players│  │ formation_id│
-│ position_id (FK)│   │ location    │   │ lineup_form. │  │ start/end   │
-│ weight          │   │ logo        │   │ is_global    │  │ year/part   │
-└─────────────────┘   │ latitude    │   └──────────────┘  └─────────────┘
-        │             │ longitude   │
-        │             └─────────────┘
-        │                     │
-        │                     │
-        │             ┌───────┘
-        │             │
-┌───────────────┐     │
-│  positions    │     │
-├───────────────┤     │
-│ id (PK)       │     │
-│ name          │     │
-└───────────────┘     │
-        │             │
-        └─────┬───────┘
-              │
-              ▼
-┌─────────────────────────────────┐
-│   football_matches              │
-├─────────────────────────────────┤
-│ id (PK)                         │
-│ user_id (FK)                    │
-│ season_id (FK)                  │
-│ opponent_id (FK)                │
-│ home (boolean)                  │
-│ goals_scored / goals_conceded   │
-│ date                            │
-└─────────────────────────────────┘
+┌─────────────────┐              ┌─────────────────┐
+│     users       │◄────────────►│   team_user     │
+├─────────────────┤   M      M   ├─────────────────┤
+│ id (PK)         │              │ team_id (PK,FK) │
+│ name            │              │ user_id (PK,FK) │
+│ email           │              │ role            │
+│ password        │              │ is_default      │
+│ role            │              │ joined_at       │
+│ is_active       │              └─────────────────┘
+└─────────────────┘                       │
+                                          │ M
+                                          ▼
+                                 ┌─────────────────┐
+                                 │     teams       │
+                                 ├─────────────────┤
+                                 │ id (PK)         │
+                                 │ opponent_id (FK)│───┐
+                                 │ invite_code     │   │
+                                 └─────────────────┘   │
+                                          │            │
+                                          │ (owns)     │
+                   ┌──────────────────────┼────────┐   │
+                   │                      │        │   │
+                   ▼                      ▼        ▼   │
+         ┌─────────────────┐    ┌─────────────┐ ┌───────────┐
+         │    players      │    │ formations  │ │  seasons  │
+         ├─────────────────┤    ├─────────────┤ ├───────────┤
+         │ id (PK)         │    │ id (PK)     │ │ id (PK)   │
+         │ team_id (FK)    │    │ team_id(FK) │ │ team_id   │
+         │ name            │    │ total_play. │ │ form._id  │
+         │ position_id (FK)│    │ lineup_form │ │ year/part │
+         │ weight          │    │ is_global   │ │ dates     │
+         └─────────────────┘    └─────────────┘ └───────────┘
+                   │                                   │
+  ┌────────────────┘                                   │
+  │                                                    │
+  │            ┌───────────────────────────────────────┘
+  │            │
+┌───────────┐  │            ┌─────────────────┐
+│ positions │  │            │ opponents       │◄──────────┘
+├───────────┤  │            ├─────────────────┤ (globaal)
+│ id (PK)   │  │            │ id (PK)         │
+│ name      │  │            │ name            │
+└───────────┘  │            │ location        │
+      │        │            │ logo            │
+      └────┬───┘            │ latitude        │
+           │                │ longitude       │
+           │                │ kit_reference   │
+           │                └─────────────────┘
+           │                         │
+           │                         │
+           ▼                         │
+  ┌─────────────────────────────────┐│
+  │   football_matches              ││
+  ├─────────────────────────────────┤│
+  │ id (PK)                         ││
+  │ team_id (FK)                    ││
+  │ season_id (FK)                  ││
+  │ opponent_id (FK)                │◄┘
+  │ home (boolean)                  │
+  │ goals_scored / goals_conceded   │
+  │ date                            │
+  └─────────────────────────────────┘
               │
               │ (line-up details)
               ▼
-┌─────────────────────────────────┐
-│   football_match_player         │
-├─────────────────────────────────┤
-│ football_match_id (FK)          │
-│ user_id (FK)                    │
-│ player_id (FK)                  │
-│ quarter (1-4)                   │
-│ position_id (FK) [nullable]     │
-└─────────────────────────────────┘
+  ┌─────────────────────────────────┐
+  │   football_match_player         │
+  ├─────────────────────────────────┤
+  │ football_match_id (FK)          │
+  │ player_id (FK)                  │
+  │ quarter (1-4)                   │
+  │ position_id (FK) [nullable]     │
+  └─────────────────────────────────┘
 ```
 
 ## 📋 Tabellen
@@ -131,32 +141,29 @@ Koppelt gebruikers aan teams met rol, standaardstatus en join datum.
 
 ### users
 
-Gebruikers van het systeem met rollen en teamprofielen.
+Gebruikers van het systeem met rollen.
 
-| Kolom               | Type            | Nullable | Default        | Beschrijving                    |
-| ------------------- | --------------- | -------- | -------------- | ------------------------------- |
-| `id`                | bigint unsigned | NO       | AUTO_INCREMENT | Primary key                     |
-| `name`              | varchar(255)    | NO       |                | Gebruikersnaam                  |
-| `email`             | varchar(255)    | NO       |                | E-mailadres (uniek)             |
-| `email_verified_at` | timestamp       | YES      | NULL           | Verificatie timestamp           |
-| `password`          | varchar(255)    | NO       |                | Gehashed wachtwoord             |
-| `role`              | tinyint         | NO       | 2              | Rol (1=admin, 2=user)           |
-| `team_name`         | varchar(255)    | YES      | NULL           | Naam van het team               |
-| `maps_location`     | varchar(255)    | YES      | NULL           | Google Maps locatie/coördinaten |
-| `logo`              | varchar(255)    | YES      | NULL           | URL naar team logo              |
-| `is_active`         | boolean         | NO       | true           | Actieve status                  |
-| `remember_token`    | varchar(100)    | YES      | NULL           | Remember me token               |
-| `created_at`        | timestamp       | YES      | NULL           | Aanmaakdatum                    |
-| `updated_at`        | timestamp       | YES      | NULL           | Laatste wijziging               |
+| Kolom               | Type            | Nullable | Default        | Beschrijving            |
+| ------------------- | --------------- | -------- | -------------- | ----------------------- |
+| `id`                | bigint unsigned | NO       | AUTO_INCREMENT | Primary key             |
+| `name`              | varchar(255)    | NO       |                | Gebruikersnaam          |
+| `email`             | varchar(255)    | NO       |                | E-mailadres (uniek)     |
+| `email_verified_at` | timestamp       | YES      | NULL           | Verificatie timestamp   |
+| `password`          | varchar(255)    | NO       |                | Gehashed wachtwoord     |
+| `role`              | tinyint         | NO       | 2              | Rol (1=admin, 2=user)   |
+| `is_active`         | boolean         | NO       | true           | Actieve status          |
+| `remember_token`    | varchar(100)    | YES      | NULL           | Remember me token       |
+| `created_at`        | timestamp       | YES      | NULL           | Aanmaakdatum            |
+| `updated_at`        | timestamp       | YES      | NULL           | Laatste wijziging       |
 
 **Role systeem:**
 
 -   `1` = Admin - Volledige toegang, kan gebruikers beheren
--   `2` = User - Standaard gebruiker, beheert eigen team
+-   `2` = User - Standaard gebruiker, lid van een of meerdere teams
 
 **Relaties:**
 
--   Heeft meerdere `players`, `opponents`, `formations`, `seasons`, `football_matches`
+-   Heeft meerdere `teams` via pivot `team_user`
 
 **Indexen:**
 
@@ -193,12 +200,12 @@ Voetbalposities die spelers kunnen spelen. **Globale tabel**, niet per gebruiker
 
 ### players
 
-Alle spelers per gebruiker met hun eigenschappen.
+Alle spelers per team met hun eigenschappen.
 
 | Kolom         | Type            | Nullable | Default        | Beschrijving           |
 | ------------- | --------------- | -------- | -------------- | ---------------------- |
 | `id`          | bigint unsigned | NO       | AUTO_INCREMENT | Primary key            |
-| `user_id`     | bigint unsigned | YES      | NULL           | Eigenaar (gebruiker)   |
+| `team_id`     | bigint unsigned | YES      | NULL           | Team waar speler bij hoort |
 | `name`        | varchar(255)    | NO       |                | Naam van de speler     |
 | `position_id` | bigint unsigned | NO       |                | Favoriete/hoofdpositie |
 | `weight`      | tinyint         | NO       | 1              | Fysiek niveau (1-5)    |
@@ -215,89 +222,90 @@ Alle spelers per gebruiker met hun eigenschappen.
 
 **Foreign Keys:**
 
--   `user_id` → `users(id)` ON DELETE SET NULL
+-   `team_id` → `teams(id)` ON DELETE SET NULL
 -   `position_id` → `positions(id)`
 
 **Indexen:**
 
 -   PRIMARY KEY (`id`)
--   INDEX (`user_id`)
+-   INDEX (`team_id`)
 -   INDEX (`position_id`)
 
 ---
 
 ### opponents
 
-Tegenstanders per gebruiker.
+Globale tegenstanders (gedeeld tussen alle teams).
 
-| Kolom        | Type            | Nullable | Default        | Beschrijving             |
-| ------------ | --------------- | -------- | -------------- | ------------------------ |
-| `id`         | bigint unsigned | NO       | AUTO_INCREMENT | Primary key              |
-| `user_id`    | bigint unsigned | YES      | NULL           | Eigenaar (gebruiker)     |
-| `name`       | varchar(255)    | NO       |                | Naam van de tegenstander |
-| `location`   | varchar(255)    | NO       |                | Plaatsnaam               |
-| `logo`       | varchar(255)    | YES      | NULL           | URL naar logo afbeelding |
-| `latitude`   | decimal(10,8)   | NO       |                | Breedtegraad             |
-| `longitude`  | decimal(11,8)   | NO       |                | Lengtegraad              |
-| `created_at` | timestamp       | YES      | NULL           | Aanmaakdatum             |
-| `updated_at` | timestamp       | YES      | NULL           | Laatste wijziging        |
+| Kolom           | Type            | Nullable | Default        | Beschrijving                          |
+| --------------- | --------------- | -------- | -------------- | ------------------------------------- |
+| `id`            | bigint unsigned | NO       | AUTO_INCREMENT | Primary key                           |
+| `name`          | varchar(255)    | NO       |                | Naam van de tegenstander/vereniging   |
+| `location`      | varchar(255)    | NO       |                | Plaatsnaam                            |
+| `logo`          | varchar(255)    | YES      | NULL           | URL naar logo afbeelding              |
+| `latitude`      | decimal(10,8)   | NO       | 0.0            | Breedtegraad                          |
+| `longitude`     | decimal(11,8)   | NO       | 0.0            | Lengtegraad                           |
+| `kit_reference` | varchar(255)    | YES      | NULL           | Referentie naar tenue (uit clubs.csv) |
+| `created_at`    | timestamp       | YES      | NULL           | Aanmaakdatum                          |
+| `updated_at`    | timestamp       | YES      | NULL           | Laatste wijziging                     |
 
-**Foreign Keys:**
+**Belangrijke opmerkingen:**
 
--   `user_id` → `users(id)` ON DELETE SET NULL
+-   Opponents zijn **globaal** - niet gekoppeld aan specifieke gebruikers of teams
+-   Logo's kunnen automatisch worden opgehaald via `php artisan clubs:fetch` command
+-   Teams kunnen een opponent selecteren om team info (naam, logo, locatie) over te nemen
 
 **Indexen:**
 
 -   PRIMARY KEY (`id`)
--   INDEX (`user_id`)
 
 ---
 
 ### formations
 
-Formatie presets (globaal beschikbaar of per gebruiker).
+Formatie presets (globaal beschikbaar of per team).
 
 | Kolom              | Type            | Nullable | Default        | Beschrijving                     |
 | ------------------ | --------------- | -------- | -------------- | -------------------------------- |
 | `id`               | bigint unsigned | NO       | AUTO_INCREMENT | Primary key                      |
-| `user_id`          | bigint unsigned | YES      | NULL           | Eigenaar (NULL = globaal)        |
+| `team_id`          | bigint unsigned | YES      | NULL           | Team (NULL = globaal)            |
 | `total_players`    | int unsigned    | NO       |                | Totaal aantal spelers            |
 | `lineup_formation` | varchar(255)    | NO       |                | Formatie string (bijv. "4-3-3")  |
-| `is_global`        | boolean         | NO       | false          | Beschikbaar voor alle gebruikers |
+| `is_global`        | boolean         | NO       | false          | Beschikbaar voor alle teams      |
 | `created_at`       | timestamp       | YES      | NULL           | Aanmaakdatum                     |
 | `updated_at`       | timestamp       | YES      | NULL           | Laatste wijziging                |
 
 **Globale formaties:**
 
--   `is_global = true` - Beschikbaar voor alle gebruikers (bijv. 2-1-2, 3-2-2, 4-3-3)
--   `user_id = NULL` - Geen specifieke eigenaar
+-   `is_global = true` - Beschikbaar voor alle teams (bijv. 2-1-2, 3-2-2, 4-3-3)
+-   `team_id = NULL` - Geen specifieke eigenaar
 -   Alleen admins kunnen globale formaties aanmaken/bewerken
 
-**Gebruiker formaties:**
+**Team formaties:**
 
--   `is_global = false` - Alleen voor specifieke gebruiker
--   `user_id` is ingevuld
+-   `is_global = false` - Alleen voor specifiek team
+-   `team_id` is ingevuld
 
 **Foreign Keys:**
 
--   `user_id` → `users(id)` ON DELETE SET NULL
+-   `team_id` → `teams(id)` ON DELETE SET NULL
 
 **Indexen:**
 
 -   PRIMARY KEY (`id`)
--   INDEX (`user_id`)
+-   INDEX (`team_id`)
 -   INDEX (`is_global`)
 
 ---
 
 ### seasons
 
-Seizoenen per gebruiker.
+Seizoenen per team.
 
 | Kolom          | Type            | Nullable | Default        | Beschrijving          |
 | -------------- | --------------- | -------- | -------------- | --------------------- |
 | `id`           | bigint unsigned | NO       | AUTO_INCREMENT | Primary key           |
-| `user_id`      | bigint unsigned | YES      | NULL           | Eigenaar (gebruiker)  |
+| `team_id`      | bigint unsigned | YES      | NULL           | Team                  |
 | `formation_id` | bigint unsigned | NO       |                | Gebruikte formatie    |
 | `year`         | int             | NO       |                | Jaar (bijv. 2025)     |
 | `part`         | varchar(255)    | NO       |                | Deel (bijv. "Najaar") |
@@ -308,25 +316,25 @@ Seizoenen per gebruiker.
 
 **Foreign Keys:**
 
--   `user_id` → `users(id)` ON DELETE SET NULL
+-   `team_id` → `teams(id)` ON DELETE SET NULL
 -   `formation_id` → `formations(id)`
 
 **Indexen:**
 
 -   PRIMARY KEY (`id`)
--   INDEX (`user_id`)
+-   INDEX (`team_id`)
 -   INDEX (`formation_id`)
 
 ---
 
 ### football_matches
 
-Wedstrijden per gebruiker met resultaten en metadata.
+Wedstrijden per team met resultaten en metadata.
 
 | Kolom            | Type            | Nullable | Default        | Beschrijving             |
 | ---------------- | --------------- | -------- | -------------- | ------------------------ |
 | `id`             | bigint unsigned | NO       | AUTO_INCREMENT | Primary key              |
-| `user_id`        | bigint unsigned | YES      | NULL           | Eigenaar (gebruiker)     |
+| `team_id`        | bigint unsigned | YES      | NULL           | Team                     |
 | `season_id`      | bigint unsigned | NO       |                | Seizoen referentie       |
 | `opponent_id`    | bigint unsigned | NO       |                | Tegenstander             |
 | `home`           | tinyint(1)      | NO       |                | Thuis (1) of uit (0)     |
@@ -342,14 +350,14 @@ Wedstrijden per gebruiker met resultaten en metadata.
 
 **Foreign Keys:**
 
--   `user_id` → `users(id)` ON DELETE SET NULL
+-   `team_id` → `teams(id)` ON DELETE SET NULL
 -   `season_id` → `seasons(id)`
 -   `opponent_id` → `opponents(id)`
 
 **Indexen:**
 
 -   PRIMARY KEY (`id`)
--   INDEX (`user_id`)
+-   INDEX (`team_id`)
 -   INDEX (`season_id`)
 -   INDEX (`opponent_id`)
 -   INDEX (`date`)
@@ -358,12 +366,11 @@ Wedstrijden per gebruiker met resultaten en metadata.
 
 ### football_match_player
 
-Pivot tabel die spelers koppelt aan wedstrijden per kwart (per gebruiker).
+Pivot tabel die spelers koppelt aan wedstrijden per kwart.
 
 | Kolom               | Type             | Nullable | Default | Beschrijving                       |
 | ------------------- | ---------------- | -------- | ------- | ---------------------------------- |
 | `football_match_id` | bigint unsigned  | NO       |         | Wedstrijd referentie               |
-| `user_id`           | bigint unsigned  | YES      | NULL    | Eigenaar (voor data isolatie)      |
 | `player_id`         | bigint unsigned  | NO       |         | Speler referentie                  |
 | `quarter`           | tinyint unsigned | NO       |         | Kwart (1-4)                        |
 | `position_id`       | bigint unsigned  | YES      | NULL    | Positie in dit kwart (NULL = bank) |
@@ -375,19 +382,16 @@ Pivot tabel die spelers koppelt aan wedstrijden per kwart (per gebruiker).
 -   `position_id = NULL` betekent dat de speler op de bank zit
 -   `position_id` gevuld betekent dat de speler speelt op die positie
 -   Elke speler kan meerdere records hebben per wedstrijd (één per kwart)
--   `user_id` zorgt voor data isolatie tussen gebruikers
 
 **Foreign Keys:**
 
 -   `football_match_id` → `football_matches(id)` ON DELETE CASCADE
--   `user_id` → `users(id)` ON DELETE SET NULL
 -   `player_id` → `players(id)` ON DELETE CASCADE
 -   `position_id` → `positions(id)` ON DELETE SET NULL
 
 **Indexen:**
 
 -   INDEX (`football_match_id`, `player_id`, `quarter`) - Composite voor queries
--   INDEX (`user_id`)
 -   INDEX (`player_id`)
 -   INDEX (`position_id`)
 
@@ -395,32 +399,40 @@ Pivot tabel die spelers koppelt aan wedstrijden per kwart (per gebruiker).
 
 ## 🔄 Relaties
 
-### User Ownership (One-to-Many)
+### Team Ownership (One-to-Many)
 
-Alle hoofdentiteiten behoren toe aan een gebruiker:
+Alle hoofdentiteiten behoren toe aan een team:
 
--   `users` → `players` (Een gebruiker heeft meerdere spelers)
--   `users` → `opponents` (Een gebruiker heeft meerdere tegenstanders)
--   `users` → `formations` (Een gebruiker heeft meerdere formaties)
--   `users` → `seasons` (Een gebruiker heeft meerdere seizoenen)
--   `users` → `football_matches` (Een gebruiker heeft meerdere wedstrijden)
+-   `teams` → `players` (Een team heeft meerdere spelers)
+-   `teams` → `formations` (Een team heeft meerdere formaties)
+-   `teams` → `seasons` (Een team heeft meerdere seizoenen)
+-   `teams` → `football_matches` (Een team heeft meerdere wedstrijden)
+
+### User-Team Relationship (Many-to-Many)
+
+-   `users` ↔ `teams` via `team_user` pivot
+    -   Extra data: `role` (hoofdcoach/assistent), `is_default`, `joined_at`
+    -   Een gebruiker kan aan meerdere teams gekoppeld zijn
+    -   Een team kan meerdere coaches hebben
 
 ### Other One-to-Many
 
+-   `opponents` → `teams` (Een opponent kan door meerdere teams gebruikt worden voor team info)
 -   `positions` → `players` (Een positie heeft meerdere spelers) - **Globaal**
 -   `formations` → `seasons` (Een formatie kan in meerdere seizoenen gebruikt worden)
 -   `seasons` → `football_matches` (Een seizoen heeft meerdere wedstrijden)
--   `opponents` → `football_matches` (Een tegenstander heeft meerdere wedstrijden)
+-   `opponents` → `football_matches` (Een opponent speelt in meerdere wedstrijden)
 
 ### Many-to-Many
 
 -   `players` ↔ `football_matches` via `football_match_player`
-    -   Extra data: `quarter`, `position_id`, `user_id`
+    -   Extra data: `quarter`, `position_id`
 
-### Global Scope
+### Global Resources
 
--   `formations` met `is_global = true` zijn beschikbaar voor alle gebruikers
--   `positions` zijn volledig globaal (geen user_id)
+-   `opponents` zijn volledig globaal (geen team_id of user_id) - gedeeld tussen alle teams
+-   `formations` met `is_global = true` zijn beschikbaar voor alle teams
+-   `positions` zijn volledig globaal (geen team_id)
 
 ### Polymorphic
 
@@ -430,17 +442,17 @@ Geen polymorphic relaties in de huidige structuur.
 
 ### Veelgebruikte queries
 
-**Alle spelers van een gebruiker met keeper statistieken:**
+**Alle spelers van een team met keeper statistieken:**
 
 ```sql
 SELECT p.*, COUNT(fmp.id) as keeper_count
 FROM players p
 LEFT JOIN football_match_player fmp ON p.id = fmp.player_id AND fmp.position_id = 1
-WHERE p.user_id = ?
+WHERE p.team_id = ?
 GROUP BY p.id;
 ```
 
-**Line-up voor een specifiek kwart (met user check):**
+**Line-up voor een specifiek kwart:**
 
 ```sql
 SELECT p.name, pos.name as position, fmp.quarter
@@ -449,11 +461,10 @@ JOIN players p ON fmp.player_id = p.id
 LEFT JOIN positions pos ON fmp.position_id = pos.id
 WHERE fmp.football_match_id = ?
   AND fmp.quarter = ?
-  AND fmp.user_id = ?
 ORDER BY fmp.position_id IS NULL, pos.name;
 ```
 
-**Keepers van laatste wedstrijd (per gebruiker):**
+**Keepers van laatste wedstrijd (per team):**
 
 ```sql
 SELECT DISTINCT p.id, p.name
@@ -461,70 +472,93 @@ FROM players p
 JOIN football_match_player fmp ON p.id = fmp.player_id
 JOIN football_matches fm ON fmp.football_match_id = fm.id
 WHERE fmp.position_id = 1
-  AND fmp.user_id = ?
+  AND fm.team_id = ?
 ORDER BY fm.date DESC
 LIMIT 4;
 ```
 
-**Globale + eigen formaties ophalen:**
+**Globale + team formaties ophalen:**
 
 ```sql
 SELECT * FROM formations
-WHERE is_global = 1 OR user_id = ?
+WHERE is_global = 1 OR team_id = ?
 ORDER BY is_global DESC, total_players ASC;
+```
+
+**Teams van een gebruiker:**
+
+```sql
+SELECT t.*, tu.role, tu.is_default, o.name as opponent_name, o.logo
+FROM teams t
+JOIN team_user tu ON t.id = tu.team_id
+LEFT JOIN opponents o ON t.opponent_id = o.id
+WHERE tu.user_id = ?
+ORDER BY tu.is_default DESC, tu.joined_at ASC;
 ```
 
 ## 🔒 Data Isolatie & Beveiliging
 
 ### Multi-tenancy Strategie
 
-De applicatie gebruikt **user_id scoping** voor data isolatie:
+De applicatie gebruikt **team_id scoping** voor data isolatie:
 
-1. **Model Level**: Eloquent Global Scopes filteren automatisch op `user_id`
-2. **Policy Level**: Laravel Policies checken ownership voor elke actie
-3. **Controller Level**: Automatische user_id toewijzing bij create/update
+1. **Model Level**: Eloquent Global Scopes filteren automatisch op `team_id`
+2. **Policy Level**: Laravel Policies checken team membership via `team_user` pivot
+3. **Controller Level**: Automatische team_id toewijzing bij create/update
+4. **Team Context**: Gebruikers selecteren hun actieve team, data wordt gefilterd op basis daarvan
 
 ### Policy Checks
 
 Alle resources hebben policies die controleren:
 
--   `viewAny`: Alleen eigen data zien (behalve admins)
--   `view`: Ownership check op specifiek item
--   `create`: Actieve gebruiker check
--   `update/delete`: Ownership + actieve status check
+-   `viewAny`: Alleen data van eigen teams zien (behalve admins)
+-   `view`: Team membership check via `team_user` pivot
+-   `create`: Team membership + actieve status check
+-   `update/delete`: Team membership + rol check (hoofdcoach heeft meer rechten)
 
 **Admin privileges:**
 
 -   Admins kunnen alle data zien en bewerken
 -   Admins kunnen globale formaties beheren
 -   Admins kunnen gebruikers beheren via `/admin/users`
+-   Admins kunnen globale opponents beheren
+
+**Team Roles:**
+
+-   `1` = Hoofdcoach - Kan team settings wijzigen, spelers beheren, line-ups maken
+-   `2` = Assistent - Kan data bekijken en mogelijk line-ups maken (afhankelijk van implementatie)
 
 ### Middleware Protection
 
 -   `auth` middleware - Alle routes behalve home
 -   `admin` middleware - Admin-only routes (/admin/\*)
+-   Team context middleware - Zorgt dat gebruiker een geldig team geselecteerd heeft
 
 ## 🚀 Performance Overwegingen
 
 ### Indexering
 
--   Alle foreign keys zijn geïndexeerd (inclusief `user_id`)
+-   Alle foreign keys zijn geïndexeerd (inclusief `team_id`)
+-   Composite primary key op `team_user` (`team_id`, `user_id`)
 -   Composite index op `football_match_player` voor efficiënte line-up queries
 -   Date index op `football_matches` voor chronologische queries
 -   `is_global` index op `formations` voor snel filteren
+-   `invite_code` unique index op `teams` voor join functionaliteit
 
 ### Query Optimalisatie
 
 -   Gebruik van `withCount()` voor aggregatie queries
--   Eager loading voor N+1 query preventie
+-   Eager loading voor N+1 query preventie (bijv. `team.opponent`)
 -   Specifieke select statements waar mogelijk
--   Global scopes voor automatische user_id filtering
+-   Global scopes voor automatische team_id filtering
+-   Caching van team membership checks
 
 ### Caching Strategie
 
--   Model caching voor `positions` (wijzigt zelden, globaal)
--   Query caching voor statistiek overzichten (per user)
+-   Model caching voor `positions` en `opponents` (wijzigt zelden, globaal)
+-   Query caching voor statistiek overzichten (per team)
 -   Page caching voor wedstrijd overzichten
+-   Session caching voor actieve team selectie
 
 ---
 
@@ -562,8 +596,24 @@ Migraties zijn te vinden in `/database/migrations/` en worden uitgevoerd in chro
 17. `2025_10_30_151907_add_is_global_to_formations_table.php` - Globale formaties (beschikbaar voor iedereen)
 18. `2025_10_30_153907_add_maps_location_to_users_table.php` - Google Maps locatie voor teams
 
+### Multi-team Support (13 November 2025)
+
+19. `2025_11_13_100000_create_teams_table.php` - Teams tabel met name, logo, maps_location
+20. `2025_11_13_100001_create_team_user_table.php` - Pivot tabel voor user-team relatie met rol
+21. `2025_11_13_151717_add_team_id_to_tables.php` - Team_id aan players, seasons, opponents, matches, formations
+22. `2025_11_13_153328_remove_name_logo_from_users_table.php` - Verwijder team_name, logo, maps_location van users
+23. `2025_11_13_153433_add_invite_code_to_teams_table.php` - Invite code voor team joins
+
+### Opponent Updates (23 November 2025)
+
+24. `2025_11_23_112806_update_opponents_table.php` - Kit_reference toevoegen, user_id en team_id verwijderen (globaal)
+25. `2025_11_23_150000_add_opponent_id_to_teams_table.php` - Opponent koppeling aan teams, verwijder name/logo/maps_location
+
 Voor een fresh installatie:
 
 ```bash
 php artisan migrate:fresh --seed
+
+# Optioneel: importeer tegenstanders met logo's
+php artisan clubs:fetch
 ```
