@@ -279,7 +279,10 @@ php artisan make:migration create_example_table
 -   [x] Formatie ook per wedstrijd kunnen aanpassen (is nu enkel per seizoensblok)
 -   [x] Tegenstanders mass import via admin, koppelen vanuit gebruikers
 -   [ ] JO13+ support met 11 spelers en twee helften i.p.v. 4 kwarten
--   [ ] Deelbare view met unieke link voor niet ingelogde gebruikers van losse wedstrijden
+-   [x] Deelbare view met unieke link voor niet ingelogde gebruikers van losse wedstrijden
+-   [ ] Aanmaken wedstrijd moet optie geven om afwezige spelers aan te geven (IPV achteraf alles te moeten aanpassen)
+-   [ ] Spelers aanmaken moet in 1 keer simpel kunnen, ook moeten die gewoon gelijk aan actieve seizoen gekoppeld worden
+-   [ ] Goals en assists bijhouden van spelers per wedstrijd
 
 ## 📝 Documentatie
 

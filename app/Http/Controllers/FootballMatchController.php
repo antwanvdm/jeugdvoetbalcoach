@@ -11,6 +11,7 @@ use App\Services\LineupGeneratorService;
 use Gate;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class FootballMatchController extends Controller
@@ -23,12 +24,12 @@ class FootballMatchController extends Controller
         Gate::authorize('viewAny', FootballMatch::class);
 
         $seasons = Season::orderByDesc('year')->orderByDesc('part')->get();
-        
+
         // Check if there are any seasons
         if ($seasons->isEmpty()) {
             return view('football_matches.no-season');
         }
-        
+
         $activeSeason = Season::getCurrent($seasons);
 
         $seasonId = $request->query('season_id') ?? ($activeSeason?->id ?? null);
@@ -81,6 +82,7 @@ class FootballMatchController extends Controller
 
         $validated['user_id'] = auth()->id();
         $validated['team_id'] = session('current_team_id');
+        $validated['share_token'] = Str::random(32);
         $match = FootballMatch::create($validated);
 
         // Generate lineup using the service
@@ -97,7 +99,35 @@ class FootballMatchController extends Controller
     {
         Gate::authorize('view', $footballMatch);
 
+        $data = $this->getMatchViewData($footballMatch);
+
+        return view('football_matches.show', $data);
+    }
+
+    /**
+     * Display the match details publicly via share token (for parents).
+     */
+    public function showPublic(FootballMatch $footballMatch, string $shareToken): View
+    {
+        // Validate share token - use withoutGlobalScope to bypass team scope
+        $match = FootballMatch::withoutGlobalScope('team')
+            ->where('id', $footballMatch->id)
+            ->where('share_token', $shareToken)
+            ->firstOrFail();
+
+        $data = $this->getMatchViewData($match);
+        $data['isPublicView'] = true;
+
+        return view('football_matches.show', $data);
+    }
+
+    /**
+     * Get shared view data for a football match.
+     */
+    private function getMatchViewData(FootballMatch $footballMatch): array
+    {
         $footballMatch->load(['opponent']);
+
         // Fetch all pivot rows for this match and group by quarter to avoid de-duplication by player_id
         $rows = Player::query()
             ->select('players.id', 'players.name', 'players.weight', 'football_match_player.quarter', 'football_match_player.position_id')
@@ -146,12 +176,12 @@ class FootballMatchController extends Controller
             return strcmp($a['player']->name, $b['player']->name);
         });
 
-        return view('football_matches.show', [
+        return [
             'footballMatch' => $footballMatch,
             'positionNames' => $positionNames,
             'assignmentsByQuarter' => $assignmentsByQuarter,
             'playersWithQuarters' => $playersWithQuarters,
-        ]);
+        ];
     }
 
     /**

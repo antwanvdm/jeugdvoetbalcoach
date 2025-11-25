@@ -2,14 +2,16 @@
     <div class="flex items-center justify-between mb-4 top-row-actions">
         <h1 class="text-2xl font-semibold">Wedstrijd tegen {{ $footballMatch->opponent->name ?? 'Onbekend' }}</h1>
         <div class="flex gap-2">
-            <a href="{{ route('football-matches.index') }}" class="px-3 py-2 bg-gray-200 rounded">Terug</a>
-            <a href="{{ route('football-matches.lineup', $footballMatch) }}" class="px-3 py-2 bg-indigo-600 text-white rounded">Line-up</a>
-            <a href="{{ route('football-matches.edit', $footballMatch) }}" class="px-3 py-2 bg-yellow-500 text-white rounded">Bewerk</a>
-            <form action="{{ route('football-matches.destroy', $footballMatch) }}" method="POST" onsubmit="return confirm('Wedstrijd verwijderen?')">
-                @csrf
-                @method('DELETE')
-                <button class="px-3 py-2 bg-red-600 text-white rounded">Verwijder</button>
-            </form>
+            @auth
+                <a href="{{ route('football-matches.index') }}" class="px-3 py-2 bg-gray-200 rounded">Terug</a>
+                <a href="{{ route('football-matches.lineup', $footballMatch) }}" class="px-3 py-2 bg-indigo-600 text-white rounded">Line-up</a>
+                <a href="{{ route('football-matches.edit', $footballMatch) }}" class="px-3 py-2 bg-yellow-500 text-white rounded">Bewerk</a>
+                <form action="{{ route('football-matches.destroy', $footballMatch) }}" method="POST" onsubmit="return confirm('Wedstrijd verwijderen?')">
+                    @csrf
+                    @method('DELETE')
+                    <button class="px-3 py-2 bg-red-600 text-white rounded">Verwijder</button>
+                </form>
+            @endauth
         </div>
     </div>
 
@@ -21,8 +23,8 @@
             <dt class="font-medium text-gray-600">Locatie</dt>
             <dd class="col-span-2">
                 {{ $footballMatch->home ? 'Thuis' : 'Uit' }} (
-                    <a href="{{ $footballMatch->home ? $footballMatch->team->opponent->location_maps_link : $footballMatch->opponent->location_maps_link }}" target="_blank" rel="noopener"
-                       class="text-blue-600 hover:underline">{{ $locLabel ?? 'bekijk op kaart' }}</a>
+                <a href="{{ $footballMatch->home ? $footballMatch->team->opponent->location_maps_link : $footballMatch->opponent->location_maps_link }}" target="_blank" rel="noopener"
+                   class="text-blue-600 hover:underline">{{ $locLabel ?? 'bekijk op kaart' }}</a>
                 )
             </dd>
 
@@ -51,63 +53,92 @@
         </div>
     </div>
 
+    @auth
+        @if($footballMatch->share_token)
+            {{-- Share link for parents --}}
+            <div class="mt-6 bg-blue-50 border border-blue-200 p-4 shadow rounded">
+                <h2 class="text-lg font-semibold mb-2 text-blue-900">📱 Deel met ouders</h2>
+                <p class="text-sm text-blue-800 mb-3">Ouders kunnen deze wedstrijd bekijken zonder in te loggen via onderstaande link:</p>
+                <div class="flex gap-2 items-center">
+                    <input
+                        type="text"
+                        readonly
+                        value="{{ route('football-matches.share', ['footballMatch' => $footballMatch, 'shareToken' => $footballMatch->share_token]) }}"
+                        id="shareLink"
+                        class="flex-1 px-3 py-2 border border-blue-300 rounded bg-white text-sm font-mono"
+                    >
+                    <button
+                        data-copy-input="shareLink"
+                        data-copy-message="Link gekopieerd naar klembord!"
+                        class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+                    >
+                        Kopieer
+                    </button>
+                </div>
+                <p class="text-xs text-blue-700 mt-2">💡 Deze link is uniek en privé - deel alleen met betrokken ouders.</p>
+            </div>
+        @endif
+    @endauth
+
     {{-- Lineup overview table --}}
     <div class="mt-6 bg-white p-4 shadow rounded">
         <div class="flex justify-between line-up-header">
             <h2 class="text-xl font-semibold mb-3">Line-up per kwart</h2>
-            <a href="{{ route('football-matches.lineup', $footballMatch) }}" class="px-3 py-2 bg-indigo-600 text-white rounded">Bewerk line-up</a>
+            @auth
+                <a href="{{ route('football-matches.lineup', $footballMatch) }}" class="px-3 py-2 bg-indigo-600 text-white rounded">Bewerk line-up</a>
+            @endauth
         </div>
         <div class="overflow-x-auto">
             <div class="overflow-x-auto">
-            <table class="min-w-full text-sm">
-                <thead>
-                <tr class="text-left text-gray-600">
-                    <th class="py-2 pr-4 w-20"></th>
-                    <th class="py-2 pr-4">Keeper</th>
-                    <th class="py-2 pr-4">Spelers</th>
-                    <th class="py-2 pr-4">Bank</th>
-                </tr>
-                </thead>
-                <tbody>
-                @foreach(range(1,4) as $q)
-                    @php
-                        $present = $assignmentsByQuarter[$q] ?? collect();
-                        $bench = $present->filter(fn($p) => is_null($p->position_id));
-                        $starters = $present->filter(fn($p) => !is_null($p->position_id));
-                        $keeper = $starters->first(function($p) use ($positionNames){
-                            $pid = $p->position_id;
-                            $n = strtolower($positionNames[$pid] ?? '');
-                            return str_contains($n, 'keep') || str_contains($n, 'goal') || str_contains($n, 'doel');
-                        });
-                        $field = $starters->filter(fn($p) => $keeper ? $p->id !== $keeper->id : true);
-                    @endphp
-                    <tr class="border-t align-middle">
-                        <td class="py-2 pr-4 font-medium">Q{{ $q }}</td>
-                        <td class="py-2 pr-4">
-                            @if($keeper)
-                                <span class="inline-block px-2 py-1 rounded text-white bg-green-800">{{ $keeper->name }}</span>
-                            @else
-                                <span class="text-gray-400">-</span>
-                            @endif
-                        </td>
-                        <td class="py-2 pr-4">
-                            @forelse($field as $p)
-                                <span class="inline-block px-2 py-1 rounded text-white bg-green-600">{{ $p->name }}</span>
-                            @empty
-                                <span class="text-gray-400">-</span>
-                            @endforelse
-                        </td>
-                        <td class="py-2 pr-4">
-                            @forelse($bench as $p)
-                                <span class="inline-block px-2 py-1 rounded bg-yellow-300 text-yellow-900">{{ $p->name }}</span>
-                            @empty
-                                <span class="text-gray-400">-</span>
-                            @endforelse
-                        </td>
+                <table class="min-w-full text-sm">
+                    <thead>
+                    <tr class="text-left text-gray-600">
+                        <th class="py-2 pr-4 w-20"></th>
+                        <th class="py-2 pr-4">Keeper</th>
+                        <th class="py-2 pr-4">Spelers</th>
+                        <th class="py-2 pr-4">Bank</th>
                     </tr>
-                @endforeach
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                    @foreach(range(1,4) as $q)
+                        @php
+                            $present = $assignmentsByQuarter[$q] ?? collect();
+                            $bench = $present->filter(fn($p) => is_null($p->position_id));
+                            $starters = $present->filter(fn($p) => !is_null($p->position_id));
+                            $keeper = $starters->first(function($p) use ($positionNames){
+                                $pid = $p->position_id;
+                                $n = strtolower($positionNames[$pid] ?? '');
+                                return str_contains($n, 'keep') || str_contains($n, 'goal') || str_contains($n, 'doel');
+                            });
+                            $field = $starters->filter(fn($p) => $keeper ? $p->id !== $keeper->id : true);
+                        @endphp
+                        <tr class="border-t align-middle">
+                            <td class="py-2 pr-4 font-medium">Q{{ $q }}</td>
+                            <td class="py-2 pr-4">
+                                @if($keeper)
+                                    <span class="inline-block px-2 py-1 rounded text-white bg-green-800">{{ $keeper->name }}</span>
+                                @else
+                                    <span class="text-gray-400">-</span>
+                                @endif
+                            </td>
+                            <td class="py-2 pr-4">
+                                @forelse($field as $p)
+                                    <span class="inline-block px-2 py-1 rounded text-white bg-green-600">{{ $p->name }}</span>
+                                @empty
+                                    <span class="text-gray-400">-</span>
+                                @endforelse
+                            </td>
+                            <td class="py-2 pr-4">
+                                @forelse($bench as $p)
+                                    <span class="inline-block px-2 py-1 rounded bg-yellow-300 text-yellow-900">{{ $p->name }}</span>
+                                @empty
+                                    <span class="text-gray-400">-</span>
+                                @endforelse
+                            </td>
+                        </tr>
+                    @endforeach
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -183,28 +214,28 @@
         <h2 class="text-xl font-semibold mb-3">Statistieken</h2>
         <div class="overflow-x-auto">
             <div class="overflow-x-auto">
-            <table class="min-w-full text-sm">
-                <thead>
-                <tr class="text-left text-gray-600 border-b">
-                    <th class="py-2 pr-4">Speler</th>
-                    <th class="py-2 pr-4">Kwarten gespeeld</th>
-                </tr>
-                </thead>
-                <tbody>
-                @foreach($playersWithQuarters as $item)
-                    <tr class="border-t">
-                        <td class="py-2 pr-4 font-medium">{{ $item['player']->name }}</td>
-                        <td class="py-2 pr-4">
-                            @if($item['quarters_played'] > 0)
-                                <span class="inline-block px-2 py-1 rounded text-white bg-green-600">{{ $item['quarters_played'] }}</span>
-                            @else
-                                <span class="inline-block px-2 py-1 rounded bg-red-200 text-red-800">Afwezig</span>
-                            @endif
-                        </td>
+                <table class="min-w-full text-sm">
+                    <thead>
+                    <tr class="text-left text-gray-600 border-b">
+                        <th class="py-2 pr-4">Speler</th>
+                        <th class="py-2 pr-4">Kwarten gespeeld</th>
                     </tr>
-                @endforeach
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                    @foreach($playersWithQuarters as $item)
+                        <tr class="border-t">
+                            <td class="py-2 pr-4 font-medium">{{ $item['player']->name }}</td>
+                            <td class="py-2 pr-4">
+                                @if($item['quarters_played'] > 0)
+                                    <span class="inline-block px-2 py-1 rounded text-white bg-green-600">{{ $item['quarters_played'] }}</span>
+                                @else
+                                    <span class="inline-block px-2 py-1 rounded bg-red-200 text-red-800">Afwezig</span>
+                                @endif
+                            </td>
+                        </tr>
+                    @endforeach
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>

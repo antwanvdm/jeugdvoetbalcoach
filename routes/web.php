@@ -21,6 +21,9 @@ Route::get('/', [HomeController::class, 'show'])->name('home');
 // Public opponents search (autocomplete endpoint)
 Route::get('/api/opponents', OpponentSearchController::class)->name('api.opponents');
 
+// Public football match share (for parents)
+Route::get('/football-matches/{footballMatch}/share/{shareToken}', [FootballMatchController::class, 'showPublic'])->name('football-matches.share');
+
 // Public team join routes (accessible without authentication)
 Route::get('/teams/join/{inviteCode}', [TeamController::class, 'showJoin'])->name('teams.join.show');
 Route::post('/teams/join/{inviteCode}', [TeamController::class, 'join'])->middleware('auth')->name('teams.join');

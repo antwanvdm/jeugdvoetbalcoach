@@ -19,6 +19,7 @@ class FootballMatch extends Model
         'season_id',
         'user_id',
         'team_id',
+        'share_token',
     ];
 
     protected $casts = [

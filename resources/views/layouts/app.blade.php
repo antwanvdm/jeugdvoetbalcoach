@@ -15,8 +15,8 @@
 <body class="bg-gray-100 text-gray-900 flex flex-col min-h-screen">
 <x-nav></x-nav>
 
-<div class="flex-grow mb-4">
-    <main class="@if(request()->route()->getName() !== 'home') max-w-5xl px-4 mb-4 mt-6 @else w-full @endif mx-auto {{str_replace('.', '-', request()->route()->getName())}}">
+<div class="flex-grow">
+    <main class="@if(request()->route()->getName() !== 'home') max-w-5xl px-4 mb-8 mt-6 @else w-full @endif mx-auto {{str_replace('.', '-', request()->route()->getName())}}">
         @if(session('success'))
             <div class="mb-4 p-3 rounded bg-green-100 text-green-800">
                 {{ session('success') }}

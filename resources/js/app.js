@@ -42,27 +42,48 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // Copy to clipboard functionality
+    // Generic copy to clipboard functionality
     document.addEventListener("click", function (e) {
+        // Handle data-copy-to-clipboard (direct value in attribute)
         if (e.target.matches("[data-copy-to-clipboard]")) {
             const textToCopy = e.target.getAttribute("data-copy-to-clipboard");
             const message =
                 e.target.getAttribute("data-copy-message") || "Gekopieerd!";
 
-            navigator.clipboard
-                .writeText(textToCopy)
-                .then(() => {
-                    alert(message);
-                })
-                .catch((err) => {
-                    console.error("Kopiëren mislukt:", err);
-                });
+            copyToClipboard(textToCopy, message);
+        }
+
+        // Handle data-copy-input (copy from input field by ID)
+        if (e.target.matches("[data-copy-input]")) {
+            const inputId = e.target.getAttribute("data-copy-input");
+            const message =
+                e.target.getAttribute("data-copy-message") ||
+                "Link gekopieerd naar klembord!";
+            const input = document.getElementById(inputId);
+
+            if (input) {
+                input.select();
+                input.setSelectionRange(0, 99999); // For mobile devices
+                copyToClipboard(input.value, message);
+            }
         }
     });
 
     // Opponent autocomplete component initialisatie
     initOpponentAutocomplete();
 });
+
+// Helper function for copying to clipboard
+function copyToClipboard(text, message = "Gekopieerd!") {
+    navigator.clipboard
+        .writeText(text)
+        .then(() => {
+            alert(message);
+        })
+        .catch((err) => {
+            console.error("Kopiëren mislukt:", err);
+        });
+}
 
 // Modal functionaliteit
 window.openModal = function (name) {
