@@ -99,7 +99,7 @@ class LineupGeneratorService
     }
 
     /**
-     * Select 4 keepers based on historical appearances, last match rotation, and weight diversity
+     * Select 4 keepers based on historical appearances and last match rotation
      */
     private function selectKeepers(): Collection
     {
@@ -107,72 +107,26 @@ class LineupGeneratorService
         $this->debugLog('Last match keepers:', $this->lastMatchKeepers->toArray());
 
         // Sort by priority:
-        // 1. Prefer players who didn't keep last match
+        // 1. Prefer players who didn't keep last match (0 = didn't keep, 1 = did keep)
         // 2. Then by historical keeper count (ascending)
         // 3. Then by name for consistency
-        $sortedKeepers = $this->players->filter(fn($p) => !$this->lastMatchKeepers->contains($p->id))->sortBy(function ($player) {
+        $sortedKeepers = $this->players->sortBy(function ($player) {
+            $wasLastMatchKeeper = $this->lastMatchKeepers->contains($player->id) ? 1 : 0;
             $historicalCount = (int)$this->keeperCounts->get($player->id, 0);
 
             // Debug: Log sorting criteria for each player
-            $this->debugLog("Player {$player->name}: historicalCount={$historicalCount}");
+            $this->debugLog("Player {$player->name}: wasLastMatchKeeper={$wasLastMatchKeeper}, historicalCount={$historicalCount}");
 
-            return [$historicalCount, $player->name];
+            return [$wasLastMatchKeeper, $historicalCount, $player->name];
         });
 
-        $keepers = collect();
-        $availableKeepers = $sortedKeepers->values();
+        // Simply take the first 4 from the sorted list
+        $keepers = $sortedKeepers->take(4)->values();
 
-        // Pick first keeper (best priority - didn't keep last match, least historical appearances)
-        if ($availableKeepers->isNotEmpty()) {
-            $firstKeeper = $availableKeepers->shift();
-            $this->debugLog("Selected first keeper: {$firstKeeper->name}");
-            $keepers->push($firstKeeper);
-        }
-
-        // Pick remaining 3 keepers considering weight diversity and rotation
-        while ($keepers->count() < 4 && $availableKeepers->isNotEmpty()) {
-            $bestCandidate = $this->findBestKeeperCandidate($keepers, $availableKeepers);
-
-            if ($bestCandidate !== null) {
-                $selectedKeeper = $availableKeepers->splice($bestCandidate, 1)->first();
-                $keeperNumber = $keepers->count() + 1;
-                $this->debugLog("Selected keeper {$keeperNumber}: {$selectedKeeper->name}");
-                $keepers->push($selectedKeeper);
-            } else {
-                $fallbackKeeper = $availableKeepers->shift();
-                $keeperNumber = $keepers->count() + 1;
-                $this->debugLog("Selected fallback keeper {$keeperNumber}: {$fallbackKeeper->name}");
-                $keepers->push($fallbackKeeper);
-            }
-        }
-
-        // Final log of selected keepers
+        // Log selected keepers
         $this->debugLog('Final selected keepers:', $keepers->pluck('name')->toArray());
 
         return $keepers;
-    }
-
-    /**
-     * Find the best keeper candidate based on weight balance
-     */
-    private function findBestKeeperCandidate(Collection $currentKeepers, Collection $availableKeepers): ?int
-    {
-        $bestCandidate = null;
-        $bestBalance = PHP_FLOAT_MAX;
-
-        foreach ($availableKeepers as $index => $candidate) {
-            $testGroup = $currentKeepers->push($candidate);
-            $balance = $this->calculateWeightBalance($testGroup->pluck('id')->all());
-
-            if ($balance < $bestBalance) {
-                $bestBalance = $balance;
-                $bestCandidate = $index;
-            }
-
-            $currentKeepers->pop(); // Remove test candidate
-        }
-
-        return $bestCandidate;
     }
 
     /**
