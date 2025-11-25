@@ -10,6 +10,7 @@
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
     'Segoe UI Symbol', 'Noto Color Emoji';
     --background-image-home-hero: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://images.unsplash.com/photo-1517927033932-b3d18e61fb3a?q=80&w=1920&auto=format&fit=crop');
+    --breakpoint-xs: 30rem;
 }
 
 @layer components {
@@ -47,22 +48,30 @@
     }
 
     main.football-matches-show .top-row-actions,
+    main.football-matches-show .parents-invite,
     main.football-matches-show .opponent-info,
     main.football-matches-show .line-up-header,
-    main.football-matches-show .player-stats {
+    main.football-matches-show .player-stats,
+    main.football-matches-share .top-row-actions,
+    main.football-matches-share .opponent-info,
+    main.football-matches-share .line-up-header,
+    main.football-matches-share .player-stats {
         display: none;
     }
 
-    main.football-matches-show .line-up-block {
+    main.football-matches-show .line-up-block,
+    main.football-matches-share .line-up-block {
         padding: 2px !important;
     }
 
-    main.football-matches-show .line-up-player-rows {
+    main.football-matches-show .line-up-player-rows,
+    main.football-matches-share .line-up-player-rows {
         padding: 0 !important;
         gap: 5px;
     }
 
-    td, th {
+    main.football-matches-show td, th,
+    main.football-matches-share td, th {
         padding-right: 0 !important;
         padding-block: 5px !important;
         width: auto !important;
