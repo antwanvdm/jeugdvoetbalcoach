@@ -270,21 +270,46 @@ class LineupGeneratorService
      */
     private function pickQuarterForPlayer(array $alreadyAssignedQuarters, array $remainingPerQuarter): ?int
     {
-        // Filter quarters with remaining slots and not yet assigned to this player
-        $options = [];
+        // Helper to check adjacency considering wrap-around (1 adjacent to 2 and 4)
+        $isAdjacent = function (int $a, int $b): bool {
+            return $a === $b - 1 || $a === $b + 1 || ($a === 4 && $b === 1) || ($a === 1 && $b === 4);
+        };
+
+        // Build candidate quarters with remaining slots, excluding ones already assigned
+        $candidates = [];
         foreach ($remainingPerQuarter as $q => $remaining) {
             if ($remaining > 0 && !in_array($q, $alreadyAssignedQuarters, true)) {
-                $options[$q] = $remaining;
+                $candidates[$q] = $remaining;
             }
         }
 
-        if (empty($options)) {
+        if (empty($candidates)) {
+            return null;
+        }
+
+        // First pass: prefer quarters that are NOT adjacent to any already assigned quarter for this player
+        $nonAdjacent = [];
+        foreach ($candidates as $q => $remaining) {
+            $adjacentToExisting = false;
+            foreach ($alreadyAssignedQuarters as $assigned) {
+                if ($isAdjacent($q, (int)$assigned)) {
+                    $adjacentToExisting = true;
+                    break;
+                }
+            }
+            if (!$adjacentToExisting) {
+                $nonAdjacent[$q] = $remaining;
+            }
+        }
+
+        // If only adjacent quarters remain, enforce the rule by skipping assignment now
+        if (empty($nonAdjacent)) {
             return null;
         }
 
         // Choose the quarter with the highest remaining; tie-breaker by quarter number
-        arsort($options); // descending by remaining
-        $bestQuarter = array_key_first($options);
+        arsort($nonAdjacent); // descending by remaining
+        $bestQuarter = array_key_first($nonAdjacent);
         return (int)$bestQuarter;
     }
 
