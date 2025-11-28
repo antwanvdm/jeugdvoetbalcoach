@@ -53,8 +53,11 @@ class PlayerController extends Controller
         Gate::authorize('create', Player::class);
 
         $positions = Position::orderBy('name')->pluck('name', 'id');
-        $seasons = Season::orderByDesc('year')->orderByDesc('part')->get()->mapWithKeys(fn($s) => [$s->id => $s->year . '-' . $s->part]);
-        return view('players.create', compact('positions', 'seasons'));
+        $seasonsCollection = Season::orderByDesc('year')->orderByDesc('part')->get();
+        $seasons = $seasonsCollection->mapWithKeys(fn($s) => [$s->id => $s->year . '-' . $s->part]);
+        $currentSeason = Season::getCurrent($seasonsCollection);
+
+        return view('players.create', compact('positions', 'seasons', 'currentSeason'));
     }
 
     /**
@@ -65,23 +68,32 @@ class PlayerController extends Controller
         Gate::authorize('create', Player::class);
 
         $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'position_id' => ['required', 'exists:positions,id'],
-            'weight' => ['required', 'numeric'],
-            'seasons' => ['sometimes', 'array'],
+            'players' => ['required', 'array', 'min:1'],
+            'players.*.name' => ['required', 'string', 'max:255'],
+            'players.*.position_id' => ['required', 'exists:positions,id'],
+            'players.*.weight' => ['required', 'numeric', 'min:1', 'max:2'],
+            'seasons' => ['required', 'array', 'min:1'],
             'seasons.*' => ['integer', 'exists:seasons,id'],
         ]);
 
-        $validated['user_id'] = auth()->id();
-        $validated['team_id'] = session('current_team_id');
-        $player = Player::create($validated);
+        $userId = auth()->id();
+        $teamId = session('current_team_id');
+        $seasonIds = array_filter((array)$request->input('seasons'));
 
-        if ($request->has('seasons')) {
-            $seasonIds = array_filter((array)$request->input('seasons'));
+        $createdCount = 0;
+        foreach ($validated['players'] as $playerData) {
+            $playerData['user_id'] = $userId;
+            $playerData['team_id'] = $teamId;
+            $player = Player::create($playerData);
             $player->seasons()->sync($seasonIds);
+            $createdCount++;
         }
 
-        return redirect()->route('players.index')->with('success', 'Speler aangemaakt.');
+        $message = $createdCount === 1
+            ? 'Speler aangemaakt.'
+            : "{$createdCount} spelers aangemaakt.";
+
+        return redirect()->route('players.index')->with('success', $message);
     }
 
     /**

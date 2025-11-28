@@ -228,3 +228,107 @@ function escapeHtml(str) {
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
 }
+
+// Dynamic Player Rows Management
+document.addEventListener("DOMContentLoaded", function () {
+    const playersContainer = document.getElementById("players-rows");
+    const addPlayerBtn = document.getElementById("add-player-btn");
+
+    if (!playersContainer || !addPlayerBtn) return;
+
+    let rowIndex = 1; // Start from 1 since we have row 0 already
+
+    // Function to update remove button visibility
+    function updateRemoveButtons() {
+        const rows = playersContainer.querySelectorAll(".player-row");
+        const removeBtns =
+            playersContainer.querySelectorAll(".remove-player-btn");
+
+        // Show remove buttons only if there's more than 1 row
+        removeBtns.forEach((btn) => {
+            if (rows.length > 1) {
+                btn.classList.remove("hidden");
+            } else {
+                btn.classList.add("hidden");
+            }
+        });
+    }
+
+    // Function to create a new player row
+    function createPlayerRow(index) {
+        const row = document.createElement("div");
+        row.className = "player-row mb-3 p-3 border rounded bg-gray-50";
+        row.setAttribute("data-row-index", index);
+
+        // Get positions from the first select element
+        const firstSelect = playersContainer.querySelector(
+            'select[name$="[position_id]"]'
+        );
+        const positionsHTML = firstSelect ? firstSelect.innerHTML : "";
+
+        row.innerHTML = `
+            <div class="grid grid-cols-1 sm:grid-cols-[2fr_1.5fr_1fr_auto] gap-3 items-start">
+                <div>
+                    <label class="block text-sm font-medium mb-1 sm:hidden">Naam</label>
+                    <input type="text" name="players[${index}][name]"
+                           class="w-full border rounded p-2"
+                           placeholder="Naam van de speler" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1 sm:hidden">Positie</label>
+                    <select name="players[${index}][position_id]"
+                            class="w-full border rounded p-2" required>
+                        ${positionsHTML}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1 sm:hidden">Fysiek</label>
+                    <input type="number" name="players[${index}][weight]"
+                           class="w-full border rounded p-2"
+                           placeholder="1-2" min="1" max="2" step="0.1" value="1" required>
+                </div>
+                <div class="flex items-start sm:items-center sm:justify-center">
+                    <button type="button" class="remove-player-btn w-10 h-10 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition" title="Verwijder speler">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        `;
+
+        return row;
+    }
+
+    // Add player button click handler
+    addPlayerBtn.addEventListener("click", function () {
+        const newRow = createPlayerRow(rowIndex);
+        playersContainer.appendChild(newRow);
+        rowIndex++;
+        updateRemoveButtons();
+
+        // Focus on the name input of the new row
+        const nameInput = newRow.querySelector('input[name$="[name]"]');
+        if (nameInput) {
+            nameInput.focus();
+        }
+    });
+
+    // Remove player button click handler (event delegation)
+    playersContainer.addEventListener("click", function (e) {
+        const removeBtn = e.target.closest(".remove-player-btn");
+        if (removeBtn) {
+            const row = removeBtn.closest(".player-row");
+            const rows = playersContainer.querySelectorAll(".player-row");
+
+            // Only remove if more than 1 row exists
+            if (rows.length > 1 && row) {
+                row.remove();
+                updateRemoveButtons();
+            }
+        }
+    });
+
+    // Initial state
+    updateRemoveButtons();
+});

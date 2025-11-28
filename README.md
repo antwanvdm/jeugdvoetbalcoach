@@ -279,8 +279,8 @@ php artisan make:migration create_example_table
 -   [x] Tegenstanders mass import via admin, koppelen vanuit gebruikers
 -   [x] Deelbare view met unieke link voor niet ingelogde gebruikers van losse wedstrijden
 -   [x] Aanmaken wedstrijd moet optie geven om afwezige spelers aan te geven (IPV achteraf alles te moeten aanpassen)
+-   [x] Spelers aanmaken moet in 1 keer simpel kunnen, ook moeten die gewoon gelijk aan actieve seizoen gekoppeld worden
 -   [ ] Cascade on delete als gebruiker profiel verwijderd
--   [ ] Spelers aanmaken moet in 1 keer simpel kunnen, ook moeten die gewoon gelijk aan actieve seizoen gekoppeld worden
 -   [ ] Goals en assists bijhouden van spelers per wedstrijd
 -   [ ] JO13+ support met 11 spelers en twee helften i.p.v. 4 kwarten
 

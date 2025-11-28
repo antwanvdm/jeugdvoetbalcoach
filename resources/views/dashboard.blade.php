@@ -76,7 +76,7 @@
                                                 <div class="flex-shrink-0 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
                                                     <span class="text-white text-xs font-bold">3</span>
                                                 </div>
-                                                <a href="{{ route('football-matches.create') }}" class="text-sm text-blue-700 font-medium hover:underline">Plan je eerste wedstrijd →</a>
+                                                <a href="{{ route('football-matches.create', ['season_id' => $activeSeason?->id ?? '']) }}" class="text-sm text-blue-700 font-medium hover:underline">Plan je eerste wedstrijd →</a>
                                             @endif
                                         </div>
                                     </div>

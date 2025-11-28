@@ -10,7 +10,7 @@
                     @endforeach
                 </select>
             </form>
-            <a href="{{ route('players.create') }}" class="px-3 py-2 bg-blue-600 text-white rounded">Nieuwe speler</a>
+            <a href="{{ route('players.create') }}" class="px-3 py-2 bg-blue-600 text-white rounded">Nieuwe speler(s)</a>
         </div>
     </div>
 

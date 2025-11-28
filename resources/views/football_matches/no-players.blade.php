@@ -8,7 +8,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3M3 11h18M5 21h14a2 2 0 002-2V7H3v12a2 2 0 002 2z"/>
                 </svg>
             </div>
-            
+
             <h2 class="text-2xl font-bold text-gray-900 mb-3">Nog geen spelers toegevoegd</h2>
             <p class="text-gray-600 mb-6">
                 Om een wedstrijd te kunnen plannen heb je minimaal één speler nodig.
@@ -28,7 +28,7 @@
                     Terug naar dashboard
                 </a>
                 <a href="{{ route('players.create') }}" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-semibold">
-                    Voeg je eerste speler toe
+                    Voeg je spelers toe
                 </a>
             </div>
         </div>

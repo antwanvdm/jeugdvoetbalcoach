@@ -34,7 +34,7 @@ class FootballMatchController extends Controller
 
         $seasonId = $request->query('season_id') ?? ($activeSeason?->id ?? null);
         $matchesQuery = FootballMatch::with('opponent')->orderByDesc('date');
-        if($seasonId !== 'all') {
+        if ($seasonId !== 'all') {
             $matchesQuery->where('season_id', $seasonId);
         }
         $footballMatches = $matchesQuery->paginate(15)->withQueryString();
@@ -45,7 +45,7 @@ class FootballMatchController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create(Request $request): View
+    public function create(Request $request): View|RedirectResponse
     {
         Gate::authorize('create', FootballMatch::class);
 
@@ -54,22 +54,32 @@ class FootballMatchController extends Controller
             return view('football_matches.no-players');
         }
 
-        $opponents = Opponent::orderBy('name')->pluck('name', 'id');
-        $seasons = Season::orderByDesc('year')->orderByDesc('part')->get();
-        $activeSeason = Season::getCurrent($seasons);
-        $seasonsMapped = $seasons->mapWithKeys(fn($s) => [$s->id => $s->year . '-' . $s->part]);
+        // Get season_id from request (required)
+        $seasonId = $request->query('season_id') ?? old('season_id');
 
-        // Get players for the selected season (check query param, then old input, then active season)
-        $selectedSeasonId = $request->query('season_id') ?? old('season_id') ?? $activeSeason?->id;
-        $players = collect();
-        
-        if ($selectedSeasonId) {
-            $players = Player::whereHas('seasons', function ($q) use ($selectedSeasonId) {
-                $q->where('seasons.id', $selectedSeasonId);
-            })->orderBy('name')->get();
+        // If no season provided, redirect to index
+        if (!$seasonId) {
+            $currentSeason = Season::getCurrent();
+            return redirect()->route('football-matches.create', ['season_id' => $currentSeason->id])->with('error', 'Selecteer eerst een seizoen.');
         }
 
-        return view('football_matches.create', compact('opponents', 'seasonsMapped', 'activeSeason', 'players', 'selectedSeasonId'));
+        // Validate that the season belongs to the current team
+        $season = Season::where('id', $seasonId)
+            ->where('team_id', session('current_team_id'))
+            ->first();
+
+        if (!$season) {
+            abort(403, 'Dit seizoen hoort niet tot jouw team.');
+        }
+
+        $opponents = Opponent::orderBy('name')->pluck('name', 'id');
+
+        // Get players for the selected season
+        $players = Player::whereHas('seasons', function ($q) use ($seasonId) {
+            $q->where('seasons.id', $seasonId);
+        })->orderBy('name')->get();
+
+        return view('football_matches.create', compact('opponents', 'season', 'players'));
     }
 
     /**
@@ -89,9 +99,18 @@ class FootballMatchController extends Controller
             'available_players.*' => ['exists:players,id'],
         ]);
 
-        $validated = array_merge($validated, $request->only('season_id'));
-        $request->validate(['season_id' => ['nullable', 'exists:seasons,id']]);
+        // Validate season_id and check it belongs to current team
+        $request->validate(['season_id' => ['required', 'exists:seasons,id']]);
 
+        $season = Season::where('id', $request->input('season_id'))
+            ->where('team_id', session('current_team_id'))
+            ->first();
+
+        if (!$season) {
+            abort(403, 'Dit seizoen hoort niet tot jouw team.');
+        }
+
+        $validated['season_id'] = $season->id;
         $validated['user_id'] = auth()->id();
         $validated['team_id'] = session('current_team_id');
         $validated['share_token'] = Str::random(32);
@@ -99,7 +118,7 @@ class FootballMatchController extends Controller
 
         // Get selected (available) players - if none selected, use all players from season
         $availablePlayerIds = $request->input('available_players', []);
-        
+
         // Generate lineup using the service with available players
         $lineupGenerator->generateLineup($match, $availablePlayerIds);
 

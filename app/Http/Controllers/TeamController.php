@@ -152,8 +152,7 @@ class TeamController extends Controller
 
         session(['current_team_id' => $team->id]);
 
-        return redirect()->back()
-            ->with('success', "Je werkt nu in team: {$team->opponent?->name}");
+        return redirect()->route('dashboard')->with('success', "Je werkt nu in team: {$team->opponent?->name}");
     }
 
     /**
