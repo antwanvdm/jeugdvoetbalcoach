@@ -54,10 +54,10 @@ app/Services/
 
 ### 🧩 Formation Context (Dynamic)
 
-- Formatie wordt opgehaald via `Season->formation` van de match.
-- `lineup_formation` (bijv. `2-1-2`) wordt geparsed naar outfield-behoeften.
-- `total_players` (indien > 0) is leidend voor het aantal spelers op het veld per kwart.
-- `desiredOnField` is GEEN property meer, maar wordt berekend via `getDesiredOnField()`.
+-   Formatie wordt opgehaald via `Season->formation` van de match.
+-   `lineup_formation` (bijv. `2-1-2`) wordt geparsed naar outfield-behoeften.
+-   `total_players` (indien > 0) is leidend voor het aantal spelers op het veld per kwart.
+-   `desiredOnField` is GEEN property meer, maar wordt berekend via `getDesiredOnField()`.
 
 ### 🎯 **Class Responsibilities**
 
@@ -102,7 +102,11 @@ generateLineup()
 public function store(Request $request, LineupGeneratorService $lineupGenerator): RedirectResponse
 {
     $match = FootballMatch::create($validated);
-    $lineupGenerator->generateLineup($match);
+
+    // Optional: filter by available players
+    $availablePlayerIds = $request->input('available_players', []);
+    $lineupGenerator->generateLineup($match, $availablePlayerIds);
+
     return redirect()->route('football-matches.show', $match);
 }
 ```
@@ -119,8 +123,8 @@ public function store(Request $request, LineupGeneratorService $lineupGenerator)
 
 ### Core Methods
 
--   `generateLineup(FootballMatch $match)` - Main entry point
--   `loadPlayersData()` - Loads players and statistics
+-   `generateLineup(FootballMatch $match, array $availablePlayerIds = [])` - Main entry point with optional player filtering
+-   `loadPlayersData(FootballMatch $currentMatch, array $availablePlayerIds = [])` - Loads players and statistics (with optional filtering)
 -   `selectKeepers()` - Intelligent keeper selection
 -   `createBenchPlan(Collection $keepers)` - Creates rotation plan
 

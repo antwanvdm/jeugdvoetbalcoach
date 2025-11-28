@@ -45,7 +45,7 @@ class FootballMatchController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create(): View
+    public function create(Request $request): View
     {
         Gate::authorize('create', FootballMatch::class);
 
@@ -59,7 +59,17 @@ class FootballMatchController extends Controller
         $activeSeason = Season::getCurrent($seasons);
         $seasonsMapped = $seasons->mapWithKeys(fn($s) => [$s->id => $s->year . '-' . $s->part]);
 
-        return view('football_matches.create', compact('opponents', 'seasonsMapped', 'activeSeason'));
+        // Get players for the selected season (check query param, then old input, then active season)
+        $selectedSeasonId = $request->query('season_id') ?? old('season_id') ?? $activeSeason?->id;
+        $players = collect();
+        
+        if ($selectedSeasonId) {
+            $players = Player::whereHas('seasons', function ($q) use ($selectedSeasonId) {
+                $q->where('seasons.id', $selectedSeasonId);
+            })->orderBy('name')->get();
+        }
+
+        return view('football_matches.create', compact('opponents', 'seasonsMapped', 'activeSeason', 'players', 'selectedSeasonId'));
     }
 
     /**
@@ -75,6 +85,8 @@ class FootballMatchController extends Controller
             'goals_scored' => ['nullable', 'integer', 'min:0'],
             'goals_conceded' => ['nullable', 'integer', 'min:0'],
             'date' => ['required', 'date'],
+            'available_players' => ['nullable', 'array'],
+            'available_players.*' => ['exists:players,id'],
         ]);
 
         $validated = array_merge($validated, $request->only('season_id'));
@@ -85,8 +97,11 @@ class FootballMatchController extends Controller
         $validated['share_token'] = Str::random(32);
         $match = FootballMatch::create($validated);
 
-        // Generate lineup using the service
-        $lineupGenerator->generateLineup($match);
+        // Get selected (available) players - if none selected, use all players from season
+        $availablePlayerIds = $request->input('available_players', []);
+        
+        // Generate lineup using the service with available players
+        $lineupGenerator->generateLineup($match, $availablePlayerIds);
 
         return redirect()->route('football-matches.show', $match)
             ->with('success', 'Wedstrijd aangemaakt en line-up automatisch gegenereerd.');
