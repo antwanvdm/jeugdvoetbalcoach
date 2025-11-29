@@ -131,13 +131,13 @@ Teams vormen de centrale entiteit voor samenwerking tussen meerdere coaches.
 
 Koppelt gebruikers aan teams met rol, standaardstatus, join datum en label.
 
-| Kolom        | Type            | Nullable | Default           | Beschrijving                          |
-|--------------|-----------------|----------|-------------------|---------------------------------------|
-| `team_id`    | bigint unsigned | NO       |                   | Verwijst naar team                    |
-| `user_id`    | bigint unsigned | NO       |                   | Verwijst naar gebruiker               |
-| `role`       | tinyint         | NO       |                   | 1 = hoofdcoach, 2 = assistent         |
-| `is_default` | boolean         | NO       | false             | Of dit het standaard team is          |
-| `joined_at`  | timestamp       | NO       | CURRENT_TIMESTAMP | Tijdstip van toetreding               |
+| Kolom        | Type            | Nullable | Default           | Beschrijving                                       |
+|--------------|-----------------|----------|-------------------|----------------------------------------------------|
+| `team_id`    | bigint unsigned | NO       |                   | Verwijst naar team                                 |
+| `user_id`    | bigint unsigned | NO       |                   | Verwijst naar gebruiker                            |
+| `role`       | tinyint         | NO       |                   | 1 = hoofdcoach, 2 = assistent                      |
+| `is_default` | boolean         | NO       | false             | Of dit het standaard team is                       |
+| `joined_at`  | timestamp       | NO       | CURRENT_TIMESTAMP | Tijdstip van toetreding                            |
 | `label`      | varchar(180)    | YES      | NULL              | Optionele rolbeschrijving (bijv. "Keeperstrainer") |
 
 **Primary Key**: Composite (`team_id`, `user_id`).
@@ -309,19 +309,19 @@ Formatie presets (globaal beschikbaar of per team).
 
 Seizoenen per team.
 
-| Kolom          | Type            | Nullable | Default        | Beschrijving                              |
-|----------------|-----------------|----------|----------------|-------------------------------------------|
-| `id`           | bigint unsigned | NO       | AUTO_INCREMENT | Primary key                               |
-| `team_id`      | bigint unsigned | YES      | NULL           | Team                                      |
-| `formation_id` | bigint unsigned | NO       |                | Gebruikte formatie                        |
-| `year`         | int             | NO       |                | Jaar (bijv. 2025)                         |
-| `part`         | varchar(255)    | NO       |                | Deel (bijv. "Najaar")                     |
-| `start_date`   | date            | NO       |                | Startdatum                                |
-| `end_date`     | date            | NO       |                | Einddatum                                 |
-| `track_goals`  | boolean         | NO       | false          | Of doelpunten bijgehouden worden          |
+| Kolom          | Type            | Nullable | Default        | Beschrijving                               |
+|----------------|-----------------|----------|----------------|--------------------------------------------|
+| `id`           | bigint unsigned | NO       | AUTO_INCREMENT | Primary key                                |
+| `team_id`      | bigint unsigned | YES      | NULL           | Team                                       |
+| `formation_id` | bigint unsigned | NO       |                | Gebruikte formatie                         |
+| `year`         | int             | NO       |                | Jaar (bijv. 2025)                          |
+| `part`         | varchar(255)    | NO       |                | Deel (bijv. "Najaar")                      |
+| `start_date`   | date            | NO       |                | Startdatum                                 |
+| `end_date`     | date            | NO       |                | Einddatum                                  |
+| `track_goals`  | boolean         | NO       | false          | Of doelpunten bijgehouden worden           |
 | `share_token`  | varchar(64)     | YES      | NULL           | Unieke token voor publieke toegang (uniek) |
-| `created_at`   | timestamp       | YES      | NULL           | Aanmaakdatum          |
-| `updated_at`   | timestamp       | YES      | NULL           | Laatste wijziging     |
+| `created_at`   | timestamp       | YES      | NULL           | Aanmaakdatum                               |
+| `updated_at`   | timestamp       | YES      | NULL           | Laatste wijziging                          |
 
 **Foreign Keys:**
 
@@ -340,20 +340,20 @@ Seizoenen per team.
 
 Wedstrijden per team met resultaten en metadata.
 
-| Kolom            | Type            | Nullable | Default        | Beschrijving                          |
-|------------------|-----------------|----------|----------------|---------------------------------------|
-| `id`             | bigint unsigned | NO       | AUTO_INCREMENT | Primary key                           |
-| `team_id`        | bigint unsigned | YES      | NULL           | Team                                  |
+| Kolom            | Type            | Nullable | Default        | Beschrijving                               |
+|------------------|-----------------|----------|----------------|--------------------------------------------|
+| `id`             | bigint unsigned | NO       | AUTO_INCREMENT | Primary key                                |
+| `team_id`        | bigint unsigned | YES      | NULL           | Team                                       |
 | `share_token`    | varchar(32)     | YES      | NULL           | Unieke token voor publieke toegang (uniek) |
-| `season_id`      | bigint unsigned | NO       |                | Seizoen referentie                    |
-| `opponent_id`    | bigint unsigned | NO       |                | Tegenstander                          |
-| `home`           | tinyint(1)      | NO       |                | Thuis (1) of uit (0)                  |
-| `goals_scored`   | int unsigned    | YES      | NULL           | Doelpunten gescoord                   |
-| `goals_conceded` | int unsigned    | YES      | NULL           | Doelpunten tegengekregen              |
-| `date`           | datetime        | NO       |                | Wedstrijddatum en tijd                |
-| `notes`          | text            | YES      | NULL           | Notities/aantekeningen bij wedstrijd  |
-| `created_at`     | timestamp       | YES      | NULL           | Aanmaakdatum                          |
-| `updated_at`     | timestamp       | YES      | NULL           | Laatste wijziging                     |
+| `season_id`      | bigint unsigned | NO       |                | Seizoen referentie                         |
+| `opponent_id`    | bigint unsigned | NO       |                | Tegenstander                               |
+| `home`           | tinyint(1)      | NO       |                | Thuis (1) of uit (0)                       |
+| `goals_scored`   | int unsigned    | YES      | NULL           | Doelpunten gescoord                        |
+| `goals_conceded` | int unsigned    | YES      | NULL           | Doelpunten tegengekregen                   |
+| `date`           | datetime        | NO       |                | Wedstrijddatum en tijd                     |
+| `notes`          | text            | YES      | NULL           | Notities/aantekeningen bij wedstrijd       |
+| `created_at`     | timestamp       | YES      | NULL           | Aanmaakdatum                               |
+| `updated_at`     | timestamp       | YES      | NULL           | Laatste wijziging                          |
 
 **Computed properties:**
 
@@ -412,17 +412,17 @@ Pivot tabel die spelers koppelt aan wedstrijden per kwart.
 
 Gescoorde doelpunten per wedstrijd met speler en assist informatie.
 
-| Kolom               | Type            | Nullable | Default        | Beschrijving                     |
-|---------------------|-----------------|----------|----------------|----------------------------------|
-| `id`                | bigint unsigned | NO       | AUTO_INCREMENT | Primary key                      |
-| `football_match_id` | bigint unsigned | NO       |                | Wedstrijd referentie             |
-| `player_id`         | bigint unsigned | YES      | NULL           | Speler die scoorde               |
-| `assist_player_id`  | bigint unsigned | YES      | NULL           | Speler die assist gaf            |
-| `minute`            | int             | YES      | NULL           | Minuut waarin gescoord werd      |
-| `subtype`           | varchar(255)    | YES      | NULL           | Type doelpunt (bijv. penalty)    |
-| `notes`             | text            | YES      | NULL           | Extra notities bij doelpunt      |
-| `created_at`        | timestamp       | YES      | NULL           | Aanmaakdatum                     |
-| `updated_at`        | timestamp       | YES      | NULL           | Laatste wijziging                |
+| Kolom               | Type            | Nullable | Default        | Beschrijving                  |
+|---------------------|-----------------|----------|----------------|-------------------------------|
+| `id`                | bigint unsigned | NO       | AUTO_INCREMENT | Primary key                   |
+| `football_match_id` | bigint unsigned | NO       |                | Wedstrijd referentie          |
+| `player_id`         | bigint unsigned | YES      | NULL           | Speler die scoorde            |
+| `assist_player_id`  | bigint unsigned | YES      | NULL           | Speler die assist gaf         |
+| `minute`            | int             | YES      | NULL           | Minuut waarin gescoord werd   |
+| `subtype`           | varchar(255)    | YES      | NULL           | Type doelpunt (bijv. penalty) |
+| `notes`             | text            | YES      | NULL           | Extra notities bij doelpunt   |
+| `created_at`        | timestamp       | YES      | NULL           | Aanmaakdatum                  |
+| `updated_at`        | timestamp       | YES      | NULL           | Laatste wijziging             |
 
 **Belangrijke opmerkingen:**
 
