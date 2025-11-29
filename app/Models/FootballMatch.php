@@ -20,6 +20,7 @@ class FootballMatch extends Model
         'user_id',
         'team_id',
         'share_token',
+        'notes',
     ];
 
     protected $casts = [
@@ -63,6 +64,11 @@ class FootballMatch extends Model
     public function season(): BelongsTo
     {
         return $this->belongsTo(Season::class);
+    }
+
+    public function goals()
+    {
+        return $this->hasMany(MatchGoal::class);
     }
 
     protected function result(): Attribute

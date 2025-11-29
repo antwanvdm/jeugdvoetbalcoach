@@ -7,6 +7,7 @@ use App\Models\Season;
 use Gate;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class SeasonController extends Controller
@@ -62,7 +63,15 @@ class SeasonController extends Controller
     {
         Gate::authorize('view', $season);
 
-        return view('seasons.show', compact('season'));
+        $matches = $season->footballMatches()
+            ->with('opponent')
+            ->orderBy('date')
+            ->get();
+
+        $topScorers = $season->track_goals ? $season->topScorers(5) : collect();
+        $topAssisters = $season->track_goals ? $season->topAssisters(5) : collect();
+
+        return view('seasons.show', compact('season', 'matches', 'topScorers', 'topAssisters'));
     }
 
     public function edit(Season $season): View
@@ -83,6 +92,7 @@ class SeasonController extends Controller
             'start' => ['required', 'date'],
             'end' => ['required', 'date', 'after_or_equal:start'],
             'formation_id' => ['required', 'integer', 'exists:formations,id'],
+            'track_goals' => ['boolean'],
         ]);
 
         $season->update($data);
@@ -96,5 +106,36 @@ class SeasonController extends Controller
 
         $season->delete();
         return redirect()->route('seasons.index')->with('success', 'Seizoen verwijderd.');
+    }
+
+    /**
+     * Regenerate the share token for a season.
+     */
+    public function regenerateShareToken(Season $season): RedirectResponse
+    {
+        Gate::authorize('update', $season);
+
+        $season->share_token = Str::random(64);
+        $season->save();
+
+        return redirect()->route('seasons.edit', $season)->with('success', 'Nieuwe deellink gegenereerd.');
+    }
+
+    /**
+     * Public view for season (parents).
+     */
+    public function showPublic(Season $season, string $shareToken): View
+    {
+        abort_if($season->share_token !== $shareToken, 404);
+
+        $matches = $season->footballMatches()
+            ->with('opponent')
+            ->orderBy('date')
+            ->get();
+
+        $topScorers = $season->track_goals ? $season->topScorers(5) : collect();
+        $topAssisters = $season->track_goals ? $season->topAssisters(5) : collect();
+
+        return view('seasons.public', compact('season', 'matches', 'topScorers', 'topAssisters'));
     }
 }

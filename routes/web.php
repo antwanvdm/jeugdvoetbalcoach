@@ -24,6 +24,9 @@ Route::get('/api/opponents', OpponentSearchController::class)->name('api.opponen
 // Public football match share (for parents)
 Route::get('/football-matches/{footballMatch}/share/{shareToken}', [FootballMatchController::class, 'showPublic'])->name('football-matches.share');
 
+// Public season share (for parents)
+Route::get('/seasons/{season}/share/{shareToken}', [SeasonController::class, 'showPublic'])->name('seasons.share');
+
 // Public team join routes (accessible without authentication)
 Route::get('/teams/join/{inviteCode}', [TeamController::class, 'showJoin'])->name('teams.join.show');
 Route::post('/teams/join/{inviteCode}', [TeamController::class, 'join'])->middleware('auth')->name('teams.join');
@@ -63,6 +66,9 @@ Route::middleware(['auth'])->group(function () {
         'opponents' => OpponentController::class,
         'football-matches' => FootballMatchController::class,
     ]);
+
+    // Season share token regeneration
+    Route::post('/seasons/{season}/share/regenerate', [SeasonController::class, 'regenerateShareToken'])->name('seasons.share.regenerate');
 
     // Admin-only: Position//User management
     Route::middleware(['admin'])->name('admin.')->group(function () {

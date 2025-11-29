@@ -160,7 +160,7 @@ class FootballMatchController extends Controller
      */
     private function getMatchViewData(FootballMatch $footballMatch): array
     {
-        $footballMatch->load(['opponent']);
+        $footballMatch->load(['opponent', 'goals.player', 'goals.assistPlayer']);
 
         // Fetch all pivot rows for this match and group by quarter to avoid de-duplication by player_id
         $rows = Player::query()
@@ -230,7 +230,18 @@ class FootballMatchController extends Controller
             ->get()
             ->mapWithKeys(fn($s) => [$s->id => $s->year . '-' . $s->part]);
 
-        return view('football_matches.edit', compact('footballMatch', 'opponents', 'seasonsMapped'));
+        // Load season and players for goal tracking
+        $season = $footballMatch->season;
+        $players = collect();
+        if ($season && $season->track_goals) {
+            $players = Player::whereHas('seasons', function ($q) use ($season) {
+                $q->where('seasons.id', $season->id);
+            })->orderBy('name')->get();
+        }
+
+        $goals = $footballMatch->goals()->with(['player', 'assistPlayer'])->orderBy('minute')->get();
+
+        return view('football_matches.edit', compact('footballMatch', 'opponents', 'seasonsMapped', 'season', 'players', 'goals'));
     }
 
     /**
@@ -246,11 +257,18 @@ class FootballMatchController extends Controller
             'goals_scored' => ['nullable', 'integer', 'min:0'],
             'goals_conceded' => ['nullable', 'integer', 'min:0'],
             'date' => ['required', 'date'],
+            'notes' => ['nullable', 'string'],
         ]);
         $request->validate(['season_id' => ['nullable', 'exists:seasons,id']]);
         $validated = array_merge($validated, $request->only('season_id'));
 
         $footballMatch->update($validated);
+
+        // Sync goals if track_goals is enabled
+        if ($footballMatch->season && $footballMatch->season->track_goals) {
+            $this->syncMatchGoals($request, $footballMatch);
+        }
+
         return redirect()->route('football-matches.show', $footballMatch)->with('success', 'Wedstrijd bijgewerkt.');
     }
 
@@ -336,5 +354,66 @@ class FootballMatchController extends Controller
         }
 
         return redirect()->route('football-matches.show', $footballMatch)->with('success', 'Line-up opgeslagen.');
+    }
+
+    /**
+     * Sync match goals from request data.
+     */
+    private function syncMatchGoals(Request $request, FootballMatch $footballMatch): void
+    {
+        $goalsData = $request->input('goals', []);
+        $teamPlayers = Player::whereHas('seasons', function ($q) use ($footballMatch) {
+            $q->where('seasons.id', $footballMatch->season_id);
+        })->pluck('id')->toArray();
+
+        $existingIds = [];
+
+        foreach ($goalsData as $goalInput) {
+            // Skip if marked for deletion
+            if (!empty($goalInput['_delete'])) {
+                if (!empty($goalInput['id'])) {
+                    $footballMatch->goals()->where('id', $goalInput['id'])->delete();
+                }
+                continue;
+            }
+
+            // Validate player_id (null = own goal is allowed)
+            $playerId = !empty($goalInput['player_id']) ? (int)$goalInput['player_id'] : null;
+            if ($playerId && !in_array($playerId, $teamPlayers)) {
+                continue; // Invalid player
+            }
+
+            // Validate assist_player_id
+            $assistPlayerId = !empty($goalInput['assist_player_id']) ? (int)$goalInput['assist_player_id'] : null;
+            if ($assistPlayerId && !in_array($assistPlayerId, $teamPlayers)) {
+                $assistPlayerId = null;
+            }
+
+            $goalData = [
+                'player_id' => $playerId,
+                'assist_player_id' => $assistPlayerId,
+                'minute' => !empty($goalInput['minute']) ? (int)$goalInput['minute'] : null,
+                'subtype' => $goalInput['subtype'] ?? null,
+                'notes' => $goalInput['notes'] ?? null,
+            ];
+
+            if (!empty($goalInput['id'])) {
+                // Update existing
+                $goal = $footballMatch->goals()->find($goalInput['id']);
+                if ($goal) {
+                    $goal->update($goalData);
+                    $existingIds[] = $goal->id;
+                }
+            } else {
+                // Create new
+                $goal = $footballMatch->goals()->create($goalData);
+                $existingIds[] = $goal->id;
+            }
+        }
+
+        // Delete goals not present in the request (orphaned)
+        if (!empty($existingIds)) {
+            $footballMatch->goals()->whereNotIn('id', $existingIds)->delete();
+        }
     }
 }

@@ -10,10 +10,11 @@ use Illuminate\Support\Carbon;
 
 class Season extends Model
 {
-    protected $fillable = ['year', 'part', 'start', 'end', 'formation_id', 'user_id', 'team_id'];
+    protected $fillable = ['year', 'part', 'start', 'end', 'formation_id', 'user_id', 'team_id', 'track_goals', 'share_token'];
     protected $casts = [
         'start' => 'date',
         'end' => 'date',
+        'track_goals' => 'boolean',
     ];
 
     /**
@@ -68,5 +69,41 @@ class Season extends Model
                 ->first();
         }
         return $activeSeason;
+    }
+
+    /**
+     * Get top scorers for this season (players with most goals).
+     */
+    public function topScorers(int $limit = 10)
+    {
+        return Player::query()
+            ->select('players.*')
+            ->selectRaw('COUNT(match_goals.id) as goals_count')
+            ->join('match_goals', 'players.id', '=', 'match_goals.player_id')
+            ->join('football_matches', 'match_goals.football_match_id', '=', 'football_matches.id')
+            ->where('football_matches.season_id', $this->id)
+            ->where('football_matches.team_id', $this->team_id)
+            ->groupBy('players.id')
+            ->orderByDesc('goals_count')
+            ->limit($limit)
+            ->get();
+    }
+
+    /**
+     * Get top assist providers for this season.
+     */
+    public function topAssisters(int $limit = 10)
+    {
+        return Player::query()
+            ->select('players.*')
+            ->selectRaw('COUNT(match_goals.id) as assists_count')
+            ->join('match_goals', 'players.id', '=', 'match_goals.assist_player_id')
+            ->join('football_matches', 'match_goals.football_match_id', '=', 'football_matches.id')
+            ->where('football_matches.season_id', $this->id)
+            ->where('football_matches.team_id', $this->team_id)
+            ->groupBy('players.id')
+            ->orderByDesc('assists_count')
+            ->limit($limit)
+            ->get();
     }
 }

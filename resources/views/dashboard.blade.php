@@ -167,9 +167,31 @@
                     @else
                         <ul>
                             @foreach($recentMatches as $m)
-                                <li class="mb-2">
-                                    <div class="text-sm text-gray-600">{{ $m->date->format('Y-m-d') }} - {{ $m->opponent?->name }}</div>
-                                    <div class="font-medium">{{ $m->goals_scored ?? '-' }} - {{ $m->goals_conceded ?? '-' }} <span class="ml-2 text-sm text-gray-500">({{ $m->result }})</span></div>
+                                <li class="pb-3 mb-3 border-b border-gray-200 last:border-b-0 last:mb-0">
+                                    <div class="flex items-center justify-between gap-4">
+                                        <div class="flex items-center gap-3">
+                                            @if($m->opponent?->logo)
+                                                <img src="{{ asset('storage/' . $m->opponent->logo) }}" alt="{{ $m->opponent?->name }}" class="h-8 w-8 object-contain">
+                                            @else
+                                                <div class="h-8 w-8 flex items-center justify-center bg-gray-100 rounded text-gray-400 text-xs">?</div>
+                                            @endif
+                                            <div>
+                                                <div class="text-sm text-gray-600">{{ $m->date->translatedFormat('d-m-Y') }} • {{ $m->opponent?->name }} <span class="text-xs text-gray-500">({{ $m->home ? 'T' : 'U' }})</span></div>
+                                                <div class="mt-1 font-bold result-{{$m->result}}">
+                                                    @if($m->result !== 'O')
+                                                        @if($m->home)
+                                                            {{ $m->goals_scored }} - {{ $m->goals_conceded }}
+                                                        @else
+                                                            {{ $m->goals_conceded }} - {{ $m->goals_scored }}
+                                                        @endif
+                                                    @else
+                                                        <span class="text-gray-500">-</span>
+                                                    @endif
+                                                    <span class="ml-2 text-xs text-gray-500">({{ $m->result }})</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </li>
                             @endforeach
                         </ul>

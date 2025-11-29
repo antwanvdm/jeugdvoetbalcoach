@@ -37,4 +37,15 @@
         @error('formation_id')
         <div class="text-red-600 text-sm">{{ $message }}</div>@enderror
     </div>
+
+    <div>
+        <label class="flex items-center gap-2 text-sm text-gray-700">
+            <input type="hidden" name="track_goals" value="0">
+            <input type="checkbox" name="track_goals" value="1" {{ old('track_goals', $season->track_goals ?? false) ? 'checked' : '' }} class="rounded">
+            <span>Doelpunten bijhouden</span>
+        </label>
+        <p class="text-xs text-gray-600 mt-1">Houd doelpunten en assists bij per wedstrijd.</p>
+        @error('track_goals')
+        <div class="text-red-600 text-sm">{{ $message }}</div>@enderror
+    </div>
 </div>

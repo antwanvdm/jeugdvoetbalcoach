@@ -332,3 +332,53 @@ document.addEventListener("DOMContentLoaded", function () {
     // Initial state
     updateRemoveButtons();
 });
+
+// Dynamic Goal Rows Management (Football Match Goals)
+document.addEventListener("DOMContentLoaded", function () {
+    const goalsContainer = document.getElementById("goals-container");
+    const addGoalBtn = document.getElementById("add-goal-btn");
+
+    if (!goalsContainer || !addGoalBtn) return;
+
+    let goalIndex = goalsContainer.querySelectorAll(".goal-row").length;
+
+    // Add goal button click handler
+    addGoalBtn.addEventListener("click", function () {
+        const template = document.getElementById("goal-row-template");
+        if (!template) return;
+
+        const templateContent = template.innerHTML.replace(
+            /__INDEX__/g,
+            goalIndex
+        );
+        const tempDiv = document.createElement("div");
+        tempDiv.innerHTML = templateContent;
+        const newRow = tempDiv.firstElementChild;
+
+        goalsContainer.appendChild(newRow);
+        goalIndex++;
+    });
+
+    // Remove goal button click handler (event delegation)
+    goalsContainer.addEventListener("click", function (e) {
+        const removeBtn = e.target.closest(".remove-goal-btn");
+        if (removeBtn) {
+            const row = removeBtn.closest(".goal-row");
+            if (row) {
+                // Check if this is an existing goal (has an ID)
+                const idInput = row.querySelector("input[name$='[id]']");
+                if (idInput && idInput.value) {
+                    // Mark for deletion instead of removing
+                    const deleteFlag = row.querySelector(".delete-flag");
+                    if (deleteFlag) {
+                        deleteFlag.value = "1";
+                        row.style.display = "none";
+                    }
+                } else {
+                    // New row, just remove it
+                    row.remove();
+                }
+            }
+        }
+    });
+});
