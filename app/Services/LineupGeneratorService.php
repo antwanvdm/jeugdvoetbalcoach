@@ -32,7 +32,7 @@ class LineupGeneratorService
 
     /**
      * Generate lineup for a football match
-     * 
+     *
      * @param FootballMatch $match
      * @param array $availablePlayerIds Optional array of player IDs that are available for this match
      */
@@ -52,7 +52,7 @@ class LineupGeneratorService
 
     /**
      * Load all players and their keeper statistics
-     * 
+     *
      * @param FootballMatch $currentMatch
      * @param array $availablePlayerIds Optional array of player IDs to filter by
      */
@@ -118,27 +118,31 @@ class LineupGeneratorService
         // Debug: Log last match keepers
         $this->debugLog('Last match keepers:', $this->lastMatchKeepers->toArray());
 
-        // Sort by priority:
-        // 1. Prefer players who didn't keep last match (0 = didn't keep, 1 = did keep)
-        // 2. Then by historical keeper count (ascending)
-        // 3. Then by name for consistency
+        // Filter players whose favorite position is keeper
+        $keeperPlayers = $this->players->filter(function ($player) {
+            return $this->getPlayerFavoriteRole($player->position_id) === 'keeper';
+        });
+
+        // Als er favoriete keepers zijn, gebruik alleen die
+        if ($keeperPlayers->isNotEmpty()) {
+            // Sorteer op wie het minst recent keeper was en minst vaak
+            $sortedKeepers = $keeperPlayers->sortBy(function ($player) {
+                $wasLastMatchKeeper = $this->lastMatchKeepers->contains($player->id) ? 1 : 0;
+                $historicalCount = (int)$this->keeperCounts->get($player->id, 0);
+                $this->debugLog("Player {$player->name}: wasLastMatchKeeper={$wasLastMatchKeeper}, historicalCount={$historicalCount}");
+                return [$wasLastMatchKeeper, $historicalCount, $player->name];
+            });
+            // Neem alle favoriete keepers
+            return $sortedKeepers->values();
+        }
+        // Geen favoriete keepers: fallback naar oude logica
         $sortedKeepers = $this->players->sortBy(function ($player) {
             $wasLastMatchKeeper = $this->lastMatchKeepers->contains($player->id) ? 1 : 0;
             $historicalCount = (int)$this->keeperCounts->get($player->id, 0);
-
-            // Debug: Log sorting criteria for each player
             $this->debugLog("Player {$player->name}: wasLastMatchKeeper={$wasLastMatchKeeper}, historicalCount={$historicalCount}");
-
             return [$wasLastMatchKeeper, $historicalCount, $player->name];
         });
-
-        // Simply take the first 4 from the sorted list
-        $keepers = $sortedKeepers->take(4)->values();
-
-        // Log selected keepers
-        $this->debugLog('Final selected keepers:', $keepers->pluck('name')->toArray());
-
-        return $keepers;
+        return $sortedKeepers->take(4)->values();
     }
 
     /**
@@ -146,7 +150,16 @@ class LineupGeneratorService
      */
     private function mapKeepersToQuarters(Collection $keepers): array
     {
-        return $keepers->mapWithKeys(fn($keeper, $index) => [$index + 1 => $keeper->id])->toArray();
+        // Verdeel keepers over 4 kwarten, herhaal indien nodig
+        $keeperCount = $keepers->count();
+        $mapping = [];
+        for ($q = 1; $q <= 4; $q++) {
+            if ($keeperCount > 0) {
+                $keeper = $keepers[($q - 1) % $keeperCount];
+                $mapping[$q] = $keeper->id;
+            }
+        }
+        return $mapping;
     }
 
     /**
@@ -160,15 +173,32 @@ class LineupGeneratorService
         // Total benches needed across all quarters
         $totalBenchesNeeded = array_sum($targetsPerQuarter);
 
-        // 1) Keepers: only bench if there are benches needed
+        // Count favorite keepers (position_id = 1)
+        $favoriteKeepersCount = $keepers->filter(fn($k) => $this->getPlayerFavoriteRole($k->position_id) === 'keeper')->count();
+
         $keeperBenchPlan = [];
-        if ($totalBenchesNeeded > 0) {
+
+        // Logica gebaseerd op aantal favoriete keepers:
+        // - 0 keepers: oude logica, iedereen kan keeper zijn, keepers krijgen 1 bankkwart
+        // - 1 keeper: keeper speelt altijd, komt nooit op de bank
+        // - 2+ keepers: keepers spelen alleen keeper, maar krijgen wel normale bankrotatie
+        if ($favoriteKeepersCount === 0 && $keepers->isNotEmpty() && $totalBenchesNeeded > 0) {
+            // Geen favoriete keepers: oude logica waarbij keepers 1 bankkwart krijgen
             foreach ($keepers as $index => $keeper) {
                 $keeperQuarter = $index + 1;
                 $benchQuarter = $this->calculateKeeperBenchQuarter($index, $keeperQuarter);
                 $keeperBenchPlan[$keeper->id] = [$benchQuarter];
             }
+        } elseif ($favoriteKeepersCount >= 2 && $totalBenchesNeeded > 0) {
+            // 2+ keepers: keepers moeten ook bankbeurten krijgen (net als andere spelers)
+            // We behandelen ze als non-keepers voor bankrotatie
+            foreach ($keepers as $index => $keeper) {
+                $keeperQuarter = ($index % 4) + 1; // Hun keeperkwart
+                // Ze mogen niet op de bank in hun keeperkwart, maar wel in andere kwarten
+                // We laten de normale distributie dit later afhandelen
+            }
         }
+        // Als $favoriteKeepersCount === 1: keeper krijgt GEEN bankkwart (blijft leeg in keeperBenchPlan)
 
         // 2) Calculate how many benches remain per quarter after assigning keeper benches
         $keeperBenchCounts = $this->computeKeeperBenchCounts($keeperBenchPlan);
@@ -178,8 +208,16 @@ class LineupGeneratorService
         }
 
         // 3) Distribute remaining benches among non-keepers evenly and deterministically
-        $nonKeepers = $this->players->reject(fn($p) => in_array($p->id, $keepers->pluck('id')->all(), true));
-        $nonKeeperBenchPlan = $this->distributeNonKeeperBenches($nonKeepers, $remainingPerQuarter);
+        // Bij 2+ favoriete keepers moeten keepers ook meedoen aan bankrotatie
+        if ($favoriteKeepersCount >= 2) {
+            // Alle spelers (inclusief keepers) doen mee aan bankrotatie
+            $playersForBenchRotation = $this->players;
+        } else {
+            // Keepers zijn al afgehandeld of niet aanwezig, alleen non-keepers
+            $playersForBenchRotation = $this->players->reject(fn($p) => in_array($p->id, $keepers->pluck('id')->all(), true));
+        }
+
+        $nonKeeperBenchPlan = $this->distributeNonKeeperBenches($playersForBenchRotation, $remainingPerQuarter, $keepers);
 
         // 4) Merge plans
         $benchPlan = $nonKeeperBenchPlan + $keeperBenchPlan;
@@ -229,8 +267,11 @@ class LineupGeneratorService
 
     /**
      * Distribute remaining bench slots across non-keepers as evenly as possible.
+     * @param Collection $nonKeepers Players to distribute bench slots for
+     * @param array $remainingPerQuarter Remaining bench slots per quarter
+     * @param Collection $keepers Collection of keepers (to check their keeping quarters)
      */
-    private function distributeNonKeeperBenches(Collection $nonKeepers, array $remainingPerQuarter): array
+    private function distributeNonKeeperBenches(Collection $nonKeepers, array $remainingPerQuarter, Collection $keepers = null): array
     {
         $benchPlan = [];
 
@@ -242,6 +283,17 @@ class LineupGeneratorService
             return $benchPlan;
         }
 
+        // Build a map of which quarter each keeper is keeping (if we have 2+ favorite keepers)
+        $keeperQuarterMap = [];
+        if ($keepers) {
+            $favoriteKeepers = $keepers->filter(fn($k) => $this->getPlayerFavoriteRole($k->position_id) === 'keeper');
+            if ($favoriteKeepers->count() >= 2) {
+                foreach ($favoriteKeepers->values() as $index => $keeper) {
+                    $keeperQuarterMap[$keeper->id] = ($index % 4) + 1;
+                }
+            }
+        }
+
         while ($totalRemaining > 0) {
             foreach ($ordered as $player) {
                 if ($totalRemaining <= 0) {
@@ -249,7 +301,11 @@ class LineupGeneratorService
                 }
 
                 $already = $benchPlan[$player->id] ?? [];
-                $quarter = $this->pickQuarterForPlayer($already, $remainingPerQuarter);
+
+                // Als deze speler een keeper is, mag hij niet op de bank in zijn keeperkwart
+                $excludedQuarter = $keeperQuarterMap[$player->id] ?? null;
+
+                $quarter = $this->pickQuarterForPlayer($already, $remainingPerQuarter, $excludedQuarter);
                 if ($quarter === null) {
                     // No quarter left that this player hasn't already been assigned → skip
                     continue;
@@ -267,18 +323,21 @@ class LineupGeneratorService
     /**
      * Pick the best quarter for a player to be benched next, preferring quarters with most remaining need.
      * Avoids assigning the same quarter twice to the same player.
+     * @param array $alreadyAssignedQuarters Quarters already assigned to this player
+     * @param array $remainingPerQuarter Remaining bench slots per quarter
+     * @param int|null $excludedQuarter Quarter that should be excluded (e.g., keeper's keeping quarter)
      */
-    private function pickQuarterForPlayer(array $alreadyAssignedQuarters, array $remainingPerQuarter): ?int
+    private function pickQuarterForPlayer(array $alreadyAssignedQuarters, array $remainingPerQuarter, ?int $excludedQuarter = null): ?int
     {
         // Helper to check adjacency considering wrap-around (1 adjacent to 2 and 4)
         $isAdjacent = function (int $a, int $b): bool {
             return $a === $b - 1 || $a === $b + 1 || ($a === 4 && $b === 1) || ($a === 1 && $b === 4);
         };
 
-        // Build candidate quarters with remaining slots, excluding ones already assigned
+        // Build candidate quarters with remaining slots, excluding ones already assigned and excluded quarter
         $candidates = [];
         foreach ($remainingPerQuarter as $q => $remaining) {
-            if ($remaining > 0 && !in_array($q, $alreadyAssignedQuarters, true)) {
+            if ($remaining > 0 && !in_array($q, $alreadyAssignedQuarters, true) && $q !== $excludedQuarter) {
                 $candidates[$q] = $remaining;
             }
         }

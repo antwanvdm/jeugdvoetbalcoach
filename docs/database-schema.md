@@ -30,8 +30,9 @@ De database bestaat uit de volgende hoofdtabellen:
 │ email           │              │ role            │
 │ password        │              │ is_default      │
 │ role            │              │ joined_at       │
-│ is_active       │              └─────────────────┘
-└─────────────────┘                       │
+│ is_active       │              │ label           │
+└─────────────────┘              └─────────────────┘
+                                          │
                                           │ M
                                           ▼
                                  ┌─────────────────┐
@@ -54,48 +55,53 @@ De database bestaat uit de volgende hoofdtabellen:
          │ name            │    │ total_play. │ │ form._id  │
          │ position_id (FK)│    │ lineup_form │ │ year/part │
          │ weight          │    │ is_global   │ │ dates     │
-         └─────────────────┘    └─────────────┘ └───────────┘
-                   │                                   │
-  ┌────────────────┘                                   │
-  │                                                    │
-  │            ┌───────────────────────────────────────┘
-  │            │
-┌───────────┐  │            ┌─────────────────┐
-│ positions │  │            │ opponents       │◄──────────┘
-├───────────┤  │            ├─────────────────┤ (globaal)
-│ id (PK)   │  │            │ id (PK)         │
-│ name      │  │            │ name            │
-└───────────┘  │            │ location        │
-      │        │            │ logo            │
-      └────┬───┘            │ latitude        │
-           │                │ longitude       │
-           │                │ kit_reference   │
-           │                └─────────────────┘
-           │                         │
-           │                         │
-           ▼                         │
-  ┌─────────────────────────────────┐│
-  │   football_matches              ││
-  ├─────────────────────────────────┤│
-  │ id (PK)                         ││
-  │ team_id (FK)                    ││
-  │ season_id (FK)                  ││
-  │ opponent_id (FK)                │◄┘
-  │ home (boolean)                  │
-  │ goals_scored / goals_conceded   │
-  │ date                            │
-  └─────────────────────────────────┘
-              │
-              │ (line-up details)
-              ▼
-  ┌─────────────────────────────────┐
-  │   football_match_player         │
-  ├─────────────────────────────────┤
-  │ football_match_id (FK)          │
-  │ player_id (FK)                  │
-  │ quarter (1-4)                   │
-  │ position_id (FK) [nullable]     │
-  └─────────────────────────────────┘
+         └─────────────────┘    └─────────────┘ │track_goals│
+                   │                             │share_token│
+  ┌────────────────┼──────────────┐              └───────────┘
+  │                │              │                   │
+  │                │              │                   │
+  │            ┌───┼──────────────┼───────────────────┘
+  │            │   │              │
+┌───────────┐  │   │    ┌─────────────────┐
+│ positions │  │   │    │ opponents       │◄──────────┘
+├───────────┤  │   │    ├─────────────────┤ (globaal)
+│ id (PK)   │  │   │    │ id (PK)         │
+│ name      │  │   │    │ name            │
+└───────────┘  │   │    │ location        │
+      │        │   │    │ logo            │
+      └────┬───┘   │    │ latitude        │
+           │       │    │ longitude       │
+           │       │    │ kit_reference   │
+           │       │    └─────────────────┘
+           │       │             │
+           │       │             │
+           ▼       │             │
+  ┌─────────────────────────────┐│
+  │   football_matches          ││
+  ├─────────────────────────────┤│
+  │ id (PK)                     ││
+  │ team_id (FK)                ││
+  │ share_token                 ││
+  │ season_id (FK)              ││
+  │ opponent_id (FK)            │◄┘
+  │ home (boolean)              │
+  │ goals_scored/conceded       │
+  │ date, notes                 │
+  └─────────────────────────────┘
+       │                    │
+       │ (line-up)          │ (goals)
+       ▼                    ▼
+  ┌──────────────────┐  ┌─────────────────┐
+  │football_match_   │  │  match_goals    │
+  │     player       │  ├─────────────────┤
+  ├──────────────────┤  │ id (PK)         │
+  │match_id (FK)     │  │ match_id (FK)   │
+  │player_id (FK)    │  │ player_id (FK)  │
+  │quarter (1-4)     │  │ assist_pl_id(FK)│
+  │position_id (FK)  │  │ minute, subtype │
+  └──────────────────┘  │ notes           │
+           │            └─────────────────┘
+           └──────────────────┘
 ```
 
 ## 📋 Tabellen
@@ -123,15 +129,16 @@ Teams vormen de centrale entiteit voor samenwerking tussen meerdere coaches.
 
 ### team_user (pivot)
 
-Koppelt gebruikers aan teams met rol, standaardstatus en join datum.
+Koppelt gebruikers aan teams met rol, standaardstatus, join datum en label.
 
-| Kolom        | Type            | Nullable | Default           | Beschrijving                  |
-|--------------|-----------------|----------|-------------------|-------------------------------|
-| `team_id`    | bigint unsigned | NO       |                   | Verwijst naar team            |
-| `user_id`    | bigint unsigned | NO       |                   | Verwijst naar gebruiker       |
-| `role`       | tinyint         | NO       |                   | 1 = hoofdcoach, 2 = assistent |
-| `is_default` | boolean         | NO       | false             | Of dit het standaard team is  |
-| `joined_at`  | timestamp       | NO       | CURRENT_TIMESTAMP | Tijdstip van toetreding       |
+| Kolom        | Type            | Nullable | Default           | Beschrijving                          |
+|--------------|-----------------|----------|-------------------|---------------------------------------|
+| `team_id`    | bigint unsigned | NO       |                   | Verwijst naar team                    |
+| `user_id`    | bigint unsigned | NO       |                   | Verwijst naar gebruiker               |
+| `role`       | tinyint         | NO       |                   | 1 = hoofdcoach, 2 = assistent         |
+| `is_default` | boolean         | NO       | false             | Of dit het standaard team is          |
+| `joined_at`  | timestamp       | NO       | CURRENT_TIMESTAMP | Tijdstip van toetreding               |
+| `label`      | varchar(180)    | YES      | NULL              | Optionele rolbeschrijving (bijv. "Keeperstrainer") |
 
 **Primary Key**: Composite (`team_id`, `user_id`).
 
@@ -302,15 +309,17 @@ Formatie presets (globaal beschikbaar of per team).
 
 Seizoenen per team.
 
-| Kolom          | Type            | Nullable | Default        | Beschrijving          |
-|----------------|-----------------|----------|----------------|-----------------------|
-| `id`           | bigint unsigned | NO       | AUTO_INCREMENT | Primary key           |
-| `team_id`      | bigint unsigned | YES      | NULL           | Team                  |
-| `formation_id` | bigint unsigned | NO       |                | Gebruikte formatie    |
-| `year`         | int             | NO       |                | Jaar (bijv. 2025)     |
-| `part`         | varchar(255)    | NO       |                | Deel (bijv. "Najaar") |
-| `start_date`   | date            | NO       |                | Startdatum            |
-| `end_date`     | date            | NO       |                | Einddatum             |
+| Kolom          | Type            | Nullable | Default        | Beschrijving                              |
+|----------------|-----------------|----------|----------------|-------------------------------------------|
+| `id`           | bigint unsigned | NO       | AUTO_INCREMENT | Primary key                               |
+| `team_id`      | bigint unsigned | YES      | NULL           | Team                                      |
+| `formation_id` | bigint unsigned | NO       |                | Gebruikte formatie                        |
+| `year`         | int             | NO       |                | Jaar (bijv. 2025)                         |
+| `part`         | varchar(255)    | NO       |                | Deel (bijv. "Najaar")                     |
+| `start_date`   | date            | NO       |                | Startdatum                                |
+| `end_date`     | date            | NO       |                | Einddatum                                 |
+| `track_goals`  | boolean         | NO       | false          | Of doelpunten bijgehouden worden          |
+| `share_token`  | varchar(64)     | YES      | NULL           | Unieke token voor publieke toegang (uniek) |
 | `created_at`   | timestamp       | YES      | NULL           | Aanmaakdatum          |
 | `updated_at`   | timestamp       | YES      | NULL           | Laatste wijziging     |
 
@@ -331,18 +340,20 @@ Seizoenen per team.
 
 Wedstrijden per team met resultaten en metadata.
 
-| Kolom            | Type            | Nullable | Default        | Beschrijving             |
-|------------------|-----------------|----------|----------------|--------------------------|
-| `id`             | bigint unsigned | NO       | AUTO_INCREMENT | Primary key              |
-| `team_id`        | bigint unsigned | YES      | NULL           | Team                     |
-| `season_id`      | bigint unsigned | NO       |                | Seizoen referentie       |
-| `opponent_id`    | bigint unsigned | NO       |                | Tegenstander             |
-| `home`           | tinyint(1)      | NO       |                | Thuis (1) of uit (0)     |
-| `goals_scored`   | int unsigned    | YES      | NULL           | Doelpunten gescoord      |
-| `goals_conceded` | int unsigned    | YES      | NULL           | Doelpunten tegengekregen |
-| `date`           | datetime        | NO       |                | Wedstrijddatum en tijd   |
-| `created_at`     | timestamp       | YES      | NULL           | Aanmaakdatum             |
-| `updated_at`     | timestamp       | YES      | NULL           | Laatste wijziging        |
+| Kolom            | Type            | Nullable | Default        | Beschrijving                          |
+|------------------|-----------------|----------|----------------|---------------------------------------|
+| `id`             | bigint unsigned | NO       | AUTO_INCREMENT | Primary key                           |
+| `team_id`        | bigint unsigned | YES      | NULL           | Team                                  |
+| `share_token`    | varchar(32)     | YES      | NULL           | Unieke token voor publieke toegang (uniek) |
+| `season_id`      | bigint unsigned | NO       |                | Seizoen referentie                    |
+| `opponent_id`    | bigint unsigned | NO       |                | Tegenstander                          |
+| `home`           | tinyint(1)      | NO       |                | Thuis (1) of uit (0)                  |
+| `goals_scored`   | int unsigned    | YES      | NULL           | Doelpunten gescoord                   |
+| `goals_conceded` | int unsigned    | YES      | NULL           | Doelpunten tegengekregen              |
+| `date`           | datetime        | NO       |                | Wedstrijddatum en tijd                |
+| `notes`          | text            | YES      | NULL           | Notities/aantekeningen bij wedstrijd  |
+| `created_at`     | timestamp       | YES      | NULL           | Aanmaakdatum                          |
+| `updated_at`     | timestamp       | YES      | NULL           | Laatste wijziging                     |
 
 **Computed properties:**
 
@@ -397,6 +408,44 @@ Pivot tabel die spelers koppelt aan wedstrijden per kwart.
 
 ---
 
+### match_goals
+
+Gescoorde doelpunten per wedstrijd met speler en assist informatie.
+
+| Kolom               | Type            | Nullable | Default        | Beschrijving                     |
+|---------------------|-----------------|----------|----------------|----------------------------------|
+| `id`                | bigint unsigned | NO       | AUTO_INCREMENT | Primary key                      |
+| `football_match_id` | bigint unsigned | NO       |                | Wedstrijd referentie             |
+| `player_id`         | bigint unsigned | YES      | NULL           | Speler die scoorde               |
+| `assist_player_id`  | bigint unsigned | YES      | NULL           | Speler die assist gaf            |
+| `minute`            | int             | YES      | NULL           | Minuut waarin gescoord werd      |
+| `subtype`           | varchar(255)    | YES      | NULL           | Type doelpunt (bijv. penalty)    |
+| `notes`             | text            | YES      | NULL           | Extra notities bij doelpunt      |
+| `created_at`        | timestamp       | YES      | NULL           | Aanmaakdatum                     |
+| `updated_at`        | timestamp       | YES      | NULL           | Laatste wijziging                |
+
+**Belangrijke opmerkingen:**
+
+- `player_id` kan NULL zijn voor eigen doelpunten van tegenstander
+- `assist_player_id` is optioneel (niet elk doelpunt heeft een assist)
+- `minute` is optioneel maar helpt bij het chronologisch ordenen van doelpunten
+- `subtype` kan gebruikt worden voor speciale doelpunten (penalty, vrije trap, etc.)
+
+**Foreign Keys:**
+
+- `football_match_id` → `football_matches(id)` ON DELETE CASCADE
+- `player_id` → `players(id)` ON DELETE CASCADE
+- `assist_player_id` → `players(id)` ON DELETE SET NULL
+
+**Indexen:**
+
+- PRIMARY KEY (`id`)
+- INDEX (`football_match_id`)
+- INDEX (`player_id`)
+- INDEX (`assist_player_id`)
+
+---
+
 ## 🔄 Relaties
 
 ### Team Ownership (One-to-Many)
@@ -411,7 +460,7 @@ Alle hoofdentiteiten behoren toe aan een team:
 ### User-Team Relationship (Many-to-Many)
 
 - `users` ↔ `teams` via `team_user` pivot
-    - Extra data: `role` (hoofdcoach/assistent), `is_default`, `joined_at`
+    - Extra data: `role` (hoofdcoach/assistent), `is_default`, `joined_at`, `label`
     - Een gebruiker kan aan meerdere teams gekoppeld zijn
     - Een team kan meerdere coaches hebben
 
@@ -422,6 +471,9 @@ Alle hoofdentiteiten behoren toe aan een team:
 - `formations` → `seasons` (Een formatie kan in meerdere seizoenen gebruikt worden)
 - `seasons` → `football_matches` (Een seizoen heeft meerdere wedstrijden)
 - `opponents` → `football_matches` (Een opponent speelt in meerdere wedstrijden)
+- `football_matches` → `match_goals` (Een wedstrijd heeft meerdere doelpunten)
+- `players` → `match_goals` (Een speler kan meerdere doelpunten scoren)
+- `players` → `match_goals` as assist (Een speler kan meerdere assists geven)
 
 ### Many-to-Many
 
@@ -546,6 +598,8 @@ Alle resources hebben policies die controleren:
 - Date index op `football_matches` voor chronologische queries
 - `is_global` index op `formations` voor snel filteren
 - `invite_code` unique index op `teams` voor join functionaliteit
+- `share_token` unique indexes op `football_matches` en `seasons` voor publieke toegang
+- Indexes op `match_goals` voor efficiënte statistiek queries (player_id, assist_player_id)
 
 ### Query Optimalisatie
 
@@ -610,6 +664,15 @@ Migraties zijn te vinden in `/database/migrations/` en worden uitgevoerd in chro
 
 24. `2025_11_23_112806_update_opponents_table.php` - Kit_reference toevoegen, user_id en team_id verwijderen (globaal)
 25. `2025_11_23_150000_add_opponent_id_to_teams_table.php` - Opponent koppeling aan teams, verwijder name/logo/maps_location
+
+### Share & Match Features (25-29 November 2025)
+
+26. `2025_11_25_130616_add_share_token_to_football_matches_table.php` - Share token voor publieke wedstrijd toegang
+27. `2025_11_29_000000_add_label_to_team_user_table.php` - Label voor coach rolbeschrijving binnen team
+28. `2025_11_29_100000_add_track_goals_to_seasons_table.php` - Track_goals boolean voor seizoenen
+29. `2025_11_29_100001_add_notes_and_share_token_to_football_matches_table.php` - Notities toevoegen aan wedstrijden
+30. `2025_11_29_100002_add_share_token_to_seasons_table.php` - Share token voor publieke seizoen toegang
+31. `2025_11_29_100003_create_match_goals_table.php` - Goals en assists tracking per wedstrijd
 
 Voor een fresh installatie:
 

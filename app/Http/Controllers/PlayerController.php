@@ -140,7 +140,7 @@ class PlayerController extends Controller
             $player->seasons()->sync($seasonIds);
         }
 
-        return redirect()->route('players.show', $player)->with('success', 'Speler bijgewerkt.');
+        return redirect()->route('players.index', $player)->with('success', 'Speler bijgewerkt.');
     }
 
     /**

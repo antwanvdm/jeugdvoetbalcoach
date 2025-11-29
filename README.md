@@ -42,17 +42,22 @@ De applicatie ondersteunt meerdere teams en gebruikers met een robuust autorisat
 - Speeltijd overzichten per wedstrijd
 - Fysieke verdeling tracking
 - Wedstrijd historie en resultaten
+- Goals en assists tracking per speler
+- Seizoensoverzichten met optionele doelpunten statistieken
 
 **💼 Beheer & Administratie**
 
 - Multi-team structuur met rolverdeling (hoofdcoach/assistent)
+- Coach labels voor rolbeschrijvingen binnen teams
 - Gebruikersbeheer met rollen en teamprofielen
 - Spelersbeheer met posities en fysieke eigenschappen
 - Tegenstander administratie
 - Wedstrijd planning en resultaten
+- Notities per wedstrijd voor extra context
 - Handmatige line-up aanpassingen mogelijk
 - Admin dashboard voor gebruikers-, positie- en globale formatiebeheer
 - Uitnodigingscodes voor snelle teamtoetreding
+- Deelbare wedstrijd- en seizoensoverzichten via share tokens
 
 **🔒 Beveiliging & Autorisatie**
 
@@ -274,6 +279,8 @@ php artisan make:migration create_example_table
 
 ## 🗺️ Roadmap
 
+### ✅ Gerealiseerd
+
 -   [x] Multi-team support & koppelen van coaches (pivot + invite codes)
 -   [x] Formatie ook per wedstrijd kunnen aanpassen (is nu enkel per seizoensblok)
 -   [x] Tegenstanders mass import via admin, koppelen vanuit gebruikers
@@ -282,6 +289,12 @@ php artisan make:migration create_example_table
 -   [x] Spelers aanmaken moet in 1 keer simpel kunnen, ook moeten die gewoon gelijk aan actieve seizoen gekoppeld worden
 -   [x] Goals en assists bijhouden van spelers per wedstrijd
 -   [x] Seizoenen ook kunnen delen met overzicht van wedstrijden en (optioneel) statistieken
+-   [x] Labels aan coaches kunnen geven binnen een team (bijv. "Hoofdtrainer", "Keeperstrainer")
+-   [x] Notities toevoegen aan wedstrijden voor extra context
+-   [x] Share tokens voor wedstrijden en seizoenen voor publieke toegang
+
+### 🔜 Toekomstige Features
+
 -   [ ] Cascade on delete als gebruiker profiel verwijderd
 -   [ ] JO13+ support met 11 spelers en twee helften i.p.v. 4 kwarten
 
