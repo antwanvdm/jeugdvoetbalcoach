@@ -11,6 +11,14 @@
                 <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
             @enderror
         </div>
+        <div class="mb-3">
+            <label class="block text-sm font-medium mb-1">Eigen label (optioneel)</label>
+            <input type="text" name="label" value="{{ old('label') }}" class="w-full border rounded p-2" placeholder="Bijv. JO13 - maandagavond">
+            <p class="text-xs text-gray-600 mt-1">Handige eigen naam als je meerdere teams bij dezelfde club hebt.</p>
+            @error('label')
+                <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+            @enderror
+        </div>
         
         <div class="flex gap-2">
             <button type="submit" class="px-3 py-2 bg-blue-600 text-white rounded">Opslaan</button>

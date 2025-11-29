@@ -25,7 +25,7 @@ class Team extends Model
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class)
-            ->withPivot('role', 'is_default', 'joined_at')
+            ->withPivot('role', 'is_default', 'joined_at', 'label')
             ->orderByPivot('joined_at', 'asc');
     }
 

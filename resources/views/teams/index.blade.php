@@ -25,7 +25,12 @@
                                 <img src="{{ asset('storage/' . $team['logo']) }}" alt="{{ $team['name'] }}" class="h-10 w-10 object-contain">
                             @endif
                             <div>
-                                <div class="font-semibold">{{ $team['name'] }}</div>
+                                <div class="font-semibold">
+                                    {{ $team['name'] }}
+                                    @if(!empty($team['label']))
+                                        <span class="text-gray-500">({{ $team['label'] }})</span>
+                                    @endif
+                                </div>
                                 @if($team['is_default'])
                                     <span class="text-xs text-blue-600">Standaard team</span>
                                 @endif

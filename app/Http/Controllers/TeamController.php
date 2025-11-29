@@ -30,6 +30,7 @@ class TeamController extends Controller
                     'role' => $pivot->role,
                     'role_label' => 'Coach', //$pivot->role === 1 ? 'Hoofdcoach' : 'Assistent',
                     'is_default' => $pivot->is_default,
+                    'label' => $pivot->label,
                     'users_count' => $team->users_count,
                     'joined_at' => $pivot->joined_at,
                 ];
@@ -56,7 +57,7 @@ class TeamController extends Controller
         \Gate::authorize('view', $team);
 
         $members = $team->users()
-            ->withPivot('role', 'is_default', 'joined_at')
+            ->withPivot('role', 'is_default', 'joined_at', 'label')
             ->get()
             ->map(function ($user) {
                 return [
@@ -65,6 +66,7 @@ class TeamController extends Controller
                     'email' => $user->email,
                     'role' => $user->pivot->role,
                     'role_label' => 'Coach', //$user->pivot->role === 1 ? 'Hoofdcoach' : 'Assistent',
+                    'label' => $user->pivot->label,
                     'joined_at' => \Carbon\Carbon::parse($user->pivot->joined_at),
                 ];
             });
@@ -99,6 +101,7 @@ class TeamController extends Controller
             'role' => 1, // hoofdcoach
             'is_default' => $isFirstTeam,
             'joined_at' => now(),
+            'label' => $request->string('label')->toString() ?: null,
         ]);
 
         // Switch to this team
@@ -229,6 +232,7 @@ class TeamController extends Controller
             'role' => 2, // assistent
             'is_default' => $isFirstTeam,
             'joined_at' => now(),
+            'label' => request()->string('label')->toString() ?: null,
         ]);
 
         // Switch to this team
@@ -348,5 +352,25 @@ class TeamController extends Controller
         });
 
         return redirect()->route('teams.index')->with('success', 'Team succesvol verwijderd.');
+    }
+
+    /**
+     * Update the current user's label on a team (pivot: team_user.label).
+     */
+    public function updateLabel(Request $request, Team $team)
+    {
+        \Gate::authorize('view', $team);
+
+        $validated = $request->validate([
+            'label' => ['nullable', 'string', 'max:64'],
+        ]);
+
+        DB::table('team_user')
+            ->where('team_id', $team->id)
+            ->where('user_id', auth()->id())
+            ->update(['label' => $validated['label'] ?? null]);
+
+        return redirect()->route('teams.show', $team)
+            ->with('success', 'Label bijgewerkt.');
     }
 }

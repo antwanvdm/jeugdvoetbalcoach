@@ -46,6 +46,7 @@ Route::middleware(['auth'])->group(function () {
     // Team management routes
     Route::post('/teams/{team}/switch', [TeamController::class, 'switch'])->name('teams.switch');
     Route::post('/teams/{team}/set-default', [TeamController::class, 'setDefault'])->name('teams.set-default');
+    Route::patch('/teams/{team}/label', [TeamController::class, 'updateLabel'])->name('teams.label.update');
     Route::post('/teams/{team}/invite/regenerate', [TeamController::class, 'regenerateInviteCode'])->name('teams.invite.regenerate');
     Route::delete('/teams/{team}/leave', [TeamController::class, 'leave'])->name('teams.leave');
 
