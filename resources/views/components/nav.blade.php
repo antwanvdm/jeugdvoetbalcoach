@@ -2,17 +2,17 @@
     <div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between md:block">
         <div class="flex items-center justify-between gap-4">
             <a href="{{ auth()->check() ? route('dashboard') : route('home') }}" class="font-semibold">
-                @if(auth()->check() && session('current_team_id'))
+                @if(auth()->check() && session('current_team_id' && request()->route()->getName() !== 'home'))
                     @php
                         $currentTeam = \App\Models\Team::find(session('current_team_id'));
                     @endphp
                     @if($currentTeam && $currentTeam->opponent->logo)
                         <img src="{{ asset('storage/' . $currentTeam->opponent->logo) }}" alt="{{ $currentTeam->opponent->name }} Logo" class="h-12">
                     @else
-                        <img src="{{Vite::asset('resources/images/logo.jpg')}}" alt="Logo" class="h-12">
+                        <img src="{{Vite::asset('resources/images/logo.webp')}}" alt="{{config('app.name')}} Logo" class="h-12">
                     @endif
                 @else
-                    <img src="{{Vite::asset('resources/images/logo.jpg')}}" alt="Logo" class="h-12">
+                    <img src="{{Vite::asset('resources/images/logo.webp')}}" alt="{{config('app.name')}} Logo" class="h-12">
                 @endif
             </a>
             <div class="hidden md:flex items-center gap-3">

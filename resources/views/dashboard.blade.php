@@ -134,7 +134,7 @@
 
                 <div class="bg-white p-4 shadow rounded mt-4">
                     <p>
-                        Team Manager is ontwikkeld voor voetbalverenigingen die hun teammanagement willen professionaliseren. Ideaal voor trainers van JO8 t/m JO12 waar spelers in 4 kwarten spelen en iedereen evenveel speel (en keep!)tijd
+                        {{config('app.name')}} is ontwikkeld voor voetbalverenigingen die hun teammanagement willen professionaliseren. Ideaal voor trainers van JO8 t/m JO12 waar spelers in 4 kwarten spelen en iedereen evenveel speel (en keep!)tijd
                         verdiend. De applicatie neemt het tijdrovende werk van het maken van line-ups uit handen en zorgt voor eerlijke rotatie en optimale teambalans.
                     </p>
                 </div>

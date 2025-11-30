@@ -1,6 +1,6 @@
 # Database Schema
 
-Dit document beschrijft de database structuur van de VVOR Team Manager applicatie.
+Dit document beschrijft de database structuur van de Jeugdvoetbalcoach.nl applicatie.
 
 ## Overzicht
 

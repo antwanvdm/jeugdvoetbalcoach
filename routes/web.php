@@ -18,6 +18,9 @@ use Illuminate\Support\Facades\Route;
 // Public home page
 Route::get('/', [HomeController::class, 'show'])->name('home');
 
+// Feedback form submission
+Route::post('/feedback', [HomeController::class, 'feedback'])->name('home.feedback');
+
 // Public opponents search (autocomplete endpoint)
 Route::get('/api/opponents', OpponentSearchController::class)->name('api.opponents');
 

@@ -1,11 +1,13 @@
-# ⚽ VVOR Team Manager
+# ⚽ jeugdvoetbalcoach.nl
 
-Een intelligente teammanagement applicatie voor voetbalverenigingen, gebouwd met Laravel. Deze applicatie automatiseert het maken van line-ups met geavanceerde algoritmes voor eerlijke speeltijdverdeling en strategische teamsamenstelling.
+Een intelligente teammanagement applicatie voor jeugdvoetbal trainers (JO8-JO12), gebouwd met Laravel. Deze applicatie automatiseert het maken van line-ups met geavanceerde algoritmes voor eerlijke speeltijdverdeling en strategische teamsamenstelling voor wedstrijden in 4 kwarten.
 
 ## 🎯 Over dit project
 
-VVOR Team Manager is ontwikkeld voor voetbalverenigingen die hun teammanagement willen professionaliseren. De applicatie neemt het tijdrovende werk van het maken van line-ups uit handen en zorgt voor eerlijke rotatie en optimale teambalans. Met de
+jeugdvoetbalcoach.nl is ontwikkeld voor jeugdvoetbal trainers die hun teammanagement willen professionaliseren. Speciaal ontworpen voor JO8 t/m JO12 teams die wedstrijden spelen in 4 kwarten. De applicatie neemt het tijdrovende werk van het maken van line-ups uit handen en zorgt voor eerlijke rotatie en optimale teambalans. Met de
 recente multi-team uitbreidingen kun je nu meerdere coaches aan één team koppelen en werken met uitnodigingscodes.
+
+🌐 **Live op**: [jeugdvoetbalcoach.nl](https://jeugdvoetbalcoach.nl)
 
 ### 👥 Multi-user & Multi-Team Support
 
