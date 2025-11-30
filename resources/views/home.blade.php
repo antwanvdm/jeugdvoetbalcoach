@@ -1,15 +1,13 @@
 <x-app-layout>
     <!-- Hero Section -->
     <section class="relative isolate overflow-hidden bg-home-hero bg-cover bg-center">
-        {{--        <div class="absolute inset-0 -z-10 bg-cover bg-center" style="background-image:url('https://images.unsplash.com/photo-1517927033932-b3d18e61fb3a?q=80&w=1920&auto=format&fit=crop');"></div>--}}
-        {{--        <div class="absolute inset-0 bg-gradient-to-br from-gray-900/80 via-gray-900/50 to-blue-900/60"></div>--}}
         <div class="mx-auto max-w-5xl px-6 py-20 text-center">
             <div class="mb-4">
                 <span class="inline-block px-4 py-2 bg-blue-600/20 backdrop-blur-sm rounded-full text-sm font-medium text-blue-100 border border-blue-400/30">
                     Speciaal voor JO8 t/m JO12 trainers
                 </span>
             </div>
-            <h1 class="text-5xl md:text-6xl font-bold tracking-tight text-white mb-3">{{config('app.name')}}</h1>
+            <h1 class="text-4xl md:text-5xl md:text-6xl font-bold tracking-tight text-white mb-3">{{config('app.name')}}</h1>
             <p class="text-xl md:text-2xl text-blue-200 font-medium mb-6">Slim Teammanagement voor 4-kwarten wedstrijden</p>
             <p class="mt-4 text-lg text-blue-100 max-w-2xl mx-auto">Automatische, eerlijke line-ups met slimme rotatie. Perfect voor trainers die wedstrijden in 4 kwarten spelen. Focus op coaching – wij doen de planning.</p>
             <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-center">

@@ -1,8 +1,8 @@
 <footer class="bg-gray-900 text-gray-300 mt-auto">
     <div class="mx-auto max-w-6xl px-6 py-12">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl">
+        <div class="flex flex-col md:flex-row md:justify-center gap-8 max-w-5xl mx-auto items-start">
             <!-- About / Branding -->
-            <div>
+            <div class="flex-shrink-0 md:max-w-xl">
                 <div class="flex items-center gap-4 mb-4">
                     <img src="{{ Vite::asset('resources/images/logo.webp') }}" alt="Logo {{ config('app.name') }}" class="h-16">
                     <h3 class="text-white font-semibold text-2xl">{{ config('app.name') }}</h3>
@@ -12,7 +12,7 @@
             </div>
 
             <!-- Open Source / Support -->
-            <div>
+            <div class="flex-shrink-0 md:max-w-md">
                 <h3 class="text-white font-semibold mb-4">Bijdragen & Steun</h3>
                 <div class="space-y-3 flex flex-col">
                     <a href="https://github.com/antwanvdm/vvor-team-manager" target="_blank" rel="noopener noreferrer" class="w-fit inline-flex items-center gap-2 px-4 py-2 rounded-md bg-gray-800 hover:bg-gray-700 text-sm font-medium">
