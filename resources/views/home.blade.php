@@ -8,17 +8,11 @@
                 </span>
             </div>
             <h1 class="text-4xl md:text-5xl md:text-6xl font-bold tracking-tight text-white mb-3">{{config('app.name')}}</h1>
-            <p class="text-xl md:text-2xl text-blue-200 font-medium mb-6">Slim Teammanagement voor 4-kwarten wedstrijden</p>
+            <p class="text-xl md:text-2xl text-blue-200 font-medium mb-6">Slim teammanagement voor amateur jeugdcoaches</p>
             <p class="mt-4 text-lg text-blue-100 max-w-2xl mx-auto">Automatische, eerlijke line-ups met slimme rotatie. Perfect voor trainers die wedstrijden in 4 kwarten spelen. Focus op coaching – wij doen de planning.</p>
             <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
                 <a href="{{ route('register') }}" class="inline-flex items-center justify-center gap-2 rounded-md bg-blue-600 px-8 py-3 text-white font-semibold shadow hover:bg-blue-500 transition">Registreren</a>
                 <a href="{{ route('login') }}" class="inline-flex items-center justify-center gap-2 rounded-md bg-white/10 backdrop-blur px-8 py-3 text-white font-medium ring-1 ring-inset ring-white/30 hover:bg-white/20 transition">Inloggen</a>
-            </div>
-            <div class="mt-10 flex flex-wrap justify-center gap-6 text-xs text-blue-100">
-                <span class="inline-flex items-center gap-1"><svg class="size-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m5 13 4 4L19 7"/></svg>Eerlijke rotatie</span>
-                <span class="inline-flex items-center gap-1"><svg class="size-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 3v18m9-9H3"/></svg>Multi-team beheer</span>
-                <span class="inline-flex items-center gap-1"><svg class="size-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path
-                            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 8 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 3.6 15a1.65 1.65 0 0 0-1.51-1H2a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 3.6 8a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 8 3.6a1.65 1.65 0 0 0 1-1.51V2a2 2 0 0 1 4 0v.09c0 .67.39 1.28 1 1.51a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 8c.67 0 1.28.39 1.51 1H21a2 2 0 0 1 0 4h-.09c-.67 0-1.28.39-1.51 1Z"/></svg>Algoritmes & balans</span>
             </div>
         </div>
     </section>
@@ -275,8 +269,9 @@
                         d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"/>
                 </svg>
                 <p class="text-gray-700 text-lg leading-relaxed mb-6">
-                    Als coach van een jeugdteam liep ik constant tegen hetzelfde probleem aan: het bijhouden van wissels en opstellingen in een Excel werd erg onoverzichtelijk. Wie heeft er al gespeeld? Wie moet er nog keepen? Hoe zorg ik dat
-                    iedereen evenveel speeltijd krijgt?
+                    Als beginnend jeugdcoach van <a href="https://www.vvor.nl/" target="_blank" class="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 transition">VVOR <svg class="size-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0
+                    1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14 21 3"/></svg></a> liep ik als snel tegen hetzelfde probleem aan: het bijhouden van wissels en opstellingen in een Excel werd erg onoverzichtelijk. Wie heeft er
+                    al gespeeld? Wie moet er nog keepen? Hoe zorg ik dat iedereen evenveel speeltijd krijgt?
                 </p>
                 <p class="text-gray-700 text-lg leading-relaxed mb-6">
                     Daarom ben ik deze tool gaan bouwen. Een systeem dat automatisch eerlijke line-ups genereert, rekening houdt met fysiek niveau en posities, en alle administratie voor je bijhoudt. Nu kan ik me focussen op wat echt belangrijk

@@ -7,8 +7,7 @@
                     <img src="{{ Vite::asset('resources/images/logo.webp') }}" alt="Logo {{ config('app.name') }}" class="h-16">
                     <h3 class="text-white font-semibold text-2xl">{{ config('app.name') }}</h3>
                 </div>
-                <p class="text-sm text-gray-400 leading-relaxed mb-2">Voor jeugdtrainers (JO8–JO12) die spelen in 4 kwarten.</p>
-                <p class="text-sm text-gray-400 leading-relaxed">Automatische, eerlijke line-ups & slimme rotatie zodat jij kunt focussen op coaching.</p>
+                <p class="text-sm text-gray-400 leading-relaxed mb-2">Voor jeugdtrainers (JO8–JO12) die spelen in 4 kwarten. Automatische, eerlijke line-ups & slimme rotatie zodat jij kunt focussen op coaching.</p>
             </div>
 
             <!-- Open Source / Support -->
