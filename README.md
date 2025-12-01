@@ -301,6 +301,7 @@ php artisan make:migration create_example_table
 
 -   [ ] Cascade on delete als gebruiker profiel verwijderd
 -   [ ] Testflows meerdere scenario's maken en uitvoeren
+-   [ ] Webservice maken zodat andere developers gemakkelijk voetbalclub data kunnen inladen
 -   [ ] JO13+ support met 11 spelers en twee helften i.p.v. 4 kwarten
 
 ## 📝 Documentatie
