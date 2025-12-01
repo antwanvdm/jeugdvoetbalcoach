@@ -184,7 +184,7 @@
                 <h3 class="text-lg font-semibold text-blue-900 mb-2">Open Source & Transparantie</h3>
                 <p class="text-blue-800 text-sm leading-relaxed">
                     {{ config('app.name') }} is volledig open source. Je kunt de broncode bekijken en controleren op
-                    <a href="https://github.com/antwanvdm/vvor-team-manager" target="_blank" rel="noopener noreferrer" class="underline font-medium">GitHub</a>.
+                    <a href="https://github.com/antwanvdm/jeugdvoetbalcoach" target="_blank" rel="noopener noreferrer" class="underline font-medium">GitHub</a>.
                     Zo kun je zelf zien hoe we met je data omgaan.
                 </p>
             </div>

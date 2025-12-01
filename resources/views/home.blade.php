@@ -321,7 +321,7 @@
                     <div class="flex-1">
                         <h3 class="font-semibold text-gray-900 mb-2">Code bijdragen via GitHub</h3>
                         <p class="text-sm text-gray-600 mb-4">Vind je een bug of heb je een goed idee? Open een issue of stuur een pull request. Alle hulp is welkom!</p>
-                        <a href="https://github.com/antwanvdm/vvor-team-manager" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 text-sm font-medium text-blue-600 hover:text-blue-700">
+                        <a href="https://github.com/antwanvdm/jeugdvoetbalcoach" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 text-sm font-medium text-blue-600 hover:text-blue-700">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                 <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
                                 <polyline points="15 3 21 3 21 9"/>

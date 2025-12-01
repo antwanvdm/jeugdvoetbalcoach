@@ -85,8 +85,8 @@ De applicatie ondersteunt meerdere teams en gebruikers met een robuust autorisat
 1. **Clone het project**
 
 ```bash
-git clone https://github.com/antwanvdm/vvor-team-manager.git
-cd vvor-team-manager
+git clone https://github.com/antwanvdm/jeugdvoetbalcoach.git
+cd jeugdvoetbalcoach
 ```
 
 2. **Installeer dependencies**

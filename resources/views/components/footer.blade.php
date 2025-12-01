@@ -14,7 +14,7 @@
             <div class="flex-shrink-0 md:max-w-md">
                 <h3 class="text-white font-semibold mb-4">Bijdragen & Steun</h3>
                 <div class="space-y-3 flex flex-col">
-                    <a href="https://github.com/antwanvdm/vvor-team-manager" target="_blank" rel="noopener noreferrer" class="w-fit inline-flex items-center gap-2 px-4 py-2 rounded-md bg-gray-800 hover:bg-gray-700 text-sm font-medium">
+                    <a href="https://github.com/antwanvdm/jeugdvoetbalcoach" target="_blank" rel="noopener noreferrer" class="w-fit inline-flex items-center gap-2 px-4 py-2 rounded-md bg-gray-800 hover:bg-gray-700 text-sm font-medium">
                         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.6.111.793-.261.793-.577v-2.07c-3.338.726-4.033-1.416-4.033-1.416-.55-1.387-1.34-1.756-1.34-1.756-1.09-.745.082-.729.082-.729 1.206.084 1.84 1.237 1.84 1.237 1.069 1.834 2.806 1.304 3.49.997.108-.775.42-1.304.764-1.603-2.665-.305-5.466-1.334-5.466-5.93 0-1.311.468-2.382 1.235-3.222-.124-.303-.536-1.524.117-3.176 0 0 1.008-.322 3.302 1.23.956-.266 1.982-.399 3.002-.404 1.02.005 2.047.138 3.004.404 2.292-1.552 3.299-1.23 3.299-1.23.653 1.653.241 2.874.117 3.176.77.84 1.236 1.911 1.236 3.222 0 4.609-2.804 5.624-5.476 5.93.431.372.824 1.101.824 2.221v2.621c0 .319.192.694.8.576C20.565 21.8 24 17.302 24 12c0-6.627-5.373-12-12-12Z"/></svg>
                         Draag bij op GitHub
                     </a>
@@ -35,7 +35,7 @@
             <p>&copy; {{ date('Y') }} {{ config('app.name') }}. Alle rechten voorbehouden.</p>
             <div class="flex flex-wrap gap-4 items-center">
                 <a href="{{ route('privacy') }}" class="hover:text-white transition">Privacy</a>
-                <a href="https://github.com/antwanvdm/vvor-team-manager" target="_blank" class="text-gray-400 hover:text-white transition">GitHub</a>
+                <a href="https://github.com/antwanvdm/jeugdvoetbalcoach" target="_blank" class="text-gray-400 hover:text-white transition">GitHub</a>
                 <a href="https://github.com/sponsors/antwanvdm" target="_blank" class="text-pink-500 hover:text-pink-400 transition">Sponsor</a>
             </div>
         </div>
