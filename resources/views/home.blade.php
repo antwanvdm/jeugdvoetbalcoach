@@ -344,7 +344,7 @@
                     <div class="flex-1">
                         <h3 class="font-semibold text-gray-900 mb-2">Steun via GitHub Sponsors</h3>
                         <p class="text-sm text-gray-600 mb-4">Help mee om de servers draaiende te houden en nieuwe features te ontwikkelen. Elke bijdrage wordt enorm gewaardeerd!</p>
-                        <a href="https://github.com/sponsors/antwanvdm" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 text-sm font-medium text-pink-600 hover:text-pink-700">
+                        <a href="https://ko-fi.com/antwanvdm" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 text-sm font-medium text-pink-600 hover:text-pink-700">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                 <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
                                 <polyline points="15 3 21 3 21 9"/>
