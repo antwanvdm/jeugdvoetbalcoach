@@ -21,7 +21,7 @@
                     Speciaal voor JO8 t/m JO12 trainers
                 </span>
             </div>
-            <h1 class="text-4xl md:text-6xl font-bold tracking-tight text-white mb-3">{{config('app.name')}}</h1>
+            <h1 class="text-3xl md:text-6xl font-bold tracking-tight text-white mb-3">{{config('app.name')}}</h1>
             <p class="text-xl md:text-2xl text-blue-200 font-medium mb-6">Slim teammanagement voor jeugdcoaches</p>
             <p class="mt-4 text-lg text-blue-100 max-w-2xl mx-auto">Automatische, eerlijke line-ups met slimme rotatie. Perfect voor trainers die wedstrijden in 4 kwarten spelen. Focus op coaching – wij doen de planning.</p>
             <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
@@ -307,7 +307,7 @@
     <!-- Contributing Section -->
     <section class="mx-auto max-w-6xl px-6 pb-16">
         <h2 class="text-2xl font-bold tracking-tight text-gray-900 mb-6">Wil je bijdragen?</h2>
-        <p class="text-gray-600 mb-8 max-w-3xl">Dit project is open source en we verwelkomen bijdragen van de community. Of je nu een bug vindt, een feature wilt toevoegen, of de servers draaiende wilt houden.</p>
+        <p class="text-gray-600 mb-8 max-w-3xl">Dit project is open source en verwelkomt bijdragen van de community. Of je nu een bug vindt, een feature wilt toevoegen, of de servers draaiende wilt houden.</p>
         <div class="grid gap-6 md:grid-cols-2">
             <!-- GitHub Contributions -->
             <div class="bg-white rounded-xl border shadow-sm p-6 hover:shadow-md transition">
@@ -361,7 +361,7 @@
     <!-- Feedback Form -->
     <section class="mx-auto max-w-6xl px-6 pb-16" id="feedback">
         <h2 class="text-2xl font-bold tracking-tight text-gray-900 mb-6">Feedback of fout gevonden?</h2>
-        <p class="text-gray-600 mb-8 max-w-3xl">Mis je clubgegevens of heb je andere feedback? Laat het ons weten!</p>
+        <p class="text-gray-600 mb-8 max-w-3xl">Mis je clubgegevens of heb je andere feedback? Laat het weten!</p>
         <div class="bg-white rounded-xl border shadow-sm p-8">
 
             @if(session('feedback_success'))

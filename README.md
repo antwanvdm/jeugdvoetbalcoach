@@ -1,15 +1,12 @@
 # ⚽ jeugdvoetbalcoach.nl
 
-Een intelligente teammanagement applicatie voor jeugdvoetbal trainers (JO8-JO12), gebouwd met Laravel. Deze applicatie automatiseert het maken van line-ups met geavanceerde algoritmes voor eerlijke speeltijdverdeling en strategische teamsamenstelling
-voor wedstrijden in 4 kwarten.
+Een intelligente teammanagement applicatie voor jeugdvoetbal trainers (JO8-JO12), gebouwd met Laravel. Deze applicatie automatiseert het maken van line-ups met geavanceerde algoritmes voor eerlijke speeltijdverdeling en strategische teamsamenstelling voor wedstrijden in 4 kwarten.
+
+🌐 **Live op**: [jeugdvoetbalcoach.nl](https://jeugdvoetbalcoach.nl)
 
 ## 🎯 Over dit project
 
-jeugdvoetbalcoach.nl is ontwikkeld voor jeugdvoetbal trainers die hun teammanagement willen professionaliseren. Speciaal ontworpen voor JO8 t/m JO12 teams die wedstrijden spelen in 4 kwarten. De applicatie neemt het tijdrovende werk van het maken van
-line-ups uit handen en zorgt voor eerlijke rotatie en optimale teambalans. Met de
-recente multi-team uitbreidingen kun je nu meerdere coaches aan één team koppelen en werken met uitnodigingscodes.
-
-🌐 **Live op**: [jeugdvoetbalcoach.nl](https://jeugdvoetbalcoach.nl)
+jeugdvoetbalcoach.nl is ontwikkeld voor jeugdvoetbal trainers die hun teammanagement willen professionaliseren. Speciaal ontworpen voor JO8 t/m JO12 teams die wedstrijden spelen in 4 kwarten. De applicatie neemt het tijdrovende werk van het maken van line-ups uit handen en zorgt voor eerlijke rotatie en optimale teambalans. Met de recente multi-team uitbreidingen kun je nu meerdere coaches aan één team koppelen en werken met uitnodigingscodes.
 
 ### 👥 Multi-user & Multi-Team Support
 
@@ -281,6 +278,70 @@ php artisan migrate:fresh --seed
 php artisan make:migration create_example_table
 ```
 
+## 📈 Hoe het werkt
+
+### Line-up Generatie Algoritme
+
+1. **Keeper Selectie**
+
+    - Prioriteit voor spelers die vorige wedstrijd NIET hebben gekeept
+    - Balanceert historische keeper-ervaring
+    - Optimaliseert fysieke diversiteit
+
+2. **Bank Planning**
+
+    - Bepaalt per kwart de bankbehoefte: `teamSize - desiredOnField`
+    - Keepers: ieder precies 1x bank (niet in hun keeperkwart)
+    - Niet-keepers: resterende bankplekken gelijkmatig verdeeld over de kwarten (geen vast Q1+Q3 of Q2+Q4 patroon)
+
+3. **Positie Toewijzing**
+
+    - Formatiegestuurd: outfield-behoefte komt uit `Season->formation` (`lineup_formation` en/of `total_players`)
+    - Eerst spelers op hun voorkeursposities, daarna opvullen met beste kandidaten
+    - Weight-balancing om clustering te voorkomen
+
+4. **Validatie & Opslag**
+    - Valideert dat per kwart maximaal `desiredOnField` spelers op het veld staan
+    - Database opslag via pivot tabel met `quarter` en `position_id`
+    - Real-time feedback en logging
+
+### Slimme Features
+
+**🧠 Weight Balancing**
+Voorkomt dat 5 spelers met fysiek niveau 1 tegelijk spelen door:
+
+- Penalty system voor clustering (>2 gelijk = zwaar gestraft)
+- Distributie optimalisatie over kwarten
+- Kandidaat selectie op basis van balans impact
+
+**🔄 Keeper Rotatie**
+Intelligente keeper verdeling die:
+
+- Laatste wedstrijd keepers excludeert
+- Historische counts balanceert
+- Fair play principes hanteert
+
+**📊 Real-time Monitoring**
+
+- Uitgebreide logging voor troubleshooting (zet `APP_DEBUG=true`)
+- Performance metrics en query optimalisatie
+- Debug mode voor development
+
+## 📝 Documentatie
+
+- [LineupGeneratorService](docs/LineupGeneratorService.md) - Uitgebreide service documentatie
+- [Database Schema](docs/database-schema.md) - Database structuur en relaties
+
+## 🤝 Bijdragen
+
+Bijdragen zijn welkom! Voor grote wijzigingen, open eerst een issue.
+
+1. Fork het project
+2. Maak een feature branch (`git checkout -b feature/nieuwe-functie`)
+3. Commit je wijzigingen (`git commit -am 'Voeg nieuwe functie toe'`)
+4. Push naar de branch (`git push origin feature/nieuwe-functie`)
+5. Open een Pull Request
+
 ## 🗺️ Roadmap
 
 ### ✅ Gerealiseerd
@@ -304,51 +365,10 @@ php artisan make:migration create_example_table
 -   [ ] Webservice maken zodat andere developers gemakkelijk voetbalclub data kunnen inladen
 -   [ ] JO13+ support met 11 spelers en twee helften i.p.v. 4 kwarten
 
-## 📝 Documentatie
-
-- [LineupGeneratorService](docs/LineupGeneratorService.md) - Uitgebreide service documentatie
-- [Database Schema](docs/database-schema.md) - Database structuur en relaties
-- Publieke homepage layout & component structuur (zie sectie hieronder)
-
-## 🌐 Publieke Homepage
-
-De publieke homepage is gemoderniseerd met een hero sectie (full-width background image + gradient overlay), een features grid, "Hoe het werkt" stappen, een voorbeeld (screenshot placeholder) en een duidelijke call-to-action. Alle secties zijn
-opgebouwd met Tailwind utility classes voor snelle aanpasbaarheid.
-
-### Secties
-
-1. Hero: Titel, korte pitch, primaire CTA (Registreren) + secundaire (Inloggen).
-2. Features Grid: Kernfunctionaliteiten (line-up generatie, multi-team, seizoenen, statistieken, autorisatie).
-3. Hoe het werkt: 4 stappen (Account → Team → Spelers → Wedstrijd & Line-up).
-4. Voorbeeld/Screenshot: Placeholder container waar later een echte screenshot / video embed kan komen.
-5. CTA Footer: Extra oproep om te starten.
-
-### Aanpasbare onderdelen
-
-- Achtergrondafbeelding aanpasbaar via inline style of via een class in `app.css`.
-- Iconen kunnen vervangen worden door SVG's in `resources/views/components`.
-- Extra secties kunnen eenvoudig toegevoegd worden als nieuwe `<section>` blokken.
-
-### Toekomstige uitbreidingen
-
-- Dynamische testimonials (JSON feed / database)
-- Live statistiek preview (keeperrotatie / speeltijd grafiek)
-- Interactie animaties (Framer Motion via React/Vite optioneel)
-
-## 🤝 Bijdragen
-
-Bijdragen zijn welkom! Voor grote wijzigingen, open eerst een issue om te bespreken wat je wilt veranderen.
-
-1. Fork het project
-2. Maak een feature branch (`git checkout -b feature/nieuwe-functie`)
-3. Commit je wijzigingen (`git commit -am 'Voeg nieuwe functie toe'`)
-4. Push naar de branch (`git push origin feature/nieuwe-functie`)
-5. Open een Pull Request
-
 ## 📄 Licentie
 
 Dit project is gelicenseerd onder de MIT License - zie het [LICENSE](LICENSE) bestand voor details.
 
 ---
 
-**Gemaakt met ❤️ voor VVOR en de voetbalgemeenschap**
+**Ontwikkeld door [Antwan van der Mooren](https://github.com/antwanvdm) met ❤️ voor VVOR en de voetbalgemeenschap**
