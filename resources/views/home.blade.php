@@ -7,7 +7,7 @@
                     Speciaal voor JO8 t/m JO12 trainers
                 </span>
             </div>
-            <h1 class="text-4xl md:text-5xl md:text-6xl font-bold tracking-tight text-white mb-3">{{config('app.name')}}</h1>
+            <h1 class="text-4xl md:text-6xl font-bold tracking-tight text-white mb-3">{{config('app.name')}}</h1>
             <p class="text-xl md:text-2xl text-blue-200 font-medium mb-6">Slim teammanagement voor amateur jeugdcoaches</p>
             <p class="mt-4 text-lg text-blue-100 max-w-2xl mx-auto">Automatische, eerlijke line-ups met slimme rotatie. Perfect voor trainers die wedstrijden in 4 kwarten spelen. Focus op coaching – wij doen de planning.</p>
             <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
