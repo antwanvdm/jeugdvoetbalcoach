@@ -34,8 +34,7 @@
         <div class="mt-8 pt-8 border-t border-gray-800 flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-gray-500">
             <p>&copy; {{ date('Y') }} {{ config('app.name') }}. Alle rechten voorbehouden.</p>
             <div class="flex flex-wrap gap-4 items-center">
-                <a href="#" class="hover:text-white transition">Privacy</a>
-                <a href="#" class="hover:text-white transition">Voorwaarden</a>
+                <a href="{{ route('privacy') }}" class="hover:text-white transition">Privacy</a>
                 <a href="https://github.com/antwanvdm/vvor-team-manager" target="_blank" class="text-gray-400 hover:text-white transition">GitHub</a>
                 <a href="https://github.com/sponsors/antwanvdm" target="_blank" class="text-pink-500 hover:text-pink-400 transition">Sponsor</a>
             </div>

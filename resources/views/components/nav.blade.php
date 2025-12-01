@@ -20,7 +20,7 @@
                     {{-- Team Switcher Dropdown --}}
                     @if(auth()->user()->teams->count() > 0)
                         <div class="relative">
-                            <button id="team-dropdown-btn" class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-200 flex items-center gap-1">
+                            <button id="team-dropdown-btn" class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-200 flex items-center gap-1 cursor-pointer">
                                 @php
                                     $currentTeam = \App\Models\Team::find(session('current_team_id'));
                                 @endphp
@@ -73,7 +73,7 @@
                         @endif
                         <form method="POST" action="{{ route('logout') }}" class="inline">
                             @csrf
-                            <button type="submit" class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-200">Uitloggen</button>
+                            <button type="submit" class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-200 cursor-pointer">Uitloggen</button>
                         </form>
                     </nav>
                 @else

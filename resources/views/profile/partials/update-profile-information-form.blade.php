@@ -33,7 +33,7 @@
                     <p class="text-sm mt-2 text-gray-800">
                         Je e-mailadres is nog niet geverifieerd.
 
-                        <button form="send-verification" class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        <button form="send-verification" class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 cursor-pointer">
                             Klik hier om de verificatie-e-mail opnieuw te verzenden.
                         </button>
                     </p>

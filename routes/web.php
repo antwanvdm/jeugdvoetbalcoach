@@ -21,6 +21,12 @@ Route::get('/', [HomeController::class, 'show'])->name('home');
 // Feedback form submission
 Route::post('/feedback', [HomeController::class, 'feedback'])->name('home.feedback');
 
+// Privacy page
+Route::get('/privacy', [\App\Http\Controllers\PrivacyController::class, 'show'])->name('privacy');
+
+// Sitemap
+Route::get('/sitemap.xml', [\App\Http\Controllers\SitemapController::class, 'index'])->name('sitemap');
+
 // Public opponents search (autocomplete endpoint)
 Route::get('/api/opponents', OpponentSearchController::class)->name('api.opponents');
 
@@ -34,8 +40,8 @@ Route::get('/seasons/{season}/share/{shareToken}', [SeasonController::class, 'sh
 Route::get('/teams/join/{inviteCode}', [TeamController::class, 'showJoin'])->name('teams.join.show');
 Route::post('/teams/join/{inviteCode}', [TeamController::class, 'join'])->middleware('auth')->name('teams.join');
 
-// Protected routes - require authentication
-Route::middleware(['auth'])->group(function () {
+// Protected routes - require authentication + verified email
+Route::middleware(['auth', 'verified'])->group(function () {
     // Dashboard (renamed from home)
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 

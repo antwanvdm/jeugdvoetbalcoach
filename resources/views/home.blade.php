@@ -1,4 +1,18 @@
-<x-app-layout>
+@push('head')
+    <meta name="description" content="Automatische, eerlijke line-ups met slimme rotatie voor JO8 t/m JO12. Focus op coachen – wij doen de planning.">
+    <link rel="canonical" href="{{ url()->current() }}">
+    <meta name="robots" content="index,follow">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{{ config('app.name') }} – Slim teammanagement voor jeugdcoaches">
+    <meta property="og:description" content="Automatische, eerlijke line-ups met slimme rotatie. Perfect voor wedstrijden in 4 kwarten.">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:image" content="{{ Vite::asset('resources/images/vvor.jpg') }}">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ config('app.name') }} – Slim teammanagement voor jeugdcoaches">
+    <meta name="twitter:description" content="Automatische, eerlijke line-ups met slimme rotatie. Perfect voor 4 kwarten.">
+    <meta name="twitter:image" content="{{ asset('favicons/apple-touch-icon.png') }}">
+@endpush
+<x-app-layout title="{{ config('app.name') }} – Slim teammanagement voor jeugdcoaches">
     <!-- Hero Section -->
     <section class="relative isolate overflow-hidden bg-home-hero bg-cover bg-center">
         <div class="mx-auto max-w-5xl px-6 py-20 text-center">
@@ -8,7 +22,7 @@
                 </span>
             </div>
             <h1 class="text-4xl md:text-6xl font-bold tracking-tight text-white mb-3">{{config('app.name')}}</h1>
-            <p class="text-xl md:text-2xl text-blue-200 font-medium mb-6">Slim teammanagement voor amateur jeugdcoaches</p>
+            <p class="text-xl md:text-2xl text-blue-200 font-medium mb-6">Slim teammanagement voor jeugdcoaches</p>
             <p class="mt-4 text-lg text-blue-100 max-w-2xl mx-auto">Automatische, eerlijke line-ups met slimme rotatie. Perfect voor trainers die wedstrijden in 4 kwarten spelen. Focus op coaching – wij doen de planning.</p>
             <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
                 <a href="{{ route('register') }}" class="inline-flex items-center justify-center gap-2 rounded-md bg-blue-600 px-8 py-3 text-white font-semibold shadow hover:bg-blue-500 transition">Registreren</a>
@@ -345,7 +359,7 @@
     </section>
 
     <!-- Feedback Form -->
-    <section class="mx-auto max-w-6xl px-6 pb-16">
+    <section class="mx-auto max-w-6xl px-6 pb-16" id="feedback">
         <h2 class="text-2xl font-bold tracking-tight text-gray-900 mb-6">Feedback of fout gevonden?</h2>
         <p class="text-gray-600 mb-8 max-w-3xl">Mis je clubgegevens of heb je andere feedback? Laat het ons weten!</p>
         <div class="bg-white rounded-xl border shadow-sm p-8">
