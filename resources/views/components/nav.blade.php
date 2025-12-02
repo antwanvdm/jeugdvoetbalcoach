@@ -57,6 +57,8 @@
                                class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-200 {{ request()->routeIs('formations.*') ? 'bg-gray-100' : '' }}">Formaties</a>
                             <a href="{{ route('admin.positions.index') }}" class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-200 {{ request()->routeIs('positions.*') ?
                             'bg-gray-100' : '' }}">Posities</a>
+                            <a href="{{ route('opponents.index') }}"
+                               class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-200 {{ request()->routeIs('opponents.*') ? 'bg-gray-100' : '' }}">Clubs</a>
                             <a href="{{ route('admin.users.index') }}"
                                class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-200 {{ request()->routeIs('admin.users.*') ? 'bg-gray-100' : '' }}">Gebruikers</a>
                         @else
