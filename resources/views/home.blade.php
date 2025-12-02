@@ -172,10 +172,10 @@
                                     src="{{Vite::asset('resources/images/screen-3.png')}}"/>
                             </div>
                         </div>
-                        <div class="carousel-dots flex justify-center gap-2 mt-4">
-                            <button class="carousel-dot w-3 h-3 rounded-full bg-blue-600 cursor-pointer" data-slide="0"></button>
-                            <button class="carousel-dot w-3 h-3 rounded-full bg-blue-300 cursor-pointer" data-slide="1"></button>
-                            <button class="carousel-dot w-3 h-3 rounded-full bg-blue-300 cursor-pointer" data-slide="2"></button>
+                        <div class="carousel-dots flex justify-center gap-3 mt-4">
+                            <button class="carousel-dot w-4 h-4 p-2 rounded-full bg-blue-600 cursor-pointer" data-slide="0" aria-label="Ga naar screenshot 1"></button>
+                            <button class="carousel-dot w-4 h-4 p-2 rounded-full bg-blue-300 cursor-pointer" data-slide="1" aria-label="Ga naar screenshot 2"></button>
+                            <button class="carousel-dot w-4 h-4 p-2 rounded-full bg-blue-300 cursor-pointer" data-slide="2" aria-label="Ga naar screenshot 3"></button>
                         </div>
                     </div>
                 </div>
@@ -208,10 +208,10 @@
                                     src="{{Vite::asset('resources/images/screen-6.png')}}"/>
                             </div>
                         </div>
-                        <div class="carousel-dots flex justify-center gap-2 mt-4">
-                            <button class="carousel-dot w-3 h-3 rounded-full bg-green-600 cursor-pointer" data-slide="0"></button>
-                            <button class="carousel-dot w-3 h-3 rounded-full bg-green-300 cursor-pointer" data-slide="1"></button>
-                            <button class="carousel-dot w-3 h-3 rounded-full bg-green-300 cursor-pointer" data-slide="2"></button>
+                        <div class="carousel-dots flex justify-center gap-3 mt-4">
+                            <button class="carousel-dot w-4 h-4 p-2 rounded-full bg-green-600 cursor-pointer" data-slide="0" aria-label="Ga naar screenshot 1"></button>
+                            <button class="carousel-dot w-4 h-4 p-2 rounded-full bg-green-300 cursor-pointer" data-slide="1" aria-label="Ga naar screenshot 2"></button>
+                            <button class="carousel-dot w-4 h-4 p-2 rounded-full bg-green-300 cursor-pointer" data-slide="2" aria-label="Ga naar screenshot 3"></button>
                         </div>
                     </div>
                 </div>
@@ -298,10 +298,10 @@
                                     src="{{Vite::asset('resources/images/screen-9.png')}}"/>
                             </div>
                         </div>
-                        <div class="carousel-dots flex justify-center gap-2 mt-4">
-                            <button class="carousel-dot w-3 h-3 rounded-full bg-purple-600 cursor-pointer" data-slide="0"></button>
-                            <button class="carousel-dot w-3 h-3 rounded-full bg-purple-300 cursor-pointer" data-slide="1"></button>
-                            <button class="carousel-dot w-3 h-3 rounded-full bg-purple-300 cursor-pointer" data-slide="2"></button>
+                        <div class="carousel-dots flex justify-center gap-3 mt-4">
+                            <button class="carousel-dot w-4 h-4 p-2 rounded-full bg-purple-600 cursor-pointer" data-slide="0" aria-label="Ga naar screenshot 1"></button>
+                            <button class="carousel-dot w-4 h-4 p-2 rounded-full bg-purple-300 cursor-pointer" data-slide="1" aria-label="Ga naar screenshot 2"></button>
+                            <button class="carousel-dot w-4 h-4 p-2 rounded-full bg-purple-300 cursor-pointer" data-slide="2" aria-label="Ga naar screenshot 3"></button>
                         </div>
                     </div>
                 </div>
@@ -334,10 +334,10 @@
                                     src="{{Vite::asset('resources/images/screen-11.png')}}"/>
                             </div>
                         </div>
-                        <div class="carousel-dots flex justify-center gap-2 mt-4">
-                            <button class="carousel-dot w-3 h-3 rounded-full bg-orange-600 cursor-pointer" data-slide="0"></button>
-                            <button class="carousel-dot w-3 h-3 rounded-full bg-orange-300 cursor-pointer" data-slide="1"></button>
-                            <button class="carousel-dot w-3 h-3 rounded-full bg-orange-300 cursor-pointer" data-slide="2"></button>
+                        <div class="carousel-dots flex justify-center gap-3 mt-4">
+                            <button class="carousel-dot w-4 h-4 p-2 rounded-full bg-orange-600 cursor-pointer" data-slide="0" aria-label="Ga naar screenshot 1"></button>
+                            <button class="carousel-dot w-4 h-4 p-2 rounded-full bg-orange-300 cursor-pointer" data-slide="1" aria-label="Ga naar screenshot 2"></button>
+                            <button class="carousel-dot w-4 h-4 p-2 rounded-full bg-orange-300 cursor-pointer" data-slide="2" aria-label="Ga naar screenshot 3"></button>
                         </div>
                     </div>
                 </div>
