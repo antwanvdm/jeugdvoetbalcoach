@@ -55,11 +55,17 @@ class TeamPolicy
 
     /**
      * Determine whether the user can leave the team.
+     * User must be a member of at least 2 teams to be able to leave one.
      * Hoofdcoach can only leave if there's at least one assistent.
      */
     public function leave(User $user, Team $team): bool
     {
         if (!$user->is_active || !$user->isMemberOf($team)) {
+            return false;
+        }
+
+        // User must have at least 2 teams to be able to leave one
+        if ($user->teams()->count() < 2) {
             return false;
         }
 
@@ -73,7 +79,7 @@ class TeamPolicy
             return $assistentenCount > 0;
         }
 
-        // Assistenten can always leave
+        // Assistenten can always leave (as long as they have another team)
         return true;
     }
 
