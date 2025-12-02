@@ -14,7 +14,7 @@
         </div>
     </div>
 
-    <div class="bg-white p-4 shadow rounded max-w-xl">
+    <div class="bg-white p-4 shadow rounded max-w-3xl">
         <dl class="grid grid-cols-3 gap-2">
             <dt class="font-medium text-gray-600">Naam</dt>
             <dd class="col-span-2">{{ $opponent->name }}</dd>

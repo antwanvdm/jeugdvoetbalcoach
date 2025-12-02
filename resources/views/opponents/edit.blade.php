@@ -1,6 +1,6 @@
 <x-app-layout>
     <h1 class="text-2xl font-semibold mb-4">Bewerk tegenstander</h1>
-    <form action="{{ route('opponents.update', $opponent) }}" method="POST" enctype="multipart/form-data" class="bg-white p-4 shadow rounded max-w-lg">
+    <form action="{{ route('opponents.update', $opponent) }}" method="POST" enctype="multipart/form-data" class="bg-white p-4 shadow rounded max-w-2xl">
         @csrf
         @method('PUT')
         <div class="mb-3">

@@ -1,7 +1,112 @@
 import.meta.glob(["../images/**"]);
 
+/**
+ * Initialize screenshot carousels with touch/swipe support
+ */
+function initScreenshotCarousels() {
+    const carousels = document.querySelectorAll(".screenshot-carousel");
+
+    carousels.forEach((carousel) => {
+        const slides = carousel.querySelectorAll(".carousel-slide");
+        const dots = carousel.querySelectorAll(".carousel-dot");
+        const slidesContainer = carousel.querySelector(".carousel-slides");
+        let currentSlide = 0;
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        // Function to show specific slide
+        function showSlide(index) {
+            // Ensure index is within bounds
+            if (index < 0) index = slides.length - 1;
+            if (index >= slides.length) index = 0;
+
+            currentSlide = index;
+
+            // Update slides visibility
+            slides.forEach((slide, i) => {
+                if (i === currentSlide) {
+                    slide.classList.remove("hidden");
+                } else {
+                    slide.classList.add("hidden");
+                }
+            });
+
+            // Update dots
+            dots.forEach((dot, i) => {
+                const color = carousel.dataset.carousel;
+                const activeColor =
+                    {
+                        step1: "bg-blue-600",
+                        step2: "bg-green-600",
+                        step3: "bg-purple-600",
+                        step4: "bg-orange-600",
+                    }[color] || "bg-blue-600";
+
+                const inactiveColor =
+                    {
+                        step1: "bg-blue-300",
+                        step2: "bg-green-300",
+                        step3: "bg-purple-300",
+                        step4: "bg-orange-300",
+                    }[color] || "bg-blue-300";
+
+                if (i === currentSlide) {
+                    dot.classList.remove(inactiveColor);
+                    dot.classList.add(activeColor);
+                } else {
+                    dot.classList.remove(activeColor);
+                    dot.classList.add(inactiveColor);
+                }
+            });
+        }
+
+        // Dot click handlers
+        dots.forEach((dot, index) => {
+            dot.addEventListener("click", () => {
+                showSlide(index);
+            });
+        });
+
+        // Touch/swipe handlers
+        slidesContainer.addEventListener(
+            "touchstart",
+            (e) => {
+                touchStartX = e.changedTouches[0].screenX;
+            },
+            { passive: true }
+        );
+
+        slidesContainer.addEventListener(
+            "touchend",
+            (e) => {
+                touchEndX = e.changedTouches[0].screenX;
+                handleSwipe();
+            },
+            { passive: true }
+        );
+
+        function handleSwipe() {
+            const swipeThreshold = 50; // minimum distance for swipe
+            const diff = touchStartX - touchEndX;
+
+            if (Math.abs(diff) > swipeThreshold) {
+                if (diff > 0) {
+                    // Swipe left - next slide
+                    showSlide(currentSlide + 1);
+                } else {
+                    // Swipe right - previous slide
+                    showSlide(currentSlide - 1);
+                }
+            }
+        }
+    });
+}
+
 //Nav toggle
 document.addEventListener("DOMContentLoaded", function () {
+    // Screenshot Carousel functionaliteit
+    initScreenshotCarousels();
+
     const btn = document.getElementById("nav-toggle");
     const menu = document.getElementById("nav-menu");
     if (!btn) return;

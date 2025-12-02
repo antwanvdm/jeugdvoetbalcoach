@@ -4,10 +4,10 @@
             <!-- About / Branding -->
             <div class="flex-shrink-0 md:max-w-xl">
                 <div class="flex items-center gap-4 mb-4">
-                    <img src="{{ Vite::asset('resources/images/logo.webp') }}" alt="Logo {{ config('app.name') }}" class="h-16">
+                    <img src="{{ Vite::asset('resources/images/logo-small.webp') }}" alt="Logo {{ config('app.name') }}" class="h-16">
                     <h3 class="text-white font-semibold text-2xl">{{ config('app.name') }}</h3>
                 </div>
-                <p class="text-sm text-gray-400 leading-relaxed mb-2">Voor jeugdtrainers (JO8–JO12) die spelen in 4 kwarten. Automatische, eerlijke line-ups & slimme rotatie zodat jij kunt focussen op coaching.</p>
+                <p class="text-sm text-gray-300 leading-relaxed mb-2">Voor jeugdtrainers (JO8–JO12) die spelen in 4 kwarten. Automatische, eerlijke line-ups & slimme rotatie zodat jij kunt focussen op coaching.</p>
             </div>
 
             <!-- Open Source / Support -->
@@ -32,11 +32,17 @@
 
         <!-- Bottom Bar -->
         <div class="mt-8 pt-8 border-t border-gray-800 flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-gray-500">
-            <p>&copy; {{ date('Y') }} {{ config('app.name') }}. Alle rechten voorbehouden.</p>
+            <p class="text-gray-300">&copy; {{ date('Y') }} {{ config('app.name') }}. Alle rechten voorbehouden.</p>
             <div class="flex flex-wrap gap-4 items-center">
-                <a href="{{ route('privacy') }}" class="hover:text-white transition">Privacy</a>
-                <a href="https://github.com/antwanvdm/jeugdvoetbalcoach" target="_blank" class="text-gray-400 hover:text-white transition">GitHub</a>
-                <a href="https://ko-fi.com/antwanvdm" target="_blank" class="text-pink-500 hover:text-pink-400 transition">Sponsor</a>
+                <a href="{{ route('privacy') }}" class="text-gray-300 hover:text-white transition">Privacy</a>
+                <a href="https://github.com/antwanvdm/jeugdvoetbalcoach" target="_blank" class="text-gray-300 hover:text-white transition inline-flex items-center gap-1">
+                    GitHub
+                    <svg class="size-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14 21 3"/></svg>
+                </a>
+                <a href="https://ko-fi.com/antwanvdm" target="_blank" class="text-pink-500 hover:text-pink-400 transition inline-flex items-center gap-1">
+                    Sponsor
+                    <svg class="size-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14 21 3"/></svg>
+                </a>
             </div>
         </div>
     </div>

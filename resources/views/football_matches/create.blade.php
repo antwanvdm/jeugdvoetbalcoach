@@ -4,7 +4,7 @@
         <p class="text-sm text-gray-600">Seizoen: <span class="font-medium">{{ $season->year }}-{{ $season->year + 1 }} / {{ $season->part }}</span></p>
     </div>
 
-    <form action="{{ route('football-matches.store') }}" method="POST" class="bg-white p-4 shadow rounded max-w-xl">
+    <form action="{{ route('football-matches.store') }}" method="POST" class="bg-white p-4 shadow rounded max-w-3xl">
         @csrf
         <input type="hidden" name="season_id" value="{{ $season->id }}">
 

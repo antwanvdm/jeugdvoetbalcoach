@@ -9,10 +9,10 @@
                     @if($currentTeam && $currentTeam->opponent->logo)
                         <img src="{{ asset('storage/' . $currentTeam->opponent->logo) }}" alt="{{ $currentTeam->opponent->name }} Logo" class="h-12">
                     @else
-                        <img src="{{Vite::asset('resources/images/logo.webp')}}" alt="{{config('app.name')}} Logo" class="h-12">
+                        <img src="{{Vite::asset('resources/images/logo-small.webp')}}" alt="{{config('app.name')}} Logo" class="h-12">
                     @endif
                 @else
-                    <img src="{{Vite::asset('resources/images/logo.webp')}}" alt="{{config('app.name')}} Logo" class="h-12">
+                    <img src="{{Vite::asset('resources/images/logo-small.webp')}}" alt="{{config('app.name')}} Logo" class="h-12">
                 @endif
             </a>
             <div class="hidden md:flex items-center gap-3">

@@ -1,7 +1,7 @@
 
 <x-app-layout>
     <h1 class="text-2xl font-semibold mb-4">Bewerk formatie</h1>
-    <form action="{{ route('formations.update', $formation) }}" method="POST" class="bg-white p-4 shadow rounded max-w-lg">
+    <form action="{{ route('formations.update', $formation) }}" method="POST" class="bg-white p-4 shadow rounded max-w-2xl">
         @csrf
         @method('PUT')
         @include('formations._form')

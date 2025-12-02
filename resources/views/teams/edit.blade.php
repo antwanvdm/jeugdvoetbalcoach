@@ -1,6 +1,6 @@
 <x-app-layout>
     <h1 class="text-2xl font-semibold mb-4">Team Bewerken</h1>
-    <form action="{{ route('teams.update', $team) }}" method="POST" class="bg-white p-4 shadow rounded max-w-lg">
+    <form action="{{ route('teams.update', $team) }}" method="POST" class="bg-white p-4 shadow rounded max-w-2xl">
         @csrf
         @method('PUT')
 
@@ -30,7 +30,7 @@
         </div>
     </form>
 
-    <div class="bg-white p-4 shadow rounded max-w-lg mt-6">
+    <div class="bg-white p-4 shadow rounded max-w-2xl mt-6">
         <h2 class="text-xl font-semibold mb-3">Mijn teamlabel</h2>
         <form method="POST" action="{{ route('teams.label.update', $team) }}">
             @csrf

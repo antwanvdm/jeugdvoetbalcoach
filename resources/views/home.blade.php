@@ -14,7 +14,16 @@
 @endpush
 <x-app-layout title="{{ config('app.name') }} – Slim teammanagement voor jeugdcoaches">
     <!-- Hero Section -->
-    <section class="relative isolate overflow-hidden bg-home-hero bg-cover bg-center">
+    <section class="relative isolate overflow-hidden">
+        <x-responsive-image
+            class="absolute inset-0 w-full h-full object-cover -z-10"
+            alt="Achtergrondafbeelding voetbalvelden VVOR"
+            sizes="100vw"
+            src="{{Vite::asset('resources/images/vvor.jpg')}}"/>
+
+        <!-- Gradient overlay (optioneel) -->
+        <div class="absolute inset-0 bg-gradient-to-b from-black/60 to-black/60 -z-10"></div>
+
         <div class="mx-auto max-w-5xl px-6 py-20 text-center">
             <div class="mb-4">
                 <span class="inline-block px-4 py-2 bg-blue-600/20 backdrop-blur-sm rounded-full text-sm font-medium text-blue-100 border border-blue-400/30">
@@ -139,14 +148,34 @@
                     </ul>
                 </div>
                 <div class="order-1 lg:order-2">
-                    <div class="aspect-video rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-200 flex items-center justify-center shadow-lg">
-                        <div class="text-center p-8">
-                            <svg class="w-16 h-16 text-blue-400 mx-auto mb-3" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                                <rect x="3" y="3" width="18" height="18" rx="2"/>
-                                <path d="M3 9h18"/>
-                                <path d="M9 21V9"/>
-                            </svg>
-                            <p class="text-sm text-blue-600 font-medium">Screenshot: Team & Spelersbeheer</p>
+                    <div class="screenshot-carousel relative" data-carousel="step1">
+                        <div class="carousel-slides relative aspect-video rounded-xl overflow-hidden shadow-lg">
+                            <div class="carousel-slide flex items-center" data-slide="0">
+                                <x-responsive-image
+                                    class="w-full h-full object-cover"
+                                    alt="Team overzicht"
+                                    sizes="(max-width: 1024px) 100vw, 50vw"
+                                    src="{{Vite::asset('resources/images/screen-1.png')}}"/>
+                            </div>
+                            <div class="carousel-slide hidden" data-slide="1">
+                                <x-responsive-image
+                                    class="w-full h-full object-cover"
+                                    alt="Coach uitnodiging"
+                                    sizes="(max-width: 1024px) 100vw, 50vw"
+                                    src="{{Vite::asset('resources/images/screen-2.png')}}"/>
+                            </div>
+                            <div class="carousel-slide hidden" data-slide="2">
+                                <x-responsive-image
+                                    class="w-full h-full object-cover"
+                                    alt="Spelers beheer"
+                                    sizes="(max-width: 1024px) 100vw, 50vw"
+                                    src="{{Vite::asset('resources/images/screen-3.png')}}"/>
+                            </div>
+                        </div>
+                        <div class="carousel-dots flex justify-center gap-2 mt-4">
+                            <button class="carousel-dot w-3 h-3 rounded-full bg-blue-600 cursor-pointer" data-slide="0"></button>
+                            <button class="carousel-dot w-3 h-3 rounded-full bg-blue-300 cursor-pointer" data-slide="1"></button>
+                            <button class="carousel-dot w-3 h-3 rounded-full bg-blue-300 cursor-pointer" data-slide="2"></button>
                         </div>
                     </div>
                 </div>
@@ -155,16 +184,34 @@
             <!-- Step 2: Seizoen & Formatie -->
             <div class="grid lg:grid-cols-2 gap-8 items-center">
                 <div>
-                    <div class="aspect-video rounded-xl bg-gradient-to-br from-green-50 to-green-100 border-2 border-green-200 flex items-center justify-center shadow-lg">
-                        <div class="text-center p-8">
-                            <svg class="w-16 h-16 text-green-400 mx-auto mb-3" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                                <rect x="3" y="3" width="18" height="18" rx="2"/>
-                                <circle cx="12" cy="8" r="1.5"/>
-                                <circle cx="8" cy="12" r="1.5"/>
-                                <circle cx="16" cy="12" r="1.5"/>
-                                <circle cx="12" cy="16" r="1.5"/>
-                            </svg>
-                            <p class="text-sm text-green-600 font-medium">Screenshot: Seizoen & Formatie</p>
+                    <div class="screenshot-carousel relative" data-carousel="step2">
+                        <div class="carousel-slides relative aspect-video rounded-xl overflow-hidden shadow-lg">
+                            <div class="carousel-slide" data-slide="0">
+                                <x-responsive-image
+                                    class="w-full h-full object-cover"
+                                    alt="Seizoen overzicht"
+                                    sizes="(max-width: 1024px) 100vw, 50vw"
+                                    src="{{Vite::asset('resources/images/screen-4.png')}}"/>
+                            </div>
+                            <div class="carousel-slide hidden" data-slide="1">
+                                <x-responsive-image
+                                    class="w-full h-full object-cover"
+                                    alt="Formaties beheren"
+                                    sizes="(max-width: 1024px) 100vw, 50vw"
+                                    src="{{Vite::asset('resources/images/screen-5.png')}}"/>
+                            </div>
+                            <div class="carousel-slide hidden" data-slide="2">
+                                <x-responsive-image
+                                    class="w-full h-full object-cover"
+                                    alt="Wedstrijd aanmaken"
+                                    sizes="(max-width: 1024px) 100vw, 50vw"
+                                    src="{{Vite::asset('resources/images/screen-6.png')}}"/>
+                            </div>
+                        </div>
+                        <div class="carousel-dots flex justify-center gap-2 mt-4">
+                            <button class="carousel-dot w-3 h-3 rounded-full bg-green-600 cursor-pointer" data-slide="0"></button>
+                            <button class="carousel-dot w-3 h-3 rounded-full bg-green-300 cursor-pointer" data-slide="1"></button>
+                            <button class="carousel-dot w-3 h-3 rounded-full bg-green-300 cursor-pointer" data-slide="2"></button>
                         </div>
                     </div>
                 </div>
@@ -227,15 +274,34 @@
                     </ul>
                 </div>
                 <div class="order-1 lg:order-2">
-                    <div class="aspect-video rounded-xl bg-gradient-to-br from-purple-50 to-purple-100 border-2 border-purple-200 flex items-center justify-center shadow-lg">
-                        <div class="text-center p-8">
-                            <svg class="w-16 h-16 text-purple-400 mx-auto mb-3" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                                <path d="M9 5H7a2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
-                                <rect x="9" y="3" width="6" height="4" rx="1"/>
-                                <path d="M9 12h6"/>
-                                <path d="M9 16h6"/>
-                            </svg>
-                            <p class="text-sm text-purple-600 font-medium">Screenshot: Gegenereerde Line-up</p>
+                    <div class="screenshot-carousel relative" data-carousel="step3">
+                        <div class="carousel-slides relative aspect-video rounded-xl overflow-hidden shadow-lg">
+                            <div class="carousel-slide" data-slide="0">
+                                <x-responsive-image
+                                    class="w-full h-full object-cover"
+                                    alt="Spelersoverzicht"
+                                    sizes="(max-width: 1024px) 100vw, 50vw"
+                                    src="{{Vite::asset('resources/images/screen-7.png')}}"/>
+                            </div>
+                            <div class="carousel-slide hidden" data-slide="1">
+                                <x-responsive-image
+                                    class="w-full h-full object-cover"
+                                    alt="Aanpassen opstelling"
+                                    sizes="(max-width: 1024px) 100vw, 50vw"
+                                    src="{{Vite::asset('resources/images/screen-8.png')}}"/>
+                            </div>
+                            <div class="carousel-slide hidden" data-slide="2">
+                                <x-responsive-image
+                                    class="w-full h-full object-cover"
+                                    alt="Line-up per kwart"
+                                    sizes="(max-width: 1024px) 100vw, 50vw"
+                                    src="{{Vite::asset('resources/images/screen-9.png')}}"/>
+                            </div>
+                        </div>
+                        <div class="carousel-dots flex justify-center gap-2 mt-4">
+                            <button class="carousel-dot w-3 h-3 rounded-full bg-purple-600 cursor-pointer" data-slide="0"></button>
+                            <button class="carousel-dot w-3 h-3 rounded-full bg-purple-300 cursor-pointer" data-slide="1"></button>
+                            <button class="carousel-dot w-3 h-3 rounded-full bg-purple-300 cursor-pointer" data-slide="2"></button>
                         </div>
                     </div>
                 </div>
@@ -244,14 +310,34 @@
             <!-- Step 4: Delen & Printen -->
             <div class="grid lg:grid-cols-2 gap-8 items-center">
                 <div>
-                    <div class="aspect-video rounded-xl bg-gradient-to-br from-orange-50 to-orange-100 border-2 border-orange-200 flex items-center justify-center shadow-lg">
-                        <div class="text-center p-8">
-                            <svg class="w-16 h-16 text-orange-400 mx-auto mb-3" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                                <polyline points="6 9 6 2 18 2 18 9"/>
-                                <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
-                                <rect x="6" y="14" width="12" height="8"/>
-                            </svg>
-                            <p class="text-sm text-orange-600 font-medium">Screenshot: Delen & Printen</p>
+                    <div class="screenshot-carousel relative" data-carousel="step4">
+                        <div class="carousel-slides relative aspect-video rounded-xl overflow-hidden shadow-lg">
+                            <div class="carousel-slide" data-slide="0">
+                                <x-responsive-image
+                                    class="w-full h-full object-cover"
+                                    alt="Deel links met ouders"
+                                    sizes="(max-width: 1024px) 100vw, 50vw"
+                                    src="{{Vite::asset('resources/images/screen-10.png')}}"/>
+                            </div>
+                            <div class="carousel-slide hidden" data-slide="2">
+                                <x-responsive-image
+                                    class="w-full h-full object-cover"
+                                    alt="Publieke link voor ouders"
+                                    sizes="(max-width: 1024px) 100vw, 50vw"
+                                    src="{{Vite::asset('resources/images/screen-12.png')}}"/>
+                            </div>
+                            <div class="carousel-slide hidden" data-slide="1">
+                                <x-responsive-image
+                                    class="w-full h-full object-cover"
+                                    alt="Print de opstelling"
+                                    sizes="(max-width: 1024px) 100vw, 50vw"
+                                    src="{{Vite::asset('resources/images/screen-11.png')}}"/>
+                            </div>
+                        </div>
+                        <div class="carousel-dots flex justify-center gap-2 mt-4">
+                            <button class="carousel-dot w-3 h-3 rounded-full bg-orange-600 cursor-pointer" data-slide="0"></button>
+                            <button class="carousel-dot w-3 h-3 rounded-full bg-orange-300 cursor-pointer" data-slide="1"></button>
+                            <button class="carousel-dot w-3 h-3 rounded-full bg-orange-300 cursor-pointer" data-slide="2"></button>
                         </div>
                     </div>
                 </div>
@@ -272,13 +358,13 @@
                             <svg class="w-5 h-5 text-orange-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                 <path d="m5 13 4 4L19 7"/>
                             </svg>
-                            Print-vriendelijke layout
+                            Publieke weergave met seizoensresultaten
                         </li>
                         <li class="flex items-start gap-2">
                             <svg class="w-5 h-5 text-orange-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                 <path d="m5 13 4 4L19 7"/>
                             </svg>
-                            Overzicht van alle 4 kwarten
+                            Print de opstelling voor de wedstrijd
                         </li>
                     </ul>
                 </div>
@@ -295,8 +381,7 @@
                         d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"/>
                 </svg>
                 <p class="text-gray-700 text-lg leading-relaxed mb-6">
-                    Als beginnend jeugdcoach van <a href="https://www.vvor.nl/" target="_blank" class="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 transition">VVOR <svg class="size-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0
-                    1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14 21 3"/></svg></a> liep ik als snel tegen hetzelfde probleem aan: het bijhouden van wissels en opstellingen in een Excel werd erg onoverzichtelijk. Wie heeft er
+                    Als beginnend jeugdcoach van <a href="https://www.vvor.nl/" target="_blank" class="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 transition">VVOR <svg class="size-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14 21 3"/></svg></a> liep ik als snel tegen hetzelfde probleem aan: het bijhouden van wissels en opstellingen in een Excel werd erg onoverzichtelijk. Wie heeft er
                     al gespeeld? Wie moet er nog keepen? Hoe zorg ik dat iedereen evenveel speeltijd krijgt?
                 </p>
                 <p class="text-gray-700 text-lg leading-relaxed mb-6">
@@ -305,7 +390,11 @@
                 </p>
                 <div class="border-t pt-4 flex gap-4 items-center">
                     <div class="w-20 h-20 bg-blue-600 rounded-full overflow-hidden flex items-center justify-center text-white font-bold text-2xl">
-                        <img src="{{Vite::asset('resources/images/coach.webp')}}" alt="Coach Antwan aan het werk"/>
+                        <x-responsive-image
+                            class=""
+                            alt="Coach Antwan aan het werk"
+                            sizes="(max-width: 1024px) 60vw, 33vw"
+                            src="{{Vite::asset('resources/images/coach.jpg')}}"/>
                     </div>
                     <div>
                         <p class="font-semibold text-gray-900">Antwan van der Mooren</p>
@@ -436,10 +525,10 @@
     <!-- Call To Action -->
     <section class="mx-auto bg-blue-600 px-8 py-10 text-center shadow-md">
         <h2 class="text-2xl font-bold text-white mb-3">Start vandaag nog</h2>
-        <p class="text-blue-100 mb-6 max-w-xl mx-auto">Maak gratis een account aan, nodig assistent-coaches uit en ervaar directe structuur in je wedstrijdvoorbereiding.</p>
+        <p class="text-white mb-6 max-w-xl mx-auto">Maak gratis een account aan, nodig assistent-coaches uit en ervaar directe structuur in je wedstrijdvoorbereiding.</p>
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
             <a href="{{ route('register') }}" class="px-7 py-3 rounded-md bg-white text-blue-700 font-semibold shadow hover:bg-blue-50">Gratis Registreren</a>
-            <a href="{{ route('login') }}" class="px-7 py-3 rounded-md bg-blue-500 text-white font-medium hover:bg-blue-400">Ik heb al een account</a>
+            <a href="{{ route('login') }}" class="px-7 py-3 rounded-md bg-blue-800 text-white font-medium hover:bg-blue-400">Ik heb al een account</a>
         </div>
     </section>
 </x-app-layout>

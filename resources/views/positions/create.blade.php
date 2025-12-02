@@ -1,6 +1,6 @@
 <x-app-layout>
     <h1 class="text-2xl font-semibold mb-4">Nieuwe positie</h1>
-    <form action="{{ route('admin.positions.store') }}" method="POST" class="bg-white p-4 shadow rounded max-w-lg">
+    <form action="{{ route('admin.positions.store') }}" method="POST" class="bg-white p-4 shadow rounded max-w-2xl">
         @csrf
         <div class="mb-3">
             <label class="block text-sm font-medium mb-1">Naam</label>

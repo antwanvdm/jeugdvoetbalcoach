@@ -10,7 +10,7 @@
         </div>
     </div>
 
-    <div class="bg-white p-4 shadow rounded max-w-lg">
+    <div class="bg-white p-4 shadow rounded max-w-2xl">
         <dl>
             <dt class="text-sm text-gray-600">Totaal spelers</dt>
             <dd class="font-medium mb-2">{{ $formation->total_players }}</dd>

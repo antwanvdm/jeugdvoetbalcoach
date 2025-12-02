@@ -12,7 +12,7 @@
         </div>
     </div>
 
-    <div class="bg-white p-4 shadow rounded max-w-lg">
+    <div class="bg-white p-4 shadow rounded max-w-2xl">
         <div class="mb-2">
             <div class="text-sm text-gray-600">Naam</div>
             <div class="font-medium">{{ $position->name }}</div>
