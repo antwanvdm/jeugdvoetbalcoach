@@ -33,6 +33,18 @@
 
     <!-- Infographic / USPs -->
     <section class="mx-auto max-w-6xl px-6 py-16">
+
+        @if(session('feedback_success'))
+            <div class="mb-6 rounded-lg bg-green-50 p-4 border border-green-200">
+                <div class="flex">
+                    <svg class="h-5 w-5 text-green-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <p class="ml-3 text-sm text-green-800">{{ session('feedback_success') }}</p>
+                </div>
+            </div>
+        @endif
+
         <h2 class="text-2xl font-bold tracking-tight text-gray-900 mb-6">Wat kan het systeem voor jou doen?</h2>
         <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
             <!-- Spelers beheer -->
@@ -364,19 +376,9 @@
         <p class="text-gray-600 mb-8 max-w-3xl">Mis je clubgegevens of heb je andere feedback? Laat het weten!</p>
         <div class="bg-white rounded-xl border shadow-sm p-8">
 
-            @if(session('feedback_success'))
-                <div class="mb-6 rounded-lg bg-green-50 p-4 border border-green-200">
-                    <div class="flex">
-                        <svg class="h-5 w-5 text-green-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                        <p class="ml-3 text-sm text-green-800">{{ session('feedback_success') }}</p>
-                    </div>
-                </div>
-            @endif
-
             <form action="{{ route('home.feedback') }}" method="POST" class="space-y-6">
                 @csrf
+                @honeypot
 
                 <div class="grid gap-6 md:grid-cols-2">
                     <div>

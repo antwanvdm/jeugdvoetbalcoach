@@ -14,12 +14,13 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SeasonController;
 use App\Http\Controllers\TeamController;
 use Illuminate\Support\Facades\Route;
+use Spatie\Honeypot\ProtectAgainstSpam;
 
 // Public home page
 Route::get('/', [HomeController::class, 'show'])->name('home');
 
 // Feedback form submission
-Route::post('/feedback', [HomeController::class, 'feedback'])->name('home.feedback');
+Route::post('/feedback', [HomeController::class, 'feedback'])->name('home.feedback')->middleware(ProtectAgainstSpam::class);
 
 // Privacy page
 Route::get('/privacy', [\App\Http\Controllers\PrivacyController::class, 'show'])->name('privacy');
