@@ -7,9 +7,16 @@
         <div id="players-container" class="mb-6">
             <div class="mb-4">
                 <h2 class="text-lg font-semibold mb-3">Spelers</h2>
-                <div class="text-sm text-gray-600 mb-3">
-                    Voeg één of meerdere spelers toe. Alle spelers worden aan de geselecteerde seizoenen gekoppeld.
-                    <strong>Tip:</strong> Zet fysiek sterkere spelers op waarde 2 zodat bij het maken van opstellingen de balans beter bewaakt blijft.
+                <div class="mb-3">
+                    <div class="bg-blue-50 border border-blue-  200 text-blue-900 text-sm rounded p-3 flex items-start gap-2">
+                        <svg class="w-5 h-5 mt-0.5 flex-shrink-0 text-blue-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg>
+                        <div>
+                            <strong>Sterkere speler?</strong> Geef aan of een speler fysiek sterker is dan gemiddeld. Dit helpt om de teams per kwart zo eerlijk mogelijk te verdelen. Het algoritme houdt hier rekening mee bij het maken van de opstelling, zodat sterke en minder sterke spelers zo goed mogelijk worden gebalanceerd.
+                        </div>
+                    </div>
+                    <div class="text-sm text-gray-600 mt-2">
+                        Voeg één of meerdere spelers toe. Alle spelers worden aan de geselecteerde seizoenen gekoppeld.
+                    </div>
                 </div>
             </div>
 
@@ -17,8 +24,7 @@
             <div class="hidden sm:grid sm:grid-cols-[2fr_1.5fr_1fr_auto] gap-3 mb-2 text-sm font-medium text-gray-700 px-3">
                 <div>Naam</div>
                 <div>Positie</div>
-                <div>Fysiek</div>
-                <div class="w-10"></div>
+                <div>Sterkere speler</div>
             </div>
 
             <!-- Players rows will be inserted here -->
@@ -47,11 +53,10 @@
                             <div class="text-red-500 text-sm mt-1">{{ $message }}</div>
                             @enderror
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium mb-1 sm:hidden">Fysiek</label>
-                            <input type="number" name="players[0][weight]" value="{{ old('players.0.weight') || '1' }}"
-                                   class="w-full border rounded p-2 @error('players.0.weight') border-red-500 @enderror"
-                                   placeholder="1-2" min="1" max="2" step="0.1" required>
+                        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-start h-full">
+                            <label class="block text-sm font-medium mb-1 sm:hidden">Sterkere speler</label>
+                            <input type="hidden" name="players[0][weight]" value="1">
+                            <input type="checkbox" name="players[0][weight]" value="2" {{ old('players.0.weight') == '2' ? 'checked' : '' }} class="h-5 w-5">
                             @error('players.0.weight')
                             <div class="text-red-500 text-sm mt-1">{{ $message }}</div>
                             @enderror

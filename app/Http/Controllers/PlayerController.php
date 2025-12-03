@@ -81,7 +81,13 @@ class PlayerController extends Controller
         $seasonIds = array_filter((array)$request->input('seasons'));
 
         $createdCount = 0;
-        foreach ($validated['players'] as $playerData) {
+        foreach ($validated['players'] as $i => $playerData) {
+            // Checkbox: if not set, fallback to 1 (hidden input), if checked, value is 2
+            if (isset($request->players[$i]['weight']) && $request->players[$i]['weight'] == '2') {
+                $playerData['weight'] = 2;
+            } else {
+                $playerData['weight'] = 1;
+            }
             $playerData['user_id'] = $userId;
             $playerData['team_id'] = $teamId;
             $player = Player::create($playerData);
@@ -126,11 +132,15 @@ class PlayerController extends Controller
     {
         Gate::authorize('update', $player);
 
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'position_id' => ['required', 'exists:positions,id'],
-            'weight' => ['required', 'numeric'],
+            'weight' => ['nullable'],
         ]);
+
+        // Checkbox: if not set, fallback to 1 (hidden input), if checked, value is 2
+        $validated['weight'] = $request->input('weight', 1) == '2' ? 2 : 1;
 
         $player->update($validated);
 

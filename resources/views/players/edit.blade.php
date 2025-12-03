@@ -16,8 +16,10 @@
             </select>
         </div>
         <div class="mb-3">
-            <label class="block text-sm font-medium mb-1">Fysiek</label>
-            <input type="number" name="weight" value="{{ old('weight', $player->weight) }}" class="w-full border rounded p-2" required>
+            <label class="block text-sm font-medium mb-1">Sterkere speler</label>
+            <input type="hidden" name="weight" value="1">
+            <input type="checkbox" name="weight" value="2" {{ old('weight', $player->weight) == '2' ? 'checked' : '' }} class="align-middle mr-2">
+            <span class="text-sm">Sterkere speler</span>
         </div>
         <div class="mb-3">
             <label class="block text-sm font-medium mb-1">Seizoenen</label>

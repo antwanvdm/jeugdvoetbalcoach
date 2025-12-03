@@ -386,11 +386,10 @@ document.addEventListener("DOMContentLoaded", function () {
                         ${positionsHTML}
                     </select>
                 </div>
-                <div>
-                    <label class="block text-sm font-medium mb-1 sm:hidden">Fysiek</label>
-                    <input type="number" name="players[${index}][weight]"
-                           class="w-full border rounded p-2"
-                           placeholder="1-2" min="1" max="2" step="0.1" value="1" required>
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-start h-full">
+                    <label class="block text-sm font-medium mb-1 sm:hidden">Sterkere speler</label>
+                    <input type="hidden" name="players[${index}][weight]" value="1">
+                    <input type="checkbox" name="players[${index}][weight]" value="2" class="h-5 w-5">
                 </div>
                 <div class="flex items-start sm:items-center sm:justify-center">
                     <button type="button" class="remove-player-btn w-10 h-10 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition" title="Verwijder speler">

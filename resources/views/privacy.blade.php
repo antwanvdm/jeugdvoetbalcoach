@@ -36,7 +36,7 @@
                 </p>
                 <ul class="list-disc list-inside text-gray-700 space-y-1 ml-4">
                     <li>Teamnamen en -instellingen</li>
-                    <li>Spelersgegevens (namen, nummers, posities, fysiek niveau)</li>
+                    <li>Spelersgegevens (namen, nummers, posities, sterkte)</li>
                     <li>Seizoenen, formaties en wedstrijden</li>
                     <li>Opstellingen en line-ups</li>
                 </ul>

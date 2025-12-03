@@ -21,7 +21,8 @@
                 <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
             </svg>
             <div class="text-sm text-green-800">
-                <strong class="font-semibold">Automatische line-up generatie:</strong> Het algoritme zorgt ervoor dat alle spelers <strong>evenveel speeltijd</strong> krijgen over de 4 kwarten. Bankbeurten worden eerlijk verdeeld en het <strong>fysieke niveau</strong> van spelers wordt meegenomen om gebalanceerde teams per kwart te maken.
+                <strong class="font-semibold">Automatische line-up generatie:</strong> Het algoritme zorgt ervoor dat alle spelers <strong>evenveel speeltijd</strong> krijgen over de 4 kwarten. Bankbeurten worden eerlijk verdeeld en de
+                <strong>aangegeven sterkte</strong> van spelers wordt meegenomen om gebalanceerde teams per kwart te maken.
             </div>
         </div>
     </div>
@@ -54,7 +55,7 @@
         <tr class="border-b">
             <th class="text-left p-3">Naam</th>
             <th class="text-left p-3">Favoriete positie</th>
-            <th class="text-left p-3">Fysiek</th>
+            <th class="text-left p-3">Sterkere speler</th>
             <th class="text-left p-3">Keer gekeept</th>
             <th class="text-right p-3"></th>
         </tr>
@@ -64,7 +65,13 @@
             <tr class="border-b">
                 <td class="p-3">{{ $player->name }}</td>
                 <td class="p-3">{{ $player->position->name ?? '-' }}</td>
-                <td class="p-3">{{ $player->weight }}</td>
+                <td class="p-3">
+                    @if($player->weight == 2)
+                        <span class="inline-block px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">Ja</span>
+                    @else
+                        <span class="inline-block px-2 py-1 bg-gray-100 text-gray-800 rounded text-xs">Nee</span>
+                    @endif
+                </td>
                 <td class="p-3">{{ $player->keeper_count ?? 0 }}</td>
                 <td class="p-3 text-right">
                     <a class="text-blue-600 mr-2" href="{{ route('players.show', $player) }}">Bekijk</a>

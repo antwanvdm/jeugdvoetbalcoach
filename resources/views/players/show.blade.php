@@ -22,8 +22,14 @@
             <div class="font-medium">{{ $player->position->name ?? '-' }}</div>
         </div>
         <div class="mb-2">
-            <div class="text-sm text-gray-600">Fysiek</div>
-            <div class="font-medium">{{ $player->weight }}</div>
+            <div class="text-sm text-gray-600">Sterkere speler</div>
+            <div class="font-medium">
+                @if($player->weight == 2)
+                    <span class="inline-block px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">Ja</span>
+                @else
+                    <span class="inline-block px-2 py-1 bg-gray-100 text-gray-800 rounded text-xs">Nee</span>
+                @endif
+            </div>
         </div>
     </div>
 

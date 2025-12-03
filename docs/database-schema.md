@@ -215,17 +215,14 @@ Alle spelers per team met hun eigenschappen.
 | `team_id`     | bigint unsigned | YES      | NULL           | Team waar speler bij hoort |
 | `name`        | varchar(255)    | NO       |                | Naam van de speler         |
 | `position_id` | bigint unsigned | NO       |                | Favoriete/hoofdpositie     |
-| `weight`      | tinyint         | NO       | 1              | Fysiek niveau (1-5)        |
+| `weight`      | tinyint         | NO       | 1              | Fysiek niveau (1-2)        |
 | `created_at`  | timestamp       | YES      | NULL           | Aanmaakdatum               |
 | `updated_at`  | timestamp       | YES      | NULL           | Laatste wijziging          |
 
 **Weight systeem:**
 
-- `1` = Laag fysiek niveau
-- `2` = Onder gemiddeld
-- `3` = Gemiddeld
-- `4` = Boven gemiddeld
-- `5` = Hoog fysiek niveau
+- `1` = Normale speler
+- `2` = Sterkere speler
 
 **Foreign Keys:**
 
