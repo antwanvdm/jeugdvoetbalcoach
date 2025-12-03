@@ -17,7 +17,7 @@ class DashboardController extends Controller
     {
         if (auth()->user()->isAdmin()){
             $statistics = [
-                'total_users' => User::count(),
+                'total_users' => User::where('role', 2)->count(),
                 'total_teams' => Team::count(),
                 'total_seasons' => Season::count(),
                 'total_players' => Player::count(),
