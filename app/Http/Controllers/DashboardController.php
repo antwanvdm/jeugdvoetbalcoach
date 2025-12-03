@@ -29,11 +29,14 @@ class DashboardController extends Controller
 
         $currentTeamId = session('current_team_id');
         $currentTeam = Team::find($currentTeamId);
+        $user = auth()->user();
 
         // Check if team has any seasons, if not redirect to onboarding
+        // Only redirect if this is the user's ONLY team (first team ever)
         // (unless user has explicitly skipped onboarding)
         $hasSeasons = Season::where('team_id', $currentTeamId)->exists();
-        if (!$hasSeasons && !session('onboarding_skipped')) {
+        $isFirstTeam = $user->teams()->count() === 1;
+        if (!$hasSeasons && !session('onboarding_skipped') && $isFirstTeam) {
             return redirect()->route('onboarding.index');
         }
 

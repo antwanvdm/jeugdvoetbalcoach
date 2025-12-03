@@ -54,7 +54,7 @@ class Season extends Model
         return $this->belongsTo(Formation::class);
     }
 
-    public static function getCurrent(?Collection $seasons = null): Season
+    public static function getCurrent(?Collection $seasons = null): ?Season
     {
         if (!$seasons) {
             $seasons = self::all();

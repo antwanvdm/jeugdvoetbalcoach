@@ -58,7 +58,7 @@
             <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
                 <h2 class="text-xl font-semibold text-blue-900 mb-3">Stap 2: Maak je eerste seizoen aan</h2>
                 <p class="text-blue-800 mb-4">
-                    Een seizoen definieert een periode waarin je wedstrijden speelt met een vaste groep spelers. 
+                    Een seizoen definieert een periode waarin je wedstrijden speelt met een vaste groep spelers.
                     Bijvoorbeeld "Najaar 2024" of "Voorjaar 2025".
                 </p>
                 <ul class="space-y-2 text-blue-800">
@@ -87,13 +87,13 @@
             <div class="flex gap-4">
                 <form action="{{ route('onboarding.skip') }}" method="POST" class="flex-1">
                     @csrf
-                    <button type="submit" class="w-full px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition">
+                    <button type="submit" class="w-full px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition cursor-pointer">
                         Later doen
                     </button>
                 </form>
                 <form action="{{ route('onboarding.complete') }}" method="POST" class="flex-1">
                     @csrf
-                    <button type="submit" class="w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-semibold">
+                    <button type="submit" class="w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-semibold cursor-pointer">
                         Seizoen aanmaken →
                     </button>
                 </form>
@@ -108,8 +108,8 @@
         <div class="mt-6 bg-gray-50 rounded-lg p-6">
             <h3 class="font-semibold text-gray-900 mb-2">💡 Waarom een seizoen?</h3>
             <p class="text-gray-700 text-sm">
-                Zonder seizoen kunnen we geen wedstrijden of spelers beheren. Een seizoen vormt de basis voor 
-                je teammanagement en zorgt ervoor dat we automatisch slimme line-ups kunnen genereren met 
+                Zonder seizoen kunnen we geen wedstrijden of spelers beheren. Een seizoen vormt de basis voor
+                je teammanagement en zorgt ervoor dat we automatisch slimme line-ups kunnen genereren met
                 eerlijke speeltijdverdeling en keeperrotatie.
             </p>
         </div>
