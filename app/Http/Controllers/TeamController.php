@@ -190,7 +190,7 @@ class TeamController extends Controller
     {
         $team = Team::where('invite_code', $inviteCode)->firstOrFail();
 
-        // Store invite code in session
+        // Store invite code in session for post-registration/verification flow
         session(['pending_team_invite' => $inviteCode]);
 
         // If user is not authenticated, redirect to register with team info

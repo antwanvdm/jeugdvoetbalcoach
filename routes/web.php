@@ -41,11 +41,13 @@ Route::get('/seasons/{season}/share/{shareToken}', [SeasonController::class, 'sh
 Route::get('/teams/join/{inviteCode}', [TeamController::class, 'showJoin'])->name('teams.join.show');
 Route::post('/teams/join/{inviteCode}', [TeamController::class, 'join'])->middleware('auth')->name('teams.join');
 
+// Dashboard - accessible with auth only (no email verification required)
+Route::middleware(['auth'])->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+});
+
 // Protected routes - require authentication + verified email
 Route::middleware(['auth', 'verified'])->group(function () {
-    // Dashboard (renamed from home)
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-
     // Onboarding wizard
     Route::get('/onboarding', [OnboardingController::class, 'index'])->name('onboarding.index');
     Route::post('/onboarding/complete', [OnboardingController::class, 'complete'])->name('onboarding.complete');

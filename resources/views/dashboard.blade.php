@@ -2,6 +2,32 @@
     <div class="max-w-5xl mx-auto">
         <h1 class="text-3xl font-semibold mb-4">{{ config('app.name') }}: {{$currentTeam->opponent->name}}</h1>
 
+        @if(!auth()->user()->hasVerifiedEmail())
+            <div class="bg-yellow-50 border-l-4 border-yellow-400 p-6 mb-6 rounded-r-lg">
+                <div class="flex items-start gap-4">
+                    <div class="flex-shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">E-mailverificatie vereist</h3>
+                        <p class="text-sm text-gray-700 mb-3">
+                            Je moet eerst je e-mailadres verifiëren voordat je {{ config('app.name') }} kunt gebruiken.
+                            @isset($onboardingComplete)
+                                @if(!$onboardingComplete)
+                                    Na verificatie kun je je onboarding afronden en volledig aan de slag.
+                                @endif
+                            @endisset
+                        </p>
+                        <a href="{{ route('verification.notice') }}" class="inline-flex items-center px-4 py-2 bg-yellow-600 text-white text-sm font-medium rounded-md hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500">
+                            Verifieer je e-mailadres →
+                        </a>
+                    </div>
+                </div>
+            </div>
+        @endif
+
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div class="md:col-span-2">
 
