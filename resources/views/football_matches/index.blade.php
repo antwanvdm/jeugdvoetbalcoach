@@ -10,7 +10,7 @@
                     @endforeach
                 </select>
             </form>
-            <a href="{{ route('football-matches.create', ['season_id' => $seasonId !== 'all' ? $seasonId : ($activeSeason?->id ?? '')]) }}" class="px-3 py-2 bg-blue-600 text-white rounded">Nieuwe wedstrijd</a>
+            <a href="{{ route('football-matches.create', ['season_id' => $seasonId !== 'all' ? $seasonId : ($activeSeason?->id ?? '')]) }}" class="px-3 py-2 bg-blue-600 text-white rounded">Plan volgende wedstrijd</a>
         </div>
     </div>
 

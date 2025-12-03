@@ -425,6 +425,7 @@ Bijdragen zijn welkom! Voor grote wijzigingen, open eerst een issue.
 
 ### 🔜 Toekomstige Features
 
+-   [ ] Notities van trainers uitklaapbaar tonen onder wedstrijden
 -   [ ] Webservice maken zodat andere developers gemakkelijk voetbalclub data kunnen inladen
 -   [ ] JO13+ support met 11 spelers en twee helften i.p.v. 4 kwarten
 

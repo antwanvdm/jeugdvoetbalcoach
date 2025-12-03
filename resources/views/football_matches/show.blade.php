@@ -3,13 +3,12 @@
         <h1 class="text-xl sm:text-2xl font-semibold">Wedstrijd tegen {{ $footballMatch->opponent->name ?? 'Onbekend' }}</h1>
         <div class="flex flex-wrap gap-2">
             @auth
-                <a href="{{ route('football-matches.index') }}" class="px-3 py-2 bg-gray-200 rounded text-sm">Terug</a>
-                <a href="{{ route('football-matches.lineup', $footballMatch) }}" class="px-3 py-2 bg-indigo-600 text-white rounded text-sm">Line-up</a>
-                <a href="{{ route('football-matches.edit', $footballMatch) }}" class="px-3 py-2 bg-yellow-500 text-white rounded text-sm">Bewerk</a>
+                <a href="{{ route('football-matches.lineup', $footballMatch) }}" class="px-3 py-2 bg-indigo-600 text-white rounded text-sm">Verander Line-up</a>
+                <a href="{{ route('football-matches.edit', $footballMatch) }}" class="px-3 py-2 bg-green-500 text-white rounded text-sm">Resultaat invoeren</a>
                 <form action="{{ route('football-matches.destroy', $footballMatch) }}" method="POST" onsubmit="return confirm('Wedstrijd verwijderen?')">
                     @csrf
                     @method('DELETE')
-                    <button class="px-3 py-2 bg-red-600 text-white rounded text-sm">Verwijder</button>
+                    <button class="px-3 py-2 bg-red-600 text-white rounded text-sm cursor-pointer">Verwijder</button>
                 </form>
             @endauth
         </div>
@@ -68,7 +67,7 @@
                     <button
                         data-copy-input="shareLink"
                         data-copy-message="Link gekopieerd naar klembord!"
-                        class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition whitespace-nowrap"
+                        class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition whitespace-nowrap cursor-pointer"
                     >
                         Kopieer
                     </button>
