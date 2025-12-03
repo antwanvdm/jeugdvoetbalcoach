@@ -369,6 +369,7 @@ Bijdragen zijn welkom! Voor grote wijzigingen, open eerst een issue.
 -   [x] Notities toevoegen aan wedstrijden voor extra context
 -   [x] Share tokens voor wedstrijden en seizoenen voor publieke toegang
 -   [x] Opruimen van data als gebruiker account verwijderd
+-   [x] Statistieken voor admin
 
 ### 🔜 Toekomstige Features
 

@@ -2,8 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\FootballMatch;
+use App\Models\Formation;
+use App\Models\Player;
 use App\Models\Season;
 use App\Models\Team;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
@@ -12,7 +16,15 @@ class DashboardController extends Controller
     public function index(): View|RedirectResponse
     {
         if (auth()->user()->isAdmin()){
-            return view('admin.dashboard');
+            $statistics = [
+                'total_teams' => Team::count(),
+                'total_users' => User::count(),
+                'total_players' => Player::count(),
+                'total_matches' => FootballMatch::count(),
+                'total_custom_formations' => Formation::where('is_global', false)->count(),
+            ];
+            
+            return view('admin.dashboard', compact('statistics'));
         }
 
         $currentTeamId = session('current_team_id');

@@ -41,9 +41,27 @@
             <div>
                 <div class="bg-white p-4 shadow rounded">
                     <h2 class="text-lg font-semibold mb-3">Statistieken</h2>
-                    <ul>
-                        <li>...</li>
-                        <li>...</li>
+                    <ul class="space-y-2">
+                        <li class="flex justify-between items-center">
+                            <span class="text-gray-600">Teams:</span>
+                            <span class="font-semibold text-gray-900">{{ number_format($statistics['total_teams']) }}</span>
+                        </li>
+                        <li class="flex justify-between items-center">
+                            <span class="text-gray-600">Accounts:</span>
+                            <span class="font-semibold text-gray-900">{{ number_format($statistics['total_users']) }}</span>
+                        </li>
+                        <li class="flex justify-between items-center">
+                            <span class="text-gray-600">Spelers:</span>
+                            <span class="font-semibold text-gray-900">{{ number_format($statistics['total_players']) }}</span>
+                        </li>
+                        <li class="flex justify-between items-center">
+                            <span class="text-gray-600">Wedstrijden:</span>
+                            <span class="font-semibold text-gray-900">{{ number_format($statistics['total_matches']) }}</span>
+                        </li>
+                        <li class="flex justify-between items-center">
+                            <span class="text-gray-600">Custom formaties:</span>
+                            <span class="font-semibold text-gray-900">{{ number_format($statistics['total_custom_formations']) }}</span>
+                        </li>
                     </ul>
                 </div>
             </div>
