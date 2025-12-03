@@ -1,6 +1,14 @@
 <x-app-layout>
     <div class="max-w-5xl mx-auto">
-        <h1 class="text-3xl font-semibold mb-4">{{ config('app.name') }}: {{$currentTeam->opponent->name}}</h1>
+        <h1 class="text-3xl font-semibold mb-4">
+            {{ config('app.name') }}: {{$currentTeam->opponent->name}}
+            @php
+                $currentTeamLabel = auth()->user()->teams()->where('teams.id', $currentTeam->id)->first()?->pivot->label;
+            @endphp
+            @if(!empty($currentTeamLabel))
+                <span class="text-gray-500">({{ $currentTeamLabel }})</span>
+            @endif
+        </h1>
 
         @if(!auth()->user()->hasVerifiedEmail())
             <div class="bg-yellow-50 border-l-4 border-yellow-400 p-6 mb-6 rounded-r-lg">

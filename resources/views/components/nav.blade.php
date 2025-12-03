@@ -23,8 +23,14 @@
                             <button id="team-dropdown-btn" class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-200 flex items-center gap-1 cursor-pointer">
                                 @php
                                     $currentTeam = \App\Models\Team::find(session('current_team_id'));
+                                    $currentTeamLabel = $currentTeam ? auth()->user()->teams()->where('teams.id', $currentTeam->id)->first()?->pivot->label : null;
                                 @endphp
-                                <span>{{ $currentTeam ? $currentTeam->opponent->name : 'Selecteer team' }}</span>
+                                <span>
+                                    {{ $currentTeam ? $currentTeam->opponent->name : 'Selecteer team' }}
+                                    @if(!empty($currentTeamLabel))
+                                        <span class="text-gray-500">({{ $currentTeamLabel }})</span>
+                                    @endif
+                                </span>
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                                 </svg>
@@ -36,6 +42,9 @@
                                             @csrf
                                             <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {{ session('current_team_id') == $team->id ? 'bg-gray-50 font-semibold' : '' }}">
                                                 {{ $team->opponent->name }}
+                                                @if(!empty($team->pivot->label))
+                                                    <span class="text-gray-500">({{ $team->pivot->label }})</span>
+                                                @endif
                                                 @if(session('current_team_id') == $team->id)
                                                     <span class="text-indigo-600">✓</span>
                                                 @endif
@@ -110,6 +119,9 @@
                             @csrf
                             <button type="submit" class="block w-full text-left py-1.5 px-2 rounded-md text-sm {{ session('current_team_id') == $team->id ? 'bg-indigo-50 text-indigo-700 font-semibold' : 'text-gray-700 hover:bg-gray-100' }}">
                                 {{ $team->opponent->name }}
+                                @if(!empty($team->pivot->label))
+                                    <span class="text-gray-500">({{ $team->pivot->label }})</span>
+                                @endif
                                 @if(session('current_team_id') == $team->id)
                                     <span class="text-indigo-600">✓</span>
                                 @endif
