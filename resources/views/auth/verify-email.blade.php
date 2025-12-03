@@ -1,6 +1,7 @@
 <x-app-layout>
     <div class="mb-4 text-sm text-gray-600">
-        Bedankt voor je registratie! Voor je begint, wil je je e-mailadres verifiëren door op de link te klikken die we je zojuist hebben gemaild? Als je de e-mail niet hebt ontvangen, sturen we je graag een nieuwe.
+        Voor je aan de slag kunt, moet je jouw e-mailadres verifiëren door op de link te klikken die we je zojuist hebben gemaild (check eventueel ook je spamfolder!). Als je de e-mail niet hebt ontvangen, sturen we je graag een nieuwe. Mocht het
+        niet lukken, neem dan contact met ons op via het <a href="{{ route('home') }}#feedback" class="text-blue-600 hover:underline">feedbackformulier</a>.
     </div>
 
     @if(session('pending_team_invite'))
@@ -34,15 +35,15 @@
             </div>
         </form>
 
-        <div class="flex gap-3">
+        <div class="flex gap-3 items-center">
             <a href="{{ route('dashboard') }}" class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                 Naar dashboard
             </a>
-            
-            <form method="POST" action="{{ route('logout') }}">
+
+            <form method="POST" action="{{ route('logout') }}" class="flex items-center">
                 @csrf
 
-                <button type="submit" class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                <button type="submit" class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 cursor-pointer">
                     Uitloggen
                 </button>
             </form>
