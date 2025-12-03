@@ -43,12 +43,16 @@
                     <h2 class="text-lg font-semibold mb-3">Statistieken</h2>
                     <ul class="space-y-2">
                         <li class="flex justify-between items-center">
+                            <span class="text-gray-600">Accounts:</span>
+                            <span class="font-semibold text-gray-900">{{ number_format($statistics['total_users']) }}</span>
+                        </li>
+                        <li class="flex justify-between items-center">
                             <span class="text-gray-600">Teams:</span>
                             <span class="font-semibold text-gray-900">{{ number_format($statistics['total_teams']) }}</span>
                         </li>
                         <li class="flex justify-between items-center">
-                            <span class="text-gray-600">Accounts:</span>
-                            <span class="font-semibold text-gray-900">{{ number_format($statistics['total_users']) }}</span>
+                            <span class="text-gray-600">Seizoenen:</span>
+                            <span class="font-semibold text-gray-900">{{ number_format($statistics['total_seasons']) }}</span>
                         </li>
                         <li class="flex justify-between items-center">
                             <span class="text-gray-600">Spelers:</span>
