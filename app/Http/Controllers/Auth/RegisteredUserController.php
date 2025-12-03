@@ -34,18 +34,18 @@ class RegisteredUserController extends Controller
     {
         // Check if user has a pending team invite
         $hasPendingInvite = session()->has('pending_team_invite');
-        
+
         $rules = [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ];
-        
+
         // Only require team fields if not joining via invite
         if (!$hasPendingInvite) {
             $rules['opponent_id'] = ['required', 'integer', 'exists:opponents,id'];
         }
-        
+
         $request->validate($rules);
 
         // Check if registering via invite
@@ -89,23 +89,23 @@ class RegisteredUserController extends Controller
         if (session()->has('pending_team_invite')) {
             $inviteCode = session()->pull('pending_team_invite');
             $inviteTeam = Team::where('invite_code', $inviteCode)->first();
-            
+
             if ($inviteTeam && !$user->isMemberOf($inviteTeam)) {
                 // Add user as assistent to the invited team
                 // Set as default if this is their first/only team
                 $isFirstTeam = $user->teams()->count() === 0;
-                
+
                 $user->teams()->attach($inviteTeam->id, [
                     'role' => 2, // assistent
                     'is_default' => $isFirstTeam,
                     'joined_at' => now(),
                 ]);
-                
+
                 // Switch to the invited team
                 session(['current_team_id' => $inviteTeam->id]);
-                
+
                 return redirect(route('dashboard', absolute: false))
-                    ->with('success', "Welkom! Je bent toegevoegd aan {$inviteTeam->name}.");
+                    ->with('success', "Welkom! Je bent toegevoegd aan {$inviteTeam->opponent->name}.");
             }
         }
 
