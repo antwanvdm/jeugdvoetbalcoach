@@ -100,7 +100,7 @@ class OpponentController extends Controller
             'longitude' => ['required', 'numeric'],
         ]);
 
-        $storedLogo = $opponent->logo; //keep current logo when no new has been added
+        $storedLogo = $opponent->logo; // Keep current logo when no new one has been added
 
         if ($request->hasFile('logo_file')) {
             $file = $request->file('logo_file');
@@ -108,7 +108,7 @@ class OpponentController extends Controller
             $filename = Str::slug($validated['name']) . '-' . time() . ($ext ? ('.' . $ext) : '');
             $newPath = $file->storeAs('opponents', $filename, 'public');
 
-            // verwijder oude indien lokaal opgeslagen relatief pad
+            // Delete old file if it's a locally stored relative path
             if ($storedLogo && !str_starts_with($storedLogo, 'http') && !str_starts_with($storedLogo, '/storage/')) {
                 Storage::disk('public')->delete($storedLogo);
             }
@@ -134,7 +134,7 @@ class OpponentController extends Controller
     {
         Gate::authorize('delete', $opponent);
 
-        // Verwijder het logo bestand als het een lokaal opgeslagen bestand is
+        // Delete the logo file if it's a locally stored file
         if ($opponent->logo) {
             Storage::disk('public')->delete($opponent->logo);
         }

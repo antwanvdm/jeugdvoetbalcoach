@@ -69,9 +69,9 @@ class RegisteredUserController extends Controller
                     'invite_code' => Str::random(64),
                 ]);
 
-                // Attach user to team as hoofdcoach with default flag
+                // Attach user to team as head coach with default flag
                 $user->teams()->attach($team->id, [
-                    'role' => 1, // hoofdcoach
+                    'role' => 1, // head coach
                     'is_default' => true,
                     'joined_at' => now(),
                 ]);
@@ -91,12 +91,12 @@ class RegisteredUserController extends Controller
             $inviteTeam = Team::where('invite_code', $inviteCode)->first();
 
             if ($inviteTeam && !$user->isMemberOf($inviteTeam)) {
-                // Add user as assistent to the invited team
+                // Add user as assistant to the invited team
                 // Set as default if this is their first/only team
                 $isFirstTeam = $user->teams()->count() === 0;
 
                 $user->teams()->attach($inviteTeam->id, [
-                    'role' => 2, // assistent
+                    'role' => 2, // assistant
                     'is_default' => $isFirstTeam,
                     'joined_at' => now(),
                 ]);

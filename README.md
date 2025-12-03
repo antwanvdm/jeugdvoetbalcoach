@@ -368,10 +368,10 @@ Bijdragen zijn welkom! Voor grote wijzigingen, open eerst een issue.
 -   [x] Labels aan coaches kunnen geven binnen een team (bijv. "Hoofdtrainer", "Keeperstrainer")
 -   [x] Notities toevoegen aan wedstrijden voor extra context
 -   [x] Share tokens voor wedstrijden en seizoenen voor publieke toegang
+-   [x] Opruimen van data als gebruiker account verwijderd
 
 ### 🔜 Toekomstige Features
 
--   [ ] Cascade on delete als gebruiker profiel verwijderd
 -   [ ] Testflows meerdere scenario's maken en uitvoeren
 -   [ ] Webservice maken zodat andere developers gemakkelijk voetbalclub data kunnen inladen
 -   [ ] JO13+ support met 11 spelers en twee helften i.p.v. 4 kwarten

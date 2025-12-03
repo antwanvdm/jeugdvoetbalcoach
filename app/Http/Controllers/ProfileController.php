@@ -54,25 +54,25 @@ class ProfileController extends Controller
         $user = $request->user();
 
         DB::transaction(function () use ($user) {
-            // Haal alle teams op waar user lid van is
+            // Get all teams where user is a member
             $teams = $user->teams()->get();
 
             foreach ($teams as $team) {
                 $otherMembers = $team->users()->where('users.id', '!=', $user->id)->count();
 
                 if ($otherMembers === 0) {
-                    // Scenario 1: Enige lid - verwijder team en alle gerelateerde data
+                    // Scenario 1: Only member - delete team and all related data
                     $this->deleteTeamData($team);
                     $team->delete();
                 } else {
-                    // Scenario 2: Andere leden aanwezig
+                    // Scenario 2: Other members present
                     $isHoofdcoach = $team->users()
                         ->wherePivot('user_id', $user->id)
                         ->wherePivot('role', 1)
                         ->exists();
 
                     if ($isHoofdcoach) {
-                        // Promoveer eerste assistent tot hoofdcoach
+                        // Promote first assistant to head coach
                         $firstAssistent = $team->users()
                             ->wherePivot('role', 2)
                             ->first();
@@ -85,12 +85,12 @@ class ProfileController extends Controller
                         }
                     }
 
-                    // Verwijder alleen de pivot relatie
+                    // Only remove the pivot relationship
                     $team->users()->detach($user->id);
                 }
             }
 
-            // Verwijder user account
+            // Delete user account
             $user->delete();
         });
 
@@ -102,15 +102,15 @@ class ProfileController extends Controller
     }
 
     /**
-     * Verwijder alle data gekoppeld aan een team
-     * (alleen wanneer gebruiker enige lid is)
+     * Delete all data associated with a team
+     * (only when user is the sole member)
      */
     private function deleteTeamData($team): void
     {
-        // Haal alle speler IDs op voor match goals cleanup
+        // Get all player IDs for match goals cleanup
         $playerIds = $team->players()->pluck('id');
 
-        // Verwijder match goals eerst (foreign key naar players)
+        // Delete match goals first (foreign key to players)
         if ($playerIds->isNotEmpty()) {
             DB::table('match_goals')
                 ->whereIn('player_id', $playerIds)
@@ -118,22 +118,22 @@ class ProfileController extends Controller
                 ->delete();
         }
 
-        // Verwijder wedstrijden met pivot data
+        // Delete matches with pivot data
         foreach ($team->footballMatches as $match) {
             $match->players()->detach();
             $match->delete();
         }
 
-        // Verwijder spelers met seizoen-koppelingen
+        // Delete players with season associations
         foreach ($team->players as $player) {
             $player->seasons()->detach();
             $player->delete();
         }
 
-        // Verwijder seizoenen
+        // Delete seasons
         $team->seasons()->delete();
 
-        // Verwijder formaties (alleen niet-globale)
+        // Delete formations (only non-global ones)
         $team->formations()->where('is_global', false)->delete();
     }
 }

@@ -39,7 +39,7 @@ class FetchClubs extends Command
         $inserted = 0;
         $updated = 0;
 
-        // Gebruik ; als delimiter (clubs.csv is nu ; gescheiden). Fallback als fgetcsv niets splitst.
+        // Use ; as delimiter (clubs.csv is now ; separated). Fallback if fgetcsv doesn't split.
         while (($row = fgetcsv($handle, 0, ';')) !== false) {
             [$name, $location, $kitRef] = array_pad($row, 3, null);
             $name = trim($this->stripBom($name) ?? '');
@@ -74,10 +74,10 @@ class FetchClubs extends Command
 //            $latitude = $geo['lat'] ?? 0.0;
 //            $longitude = $geo['lng'] ?? 0.0;
 
-            // Logo scraping van Hollandse Velden website
+            // Logo scraping from Hollandse Velden website
             $logoPathRelative = null;
             try {
-                // Bouw de club URL op basis van eerste letter van de teamnaam
+                // Build the club URL based on the first letter of the team name
                 $teamSlug = Str::slug($name);
                 $firstLetter = strtolower(substr($teamSlug, 0, 1));
                 $clubUrl = "https://www.hollandsevelden.nl/clubs/{$firstLetter}/{$teamSlug}/";
@@ -139,7 +139,7 @@ class FetchClubs extends Command
 
     private function extractHollandseVeldenLogo(Crawler $crawler, string $baseUrl): ?string
     {
-        // Zoek naar <p class="logo"> met daarin een <picture> element met <source> webp
+        // Look for <p class="logo"> containing a <picture> element with <source> webp
         try {
             $logoP = $crawler->filter('p.logo')->first();
             if ($logoP->count()) {
@@ -147,14 +147,14 @@ class FetchClubs extends Command
                 if ($source->count()) {
                     $srcset = $source->attr('srcset');
                     if ($srcset) {
-                        // srcset kan meerdere URLs bevatten, neem de eerste
+                        // srcset can contain multiple URLs, take the first one
                         $url = explode(' ', trim($srcset))[0];
                         return $this->absoluteUrl($url, $baseUrl);
                     }
                 }
             }
         } catch (\Throwable $e) {
-            // Als de specifieke selector faalt, return null
+            // If the specific selector fails, return null
             return null;
         }
 

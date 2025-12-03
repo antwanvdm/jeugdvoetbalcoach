@@ -94,12 +94,12 @@ class TeamController extends Controller
             'invite_code' => Str::random(64),
         ]);
 
-        // Attach user as hoofdcoach
+        // Attach user as head coach
         // If this is user's first team, make it default
         $isFirstTeam = auth()->user()->teams()->count() === 0;
 
         auth()->user()->teams()->attach($team->id, [
-            'role' => 1, // hoofdcoach
+            'role' => 1, // head coach
             'is_default' => $isFirstTeam,
             'joined_at' => now(),
             'label' => $request->string('label')->toString() ?: null,
@@ -225,12 +225,12 @@ class TeamController extends Controller
                 ->with('info', "Je bent al lid van {$team->name}.");
         }
 
-        // Add user as assistent
+        // Add user as assistant
         // Set as default if this is their first/only team
         $isFirstTeam = auth()->user()->teams()->count() === 0;
 
         auth()->user()->teams()->attach($team->id, [
-            'role' => 2, // assistent
+            'role' => 2, // assistant
             'is_default' => $isFirstTeam,
             'joined_at' => now(),
             'label' => request()->string('label')->toString() ?: null,
@@ -268,7 +268,7 @@ class TeamController extends Controller
             $isHoofdcoach = auth()->user()->isHeadCoach($team);
 
             if ($isHoofdcoach) {
-                // Promote first assistent to hoofdcoach
+                // Promote first assistant to head coach
                 $firstAssistent = DB::table('team_user')
                     ->where('team_id', $team->id)
                     ->where('role', 2)

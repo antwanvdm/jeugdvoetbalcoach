@@ -62,10 +62,7 @@ class Team extends Model
     }
 
     /**
-     * Get the opponents for the team.
-     */
-    /**
-     * Gekoppelde club (opponent) record.
+     * Get the linked club (opponent) record.
      */
     public function opponent(): BelongsTo
     {

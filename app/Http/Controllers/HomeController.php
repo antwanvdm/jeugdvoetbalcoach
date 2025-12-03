@@ -25,13 +25,13 @@ class HomeController extends Controller
 
         Log::info('Feedback ontvangen', $validated);
 
-        // Naar beheerder
+        // To administrator
         if (config('mail.default_to')) {
             Mail::to(config('mail.default_to'))
                 ->send((new Feedback($validated))->replyTo($validated['email'], $validated['name']));
         }
 
-        // Kopie naar inzender
+        // Copy to sender
         Mail::to($validated['email'])->send(new Feedback($validated));
 
         return back()->with('feedback_success', 'Bedankt voor je feedback! We nemen deze in behandeling.');

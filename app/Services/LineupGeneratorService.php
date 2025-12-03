@@ -123,19 +123,19 @@ class LineupGeneratorService
             return $this->getPlayerFavoriteRole($player->position_id) === 'keeper';
         });
 
-        // Als er favoriete keepers zijn, gebruik alleen die
+        // If there are favorite keepers, use only those
         if ($keeperPlayers->isNotEmpty()) {
-            // Sorteer op wie het minst recent keeper was en minst vaak
+            // Sort by who was least recently keeper and least often
             $sortedKeepers = $keeperPlayers->sortBy(function ($player) {
                 $wasLastMatchKeeper = $this->lastMatchKeepers->contains($player->id) ? 1 : 0;
                 $historicalCount = (int)$this->keeperCounts->get($player->id, 0);
                 $this->debugLog("Player {$player->name}: wasLastMatchKeeper={$wasLastMatchKeeper}, historicalCount={$historicalCount}");
                 return [$wasLastMatchKeeper, $historicalCount, $player->name];
             });
-            // Neem alle favoriete keepers
+            // Take all favorite keepers
             return $sortedKeepers->values();
         }
-        // Geen favoriete keepers: fallback naar oude logica
+        // No favorite keepers: fallback to old logic
         $sortedKeepers = $this->players->sortBy(function ($player) {
             $wasLastMatchKeeper = $this->lastMatchKeepers->contains($player->id) ? 1 : 0;
             $historicalCount = (int)$this->keeperCounts->get($player->id, 0);
@@ -150,7 +150,7 @@ class LineupGeneratorService
      */
     private function mapKeepersToQuarters(Collection $keepers): array
     {
-        // Verdeel keepers over 4 kwarten, herhaal indien nodig
+        // Distribute keepers over 4 quarters, repeat if necessary
         $keeperCount = $keepers->count();
         $mapping = [];
         for ($q = 1; $q <= 4; $q++) {
@@ -178,27 +178,27 @@ class LineupGeneratorService
 
         $keeperBenchPlan = [];
 
-        // Logica gebaseerd op aantal favoriete keepers:
-        // - 0 keepers: oude logica, iedereen kan keeper zijn, keepers krijgen 1 bankkwart
-        // - 1 keeper: keeper speelt altijd, komt nooit op de bank
-        // - 2+ keepers: keepers spelen alleen keeper, maar krijgen wel normale bankrotatie
+        // Logic based on number of favorite keepers:
+        // - 0 keepers: old logic, everyone can be keeper, keepers get 1 bench quarter
+        // - 1 keeper: keeper always plays, never benched
+        // - 2+ keepers: keepers only play keeper, but get normal bench rotation
         if ($favoriteKeepersCount === 0 && $keepers->isNotEmpty() && $totalBenchesNeeded > 0) {
-            // Geen favoriete keepers: oude logica waarbij keepers 1 bankkwart krijgen
+            // No favorite keepers: old logic where keepers get 1 bench quarter
             foreach ($keepers as $index => $keeper) {
                 $keeperQuarter = $index + 1;
                 $benchQuarter = $this->calculateKeeperBenchQuarter($index, $keeperQuarter);
                 $keeperBenchPlan[$keeper->id] = [$benchQuarter];
             }
         } elseif ($favoriteKeepersCount >= 2 && $totalBenchesNeeded > 0) {
-            // 2+ keepers: keepers moeten ook bankbeurten krijgen (net als andere spelers)
-            // We behandelen ze als non-keepers voor bankrotatie
+            // 2+ keepers: keepers also need bench turns (like other players)
+            // We treat them as non-keepers for bench rotation
             foreach ($keepers as $index => $keeper) {
-                $keeperQuarter = ($index % 4) + 1; // Hun keeperkwart
-                // Ze mogen niet op de bank in hun keeperkwart, maar wel in andere kwarten
-                // We laten de normale distributie dit later afhandelen
+                $keeperQuarter = ($index % 4) + 1; // Their keeper quarter
+                // They can't be benched in their keeper quarter, but can be in other quarters
+                // We let the normal distribution handle this later
             }
         }
-        // Als $favoriteKeepersCount === 1: keeper krijgt GEEN bankkwart (blijft leeg in keeperBenchPlan)
+        // If $favoriteKeepersCount === 1: keeper gets NO bench quarter (stays empty in keeperBenchPlan)
 
         // 2) Calculate how many benches remain per quarter after assigning keeper benches
         $keeperBenchCounts = $this->computeKeeperBenchCounts($keeperBenchPlan);
@@ -208,12 +208,12 @@ class LineupGeneratorService
         }
 
         // 3) Distribute remaining benches among non-keepers evenly and deterministically
-        // Bij 2+ favoriete keepers moeten keepers ook meedoen aan bankrotatie
+        // With 2+ favorite keepers, keepers must also participate in bench rotation
         if ($favoriteKeepersCount >= 2) {
-            // Alle spelers (inclusief keepers) doen mee aan bankrotatie
+            // All players (including keepers) participate in bench rotation
             $playersForBenchRotation = $this->players;
         } else {
-            // Keepers zijn al afgehandeld of niet aanwezig, alleen non-keepers
+            // Keepers are already handled or not present, only non-keepers
             $playersForBenchRotation = $this->players->reject(fn($p) => in_array($p->id, $keepers->pluck('id')->all(), true));
         }
 
@@ -302,7 +302,7 @@ class LineupGeneratorService
 
                 $already = $benchPlan[$player->id] ?? [];
 
-                // Als deze speler een keeper is, mag hij niet op de bank in zijn keeperkwart
+                // If this player is a keeper, they can't be benched in their keeper quarter
                 $excludedQuarter = $keeperQuarterMap[$player->id] ?? null;
 
                 $quarter = $this->pickQuarterForPlayer($already, $remainingPerQuarter, $excludedQuarter);
