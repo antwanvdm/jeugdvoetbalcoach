@@ -33,6 +33,7 @@ class TeamController extends Controller
                     'label' => $pivot->label,
                     'users_count' => $team->users_count,
                     'joined_at' => $pivot->joined_at,
+                    'can_leave' => \Gate::allows('leave', $team),
                 ];
             });
 

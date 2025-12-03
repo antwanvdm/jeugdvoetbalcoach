@@ -73,13 +73,13 @@
 
                         <a href="{{ route('teams.edit', $team['id']) }}" class="text-yellow-600 mr-2">Bewerk</a>
 
-                        @can('leave', App\Models\Team::find($team['id']))
+                        @if($team['can_leave'])
                             <form method="POST" action="{{ route('teams.leave', $team['id']) }}" class="inline" onsubmit="return confirm('Weet je zeker dat je dit team wilt verlaten?')">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="text-yellow-600 mr-2">Verlaat</button>
                             </form>
-                        @endcan
+                        @endif
 
                         @if($team['role'] === 1)
                             <form method="POST" action="{{ route('teams.destroy', $team['id']) }}" class="inline" onsubmit="return confirm('Weet je zeker dat je dit team wilt verwijderen? Alle data wordt verwijderd!')">
