@@ -261,13 +261,64 @@ Intelligente keeper verdeling die:
 
 ### Testing
 
+#### Test Environment Setup
+
+Tests draaien op een geïsoleerde SQLite database. Maak een `.env.testing` bestand aan (staat in .gitignore):
+
+```env
+APP_NAME="Jeugdvoetbalcoach Test"
+APP_ENV=testing
+APP_KEY=base64:your_test_key_here
+APP_DEBUG=true
+
+DB_CONNECTION=sqlite
+DB_DATABASE=database/test.sqlite
+
+CACHE_DRIVER=array
+SESSION_DRIVER=array
+QUEUE_CONNECTION=sync
+```
+
+Genereer een test key:
+
 ```bash
-# Run alle tests
+php artisan key:generate --env=testing
+```
+
+Maak de SQLite database aan:
+
+```bash
+touch database/test.sqlite
+```
+
+#### Tests Uitvoeren
+
+```bash
+# Alle tests
 php artisan test
+
+# Specifieke test class
+php artisan test --filter=LineupGeneratorServiceTest
 
 # Met coverage
 php artisan test --coverage
+
+# Specifieke test methode
+php artisan test --filter=test_generates_lineup_with_one_keeper
 ```
+
+#### Test Suite Overview
+
+**LineupGeneratorServiceTest** (22 tests):
+
+- Keeper scenarios: 0, 1, 2, 3, 4 keepers
+- Bench fairness: historische tracking over 3-10 wedstrijden
+- Formatie validatie: 2-1-2, 3-2-2
+- Variabele beschikbaarheid: spelers wisselend beschikbaar
+- Positie voorkeuren en weight balancing
+- Edge cases: kleine teams, verschillende formaties
+
+Zie `docs/LineupGeneratorService.md` voor gedetailleerde test documentatie.
 
 ### Code Style
 
@@ -369,11 +420,11 @@ Bijdragen zijn welkom! Voor grote wijzigingen, open eerst een issue.
 -   [x] Notities toevoegen aan wedstrijden voor extra context
 -   [x] Share tokens voor wedstrijden en seizoenen voor publieke toegang
 -   [x] Opruimen van data als gebruiker account verwijderd
--   [x] Statistieken voor admin
+-   [x] Statistieken voor admin over aantallen aan data in de DB
+-   [x] Unit tests voor line-up met meerdere scenario's maken en uitvoeren
 
 ### 🔜 Toekomstige Features
 
--   [ ] Testflows meerdere scenario's maken en uitvoeren
 -   [ ] Webservice maken zodat andere developers gemakkelijk voetbalclub data kunnen inladen
 -   [ ] JO13+ support met 11 spelers en twee helften i.p.v. 4 kwarten
 

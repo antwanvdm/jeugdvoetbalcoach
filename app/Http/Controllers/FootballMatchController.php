@@ -89,17 +89,7 @@ class FootballMatchController extends Controller
     {
         Gate::authorize('create', FootballMatch::class);
 
-        $validated = $request->validate([
-            'opponent_id' => ['required', 'exists:opponents,id'],
-            'home' => ['required', 'boolean'],
-            'goals_scored' => ['nullable', 'integer', 'min:0'],
-            'goals_conceded' => ['nullable', 'integer', 'min:0'],
-            'date' => ['required', 'date'],
-            'available_players' => ['nullable', 'array'],
-            'available_players.*' => ['exists:players,id'],
-        ]);
-
-        // Validate season_id and check it belongs to current team
+        // Validate season_id first and check it belongs to current team
         $request->validate(['season_id' => ['required', 'exists:seasons,id']]);
 
         $season = Season::where('id', $request->input('season_id'))
@@ -109,6 +99,20 @@ class FootballMatchController extends Controller
         if (!$season) {
             abort(403, 'Dit seizoen hoort niet tot jouw team.');
         }
+
+        // Validate match data including minimum player requirement
+        $validated = $request->validate([
+            'opponent_id' => ['required', 'exists:opponents,id'],
+            'home' => ['required', 'boolean'],
+            'goals_scored' => ['nullable', 'integer', 'min:0'],
+            'goals_conceded' => ['nullable', 'integer', 'min:0'],
+            'date' => ['required', 'date'],
+            'available_players' => ['required', 'array', 'min:' . $season->formation->total_players],
+            'available_players.*' => ['exists:players,id'],
+        ], [
+            'opponent_id.required' => 'Een tegenstander kiezen is verplicht.',
+            'available_players.min' => "Je hebt minimaal {$season->formation->total_players} spelers nodig voor formatie {$season->formation->lineup_formation}.",
+        ]);
 
         $validated['season_id'] = $season->id;
         $validated['user_id'] = auth()->id();

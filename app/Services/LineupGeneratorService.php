@@ -25,6 +25,7 @@ class LineupGeneratorService
     private Collection $players;
     private Collection $keeperCounts;
     private Collection $lastMatchKeepers;
+    private Collection $benchCounts; // Bench counts from last 3 matches
 
     // Dynamic formation context (set per match): outfield needs; total on-field count is computed dynamically
     private array $formationNeeds = [];
@@ -81,6 +82,9 @@ class LineupGeneratorService
 
         // Get keepers from the last match (most recent 4 quarters, excluding current match)
         $this->lastMatchKeepers = $this->getLastMatchKeepers($currentMatch);
+        
+        // Get bench counts from last 3 matches for fair rotation
+        $this->benchCounts = $this->getRecentBenchCounts($currentMatch);
     }
 
     /**
@@ -108,6 +112,38 @@ class LineupGeneratorService
         $this->debugLog("Found keepers from last match:", $lastMatchKeepers->toArray());
 
         return $lastMatchKeepers;
+    }
+
+    /**
+     * Get bench counts for each player from the last 3 matches
+     */
+    private function getRecentBenchCounts(FootballMatch $currentMatch): Collection
+    {
+        // Get the last 3 matches before the current one
+        $lastThreeMatches = FootballMatch::where('season_id', $currentMatch->season_id)
+            ->where('id', '!=', $currentMatch->id)
+            ->orderBy('date', 'desc')
+            ->limit(3)
+            ->pluck('id');
+
+        if ($lastThreeMatches->isEmpty()) {
+            // No previous matches, return empty counts
+            return collect();
+        }
+
+        // Count bench appearances (position_id = null) for each player in these matches
+        $benchCounts = Player::query()
+            ->withCount([
+                'footballMatches as bench_count' => function ($q) use ($lastThreeMatches) {
+                    $q->whereIn('football_match_player.football_match_id', $lastThreeMatches)
+                        ->whereNull('football_match_player.position_id');
+                }
+            ])
+            ->pluck('bench_count', 'id');
+
+        $this->debugLog('Bench counts from last 3 matches:', $benchCounts->toArray());
+
+        return $benchCounts;
     }
 
     /**
@@ -275,21 +311,41 @@ class LineupGeneratorService
     {
         $benchPlan = [];
 
-        // Deterministic ordering for fairness
-        $ordered = $nonKeepers->sortBy(['weight', 'name'])->values();
+        // Sort players by bench count (ascending) so those with fewer benches get priority
+        // Secondary sort by weight and name for determinism
+        $ordered = $nonKeepers->sortBy(function ($player) {
+            $benchCount = $this->benchCounts->get($player->id, 0);
+            return [$benchCount, $player->weight, $player->name];
+        })->values();
 
         $totalRemaining = array_sum($remainingPerQuarter);
         if ($totalRemaining <= 0 || $ordered->isEmpty()) {
             return $benchPlan;
         }
 
-        // Build a map of which quarter each keeper is keeping (if we have 2+ favorite keepers)
+        // Build a map of which quarters each keeper is keeping
+        // This prevents keepers from being benched during their keeper quarters
         $keeperQuarterMap = [];
-        if ($keepers) {
+        if ($keepers && $keepers->isNotEmpty()) {
             $favoriteKeepers = $keepers->filter(fn($k) => $this->getPlayerFavoriteRole($k->position_id) === 'keeper');
-            if ($favoriteKeepers->count() >= 2) {
+            $favoriteKeepersCount = $favoriteKeepers->count();
+            
+            // Map ALL keepers to their quarters (not just 2+ favorites)
+            if ($favoriteKeepersCount === 1) {
+                // Single keeper keeps all quarters - exclude from bench entirely
+                $keeperQuarterMap[$favoriteKeepers->first()->id] = 'all'; // Special marker
+            } else if ($favoriteKeepersCount >= 2) {
+                // Build reverse mapping from mapKeepersToQuarters
+                // keeper_id => [array of quarters they keep]
+                $keeperCount = $favoriteKeepers->count();
                 foreach ($favoriteKeepers->values() as $index => $keeper) {
-                    $keeperQuarterMap[$keeper->id] = ($index % 4) + 1;
+                    $keeperQuarters = [];
+                    for ($q = 1; $q <= 4; $q++) {
+                        if (($q - 1) % $keeperCount === $index) {
+                            $keeperQuarters[] = $q;
+                        }
+                    }
+                    $keeperQuarterMap[$keeper->id] = $keeperQuarters;
                 }
             }
         }
@@ -325,19 +381,32 @@ class LineupGeneratorService
      * Avoids assigning the same quarter twice to the same player.
      * @param array $alreadyAssignedQuarters Quarters already assigned to this player
      * @param array $remainingPerQuarter Remaining bench slots per quarter
-     * @param int|null $excludedQuarter Quarter that should be excluded (e.g., keeper's keeping quarter)
+     * @param int|string|array|null $excludedQuarter Quarter(s) that should be excluded (e.g., keeper's keeping quarters), or 'all' to exclude player entirely
      */
-    private function pickQuarterForPlayer(array $alreadyAssignedQuarters, array $remainingPerQuarter, ?int $excludedQuarter = null): ?int
+    private function pickQuarterForPlayer(array $alreadyAssignedQuarters, array $remainingPerQuarter, int|string|array|null $excludedQuarter = null): ?int
     {
+        // If excludedQuarter is 'all', this player should never be benched (e.g., single keeper)
+        if ($excludedQuarter === 'all') {
+            return null;
+        }
+        
+        // Normalize excludedQuarter to array for easier checking
+        $excludedQuarters = [];
+        if (is_int($excludedQuarter)) {
+            $excludedQuarters = [$excludedQuarter];
+        } elseif (is_array($excludedQuarter)) {
+            $excludedQuarters = $excludedQuarter;
+        }
+        
         // Helper to check adjacency considering wrap-around (1 adjacent to 2 and 4)
         $isAdjacent = function (int $a, int $b): bool {
             return $a === $b - 1 || $a === $b + 1 || ($a === 4 && $b === 1) || ($a === 1 && $b === 4);
         };
 
-        // Build candidate quarters with remaining slots, excluding ones already assigned and excluded quarter
+        // Build candidate quarters with remaining slots, excluding ones already assigned and excluded quarters
         $candidates = [];
         foreach ($remainingPerQuarter as $q => $remaining) {
-            if ($remaining > 0 && !in_array($q, $alreadyAssignedQuarters, true) && $q !== $excludedQuarter) {
+            if ($remaining > 0 && !in_array($q, $alreadyAssignedQuarters, true) && !in_array($q, $excludedQuarters, true)) {
                 $candidates[$q] = $remaining;
             }
         }
@@ -408,10 +477,24 @@ class LineupGeneratorService
     {
         $quarterData = new QuarterAssignmentData($quarter);
 
+        // Identify the keeper for this quarter
+        $keeperId = $keeperByQuarter[$quarter] ?? null;
+
         // Mark benched players (position_id = null means on the bench)
         foreach ($this->players as $player) {
             if (in_array($quarter, $benchPlan[$player->id] ?? [], true)) {
                 $quarterData->addAssignment($player->id, null);
+            }
+        }
+
+        // Ensure favorite keepers who aren't keeping this quarter are benched
+        if ($keeperId) {
+            $favoriteKeepers = $this->players->filter(fn($p) => $this->getPlayerFavoriteRole($p->position_id) === 'keeper');
+            foreach ($favoriteKeepers as $keeper) {
+                // If this keeper is not the designated keeper for this quarter and not already assigned, bench them
+                if ($keeper->id !== $keeperId && !$quarterData->isPlayerAssigned($keeper->id)) {
+                    $quarterData->addAssignment($keeper->id, null);
+                }
             }
         }
 
@@ -522,11 +605,17 @@ class LineupGeneratorService
                 return false;
             }
 
+            $favoriteRole = $this->getPlayerFavoriteRole($player->position_id);
+
+            // Keepers can ONLY play keeper role, never outfield
+            if ($favoriteRole === 'keeper' && $role !== 'keeper') {
+                return false;
+            }
+
             if (!$preferredRoleOnly) {
                 return true;
             }
 
-            $favoriteRole = $this->getPlayerFavoriteRole($player->position_id);
             return $favoriteRole === $role;
         });
     }
@@ -575,6 +664,10 @@ class LineupGeneratorService
     private function withAssignedRemainingPlayers(QuarterAssignmentData $quarterData, Collection $availablePlayers): QuarterAssignmentData
     {
         $remainingPlayers = $availablePlayers->filter(function ($player) use ($quarterData) {
+            // Skip favorite keepers - they should never be assigned to outfield
+            if ($this->getPlayerFavoriteRole($player->position_id) === 'keeper') {
+                return false;
+            }
             return !$quarterData->isPlayerSelected($player->id) && !$quarterData->isPlayerAssigned($player->id);
         });
 
@@ -586,13 +679,7 @@ class LineupGeneratorService
             ]);
 
             foreach ($remainingPlayers as $player) {
-                // Assign their favorite non-keeper position, or fallback to defender
-                $positionId = $player->position_id;
-                if ($this->getPlayerFavoriteRole($positionId) === 'keeper') {
-                    $positionId = self::DEFENDER_POSITION_ID;
-                }
-
-                $quarterData->addAssignment($player->id, $positionId);
+                $quarterData->addAssignment($player->id, $player->position_id ?? self::DEFENDER_POSITION_ID);
             }
         }
 
