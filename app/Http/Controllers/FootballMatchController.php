@@ -256,7 +256,6 @@ class FootballMatchController extends Controller
         Gate::authorize('update', $footballMatch);
 
         $validated = $request->validate([
-            'opponent_id' => ['required', 'exists:opponents,id'],
             'home' => ['required', 'boolean'],
             'goals_scored' => ['nullable', 'integer', 'min:0'],
             'goals_conceded' => ['nullable', 'integer', 'min:0'],
