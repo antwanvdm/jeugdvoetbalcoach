@@ -166,11 +166,41 @@
 
                 </div>
 
-                <div class="bg-white p-4 shadow rounded mt-4">
-                    <p>
-                        {{config('app.name')}} is ontwikkeld voor voetbalverenigingen die hun teammanagement willen professionaliseren. Ideaal voor trainers van JO8 t/m JO12 waar spelers in 4 kwarten spelen en iedereen evenveel speel (en keep!)tijd
-                        verdiend. De applicatie neemt het tijdrovende werk van het maken van line-ups uit handen en zorgt voor eerlijke rotatie en optimale teambalans.
-                    </p>
+                <div class="bg-white border border-gray-200 p-6 shadow rounded mt-4">
+                    <div class="flex items-start gap-4">
+                        <div class="flex-shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">Eerlijke opstellingen, automatisch gebalanceerd</h3>
+                            <p class="text-sm text-gray-700 mb-3">
+                                {{config('app.name')}} maakt het plannen van wedstrijden en het samenstellen van opstellingen eenvoudig. Het intelligente algoritme zorgt ervoor dat:
+                            </p>
+                            <ul class="text-sm text-gray-700 space-y-1.5 ml-4">
+                                <li class="flex items-start gap-2">
+                                    <span class="text-green-600 font-bold mt-0.5">✓</span>
+                                    <span>Alle spelers <strong>evenveel speeltijd</strong> krijgen over de 4 kwarten</span>
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <span class="text-green-600 font-bold mt-0.5">✓</span>
+                                    <span>Sterkere en minder sterke spelers <strong>eerlijk worden verdeeld</strong> per kwart</span>
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <span class="text-green-600 font-bold mt-0.5">✓</span>
+                                    <span>De balans <strong>over het hele seizoen</strong> wordt bewaakt</span>
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <span class="text-green-600 font-bold mt-0.5">✓</span>
+                                    <span>Je in <strong>enkele seconden</strong> een volledige opstelling hebt</span>
+                                </li>
+                            </ul>
+                            <p class="text-sm text-gray-600 mt-3 italic">
+                                Ideaal voor JO8 t/m JO12 teams waar iedereen evenveel speeltijd verdient!
+                            </p>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -197,7 +227,7 @@
                 <div class="bg-white p-4 shadow rounded @if($nextMatch) mt-4 @endif">
                     <h2 class="text-lg font-semibold mb-3">Laatste resultaten</h2>
                     @if($recentMatches->isEmpty())
-                        <div class="text-gray-500">Nog geen gespeelde wedstrijden.</div>
+                        <div class="text-gray-500 text-sm">Nog geen gespeelde wedstrijden.</div>
                     @else
                         <ul>
                             @foreach($recentMatches as $m)
@@ -231,6 +261,43 @@
                         </ul>
                     @endif
                 </div>
+
+                @if($activeSeason)
+                    <div class="bg-white p-4 shadow rounded mt-4">
+                        <h2 class="text-lg font-semibold mb-3">Huidig seizoen</h2>
+                        <div class="p-3 border border-gray-200 rounded-lg hover:border-blue-300 hover:shadow-sm transition">
+                            <div class="flex items-center justify-between mb-2">
+                                <h3 class="font-semibold text-gray-900">{{ $activeSeason->year }}-{{ $activeSeason->year + 1 }}</h3>
+                                <span class="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded">{{ $activeSeason->part }}</span>
+                            </div>
+                            @if($activeSeason->stats)
+                                <div class="text-xs text-gray-600 space-y-1 mb-2">
+                                    <div class="flex justify-between">
+                                        <span>Wedstrijden:</span>
+                                        <span class="font-medium">{{ $activeSeason->stats['total'] }}</span>
+                                    </div>
+                                    @if($activeSeason->stats['total'] > 0)
+                                        <div class="flex justify-between">
+                                            <span>Prestatie:</span>
+                                            <span class="font-medium">
+                                                <span class="text-green-600">{{ $activeSeason->stats['wins'] }}W</span>
+                                                <span class="text-gray-400 mx-1">•</span>
+                                                <span class="text-gray-600">{{ $activeSeason->stats['draws'] }}G</span>
+                                                <span class="text-gray-400 mx-1">•</span>
+                                                <span class="text-red-600">{{ $activeSeason->stats['losses'] }}V</span>
+                                            </span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span>Doelsaldo:</span>
+                                            <span class="font-medium {{ $activeSeason->stats['goal_diff'] >= 0 ? 'text-green-600' : 'text-red-600' }}">{{ $activeSeason->stats['goal_diff'] > 0 ? '+' : '' }}{{ $activeSeason->stats['goal_diff'] }}</span>
+                                        </div>
+                                    @endif
+                                </div>
+                            @endif
+                            <a href="{{ route('seasons.show', $activeSeason) }}" class="text-xs text-blue-600 hover:text-blue-800 font-medium">Bekijk seizoen →</a>
+                        </div>
+                    </div>
+                @endif
             </div>
         </div>
     </div>

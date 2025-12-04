@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -16,6 +17,8 @@ class Season extends Model
         'end' => 'date',
         'track_goals' => 'boolean',
     ];
+
+    protected $appends = ['stats'];
 
     /**
      * Boot the model.
@@ -52,6 +55,24 @@ class Season extends Model
     public function formation()
     {
         return $this->belongsTo(Formation::class);
+    }
+
+    protected function stats(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                $matches = $this->footballMatches()->whereNotNull('goals_scored')->get();
+                return [
+                    'total' => $matches->count(),
+                    'wins' => $matches->filter(fn($m) => $m->result === 'W')->count(),
+                    'draws' => $matches->filter(fn($m) => $m->result === 'D')->count(),
+                    'losses' => $matches->filter(fn($m) => $m->result === 'L')->count(),
+                    'goals_for' => $matches->sum('goals_scored'),
+                    'goals_against' => $matches->sum('goals_conceded'),
+                    'goal_diff' => $matches->sum('goals_scored') - $matches->sum('goals_conceded'),
+                ];
+            }
+        );
     }
 
     public static function getCurrent(?Collection $seasons = null): ?Season

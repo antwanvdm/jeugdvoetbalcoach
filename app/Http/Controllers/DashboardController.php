@@ -52,6 +52,7 @@ class DashboardController extends Controller
         $activeSeason = Season::getCurrent();
         $recentMatches = $currentTeam->footballMatches()->whereNotNull('goals_scored')->orderByDesc('date')->take(3)->get();
         $nextMatch = $currentTeam->footballMatches()->where('date', '>', now())->get()->first();
+        
         return view('dashboard', compact('recentMatches', 'nextMatch', 'currentTeam', 'onboardingSteps', 'onboardingComplete', 'activeSeason'));
     }
 }
