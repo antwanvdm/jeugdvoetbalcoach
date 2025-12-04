@@ -486,3 +486,33 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 });
+
+//Season page year preview
+document.addEventListener("DOMContentLoaded", function () {
+    // Year preview
+    const yearInput = document.getElementById("season-year");
+    const yearPreview = document.getElementById("season-year-preview");
+    if (yearInput && yearPreview) {
+        function updateYearPreview() {
+            const jaar = parseInt(yearInput.value);
+            if (!isNaN(jaar) && jaar >= 2000 && jaar <= 2100) {
+                yearPreview.textContent = jaar + "-" + (jaar + 1);
+            } else {
+                yearPreview.textContent = "";
+            }
+        }
+        yearInput.addEventListener("input", updateYearPreview);
+        updateYearPreview();
+    }
+
+    // Fase validation
+    window.validatePhaseInput = function(input) {
+        const errorDiv = document.getElementById("phase-error");
+        const value = parseInt(input.value);
+        if (isNaN(value) || value < 1 || value > 4) {
+            errorDiv.style.display = "block";
+        } else {
+            errorDiv.style.display = "none";
+        }
+    };
+});

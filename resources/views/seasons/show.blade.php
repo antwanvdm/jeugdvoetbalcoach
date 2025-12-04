@@ -6,7 +6,7 @@
                     <img src="{{ asset('storage/' . $season->team->opponent->logo) }}" alt="{{ $season->team->opponent->name }}" class="h-16 w-16 object-contain">
                 @endif
                 <div>
-                    <h1 class="text-3xl font-bold">Seizoen {{ $season->year }}/{{ $season->year + 1 }} - Deel {{ $season->part }}</h1>
+                    <h1 class="text-3xl font-bold">Seizoen {{ $season->year }}/{{ $season->year + 1 }} - Fase {{ $season->part }}</h1>
                     <p class="text-gray-600">{{ $season->start->format('d-m-Y') }} - {{ $season->end->format('d-m-Y') }}</p>
                 </div>
             </div>

@@ -220,7 +220,7 @@
                         <span class="flex h-10 w-10 items-center justify-center rounded-full bg-green-600 text-white font-bold text-lg">2</span>
                         <h3 class="text-xl font-semibold text-gray-900">Kies je formatie en seizoen</h3>
                     </div>
-                    <p class="text-gray-600 mb-4">Definieer een seizoensblok en kies de formatie waarin je wilt spelen. Gebruik standaard presets of maak je eigen formaties aan.</p>
+                    <p class="text-gray-600 mb-4">Definieer een seizoensfase en kies de formatie waarin je wilt spelen. Gebruik standaard presets of maak je eigen formaties aan.</p>
                     <ul class="space-y-2 text-sm text-gray-600">
                         <li class="flex items-start gap-2">
                             <svg class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">

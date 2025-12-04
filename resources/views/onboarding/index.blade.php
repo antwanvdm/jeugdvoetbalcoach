@@ -59,7 +59,7 @@
                 <h2 class="text-xl font-semibold text-blue-900 mb-3">Stap 2: Maak je eerste seizoen aan</h2>
                 <p class="text-blue-800 mb-4">
                     Een seizoen definieert een periode waarin je wedstrijden speelt met een vaste groep spelers.
-                    Bijvoorbeeld "Najaar 2024" of "Voorjaar 2025".
+                    Bijvoorbeeld "2025-2026 Fase 3".
                 </p>
                 <ul class="space-y-2 text-blue-800">
                     <li class="flex items-start">

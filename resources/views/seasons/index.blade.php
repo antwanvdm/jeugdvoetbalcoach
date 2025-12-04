@@ -10,7 +10,7 @@
             <thead>
             <tr class="text-left text-gray-600 border-b">
                 <th class="py-2 pr-4">Jaar</th>
-                <th class="py-2 pr-4">Deel</th>
+                <th class="py-2 pr-4">Fase</th>
                 <th class="py-2 pr-4">Start</th>
                 <th class="py-2 pr-4">Eind</th>
                 <th class="py-2 pr-4">Formatie</th>

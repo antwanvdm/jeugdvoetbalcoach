@@ -8,17 +8,17 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3M3 11h18M5 21h14a2 2 0 002-2V7H3v12a2 2 0 002 2z"/>
                 </svg>
             </div>
-            
+
             <h2 class="text-2xl font-bold text-gray-900 mb-3">Nog geen seizoen aangemaakt</h2>
             <p class="text-gray-600 mb-6">
-                Om spelers te kunnen beheren, moet je eerst een seizoen aanmaken. 
+                Om spelers te kunnen beheren, moet je eerst een seizoen aanmaken.
                 Een seizoen definieert de periode waarin je speelt met een specifieke groep spelers.
             </p>
 
             <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 text-left">
                 <p class="text-blue-900 font-medium mb-2">💡 Wat is een seizoen?</p>
                 <ul class="text-blue-800 text-sm space-y-1">
-                    <li>• Een periode met een start- en einddatum (bijv. "Najaar 2024")</li>
+                    <li>• Een periode met een start- en einddatum (bijv. "2025-2026 Fase 3")</li>
                     <li>• Een vaste formatie voor je team (bijv. 2-1-2 voor 6 spelers)</li>
                     <li>• Een groep spelers die in dit seizoen actief zijn</li>
                 </ul>

@@ -1,14 +1,17 @@
-<div class="grid grid-cols-2 gap-4">
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
     <div>
         <label class="block text-sm text-gray-600">Startjaar seizoen</label>
-        <input type="number" name="year" value="{{ old('year', $season->year ?? '') }}" class="mt-1 block w-full border p-2 rounded">
+        <div class="flex items-center gap-2">
+            <input type="number" name="year" id="season-year" value="{{ old('year', $season->year ?? '') }}" class="mt-1 block flex-1 border p-2 rounded" min="2000" max="2100">
+            <span id="season-year-preview" class="flex-1 text-gray-500 italic text-sm"></span>
+        </div>
         @error('year')
         <div class="text-red-600 text-sm">{{ $message }}</div>@enderror
     </div>
-
     <div>
-        <label class="block text-sm text-gray-600">Deel</label>
-        <input type="number" name="part" value="{{ old('part', $season->part ?? 1) }}" class="mt-1 block w-full border p-2 rounded">
+        <label class="block text-sm text-gray-600">Fase <span class="text-xs text-gray-500">(1 t/m 4)</span></label>
+        <input type="number" name="part" id="season-phase" min="1" max="4" value="{{ old('part', $season->part ?? 1) }}" class="mt-1 block w-full border p-2 rounded" oninput="validatePhaseInput(this)">
+        <div id="phase-error" class="text-red-600 text-sm" style="display:none;">Voer een getal tussen 1 en 4 in.</div>
         @error('part')
         <div class="text-red-600 text-sm">{{ $message }}</div>@enderror
     </div>

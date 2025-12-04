@@ -312,7 +312,7 @@ Seizoenen per team.
 | `team_id`      | bigint unsigned | YES      | NULL           | Team                                       |
 | `formation_id` | bigint unsigned | NO       |                | Gebruikte formatie                         |
 | `year`         | int             | NO       |                | Jaar (bijv. 2025)                          |
-| `part`         | varchar(255)    | NO       |                | Deel (bijv. "Najaar")                      |
+| `part`         | varchar(255)    | NO       |                | Fase (bijv. "1")                           |
 | `start_date`   | date            | NO       |                | Startdatum                                 |
 | `end_date`     | date            | NO       |                | Einddatum                                  |
 | `track_goals`  | boolean         | NO       | false          | Of doelpunten bijgehouden worden           |
