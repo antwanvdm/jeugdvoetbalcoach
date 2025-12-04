@@ -80,7 +80,13 @@ class SeasonController extends Controller
         $topScorers = $season->track_goals ? $season->topScorers(5) : collect();
         $topAssisters = $season->track_goals ? $season->topAssisters(5) : collect();
 
-        return view('seasons.show', compact('season', 'matches', 'topScorers', 'topAssisters'));
+        // Calculate season statistics
+        $stats = $season->stats;
+
+        // Get coaches for this team
+        $coaches = $season->team->users()->get();
+
+        return view('seasons.show', compact('season', 'matches', 'topScorers', 'topAssisters', 'stats', 'coaches'));
     }
 
     public function edit(Season $season): View

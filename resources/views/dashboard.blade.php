@@ -232,7 +232,7 @@
                         <ul>
                             @foreach($recentMatches as $m)
                                 <li class="pb-3 mb-3 border-b border-gray-200 last:border-b-0 last:mb-0">
-                                    <div class="flex items-center justify-between gap-4">
+                                    <a href="{{ route('football-matches.show', $m) }}" class="flex items-center justify-between gap-4 hover:bg-gray-50 -mx-2 px-2 py-1 rounded transition">
                                         <div class="flex items-center gap-3">
                                             @if($m->opponent?->logo)
                                                 <img src="{{ asset('storage/' . $m->opponent->logo) }}" alt="{{ $m->opponent?->name }}" class="h-8 w-8 object-contain">
@@ -255,7 +255,7 @@
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
+                                    </a>
                                 </li>
                             @endforeach
                         </ul>

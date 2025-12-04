@@ -42,6 +42,54 @@
             </div>
         @endif
 
+        <!-- Statistics & Coaches -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-6">
+            <!-- Season Statistics (2/3) -->
+            <div class="sm:col-span-2 bg-white rounded-lg shadow p-4">
+                <h2 class="text-lg font-semibold mb-4">Seizoensstatistieken</h2>
+                @if($stats && $stats['total'] > 0)
+                    <div class="space-y-3 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Wedstrijden:</span>
+                            <span class="font-semibold">{{ $stats['total'] }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Prestatie:</span>
+                            <span class="font-semibold">
+                                <span class="text-green-600">{{ $stats['wins'] }}W</span>
+                                <span class="text-gray-400 mx-1">•</span>
+                                <span class="text-gray-600">{{ $stats['draws'] }}G</span>
+                                <span class="text-gray-400 mx-1">•</span>
+                                <span class="text-red-600">{{ $stats['losses'] }}V</span>
+                            </span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Doelsaldo:</span>
+                            <span class="font-semibold {{ $stats['goal_diff'] >= 0 ? 'text-green-600' : 'text-red-600' }}">{{ $stats['goal_diff'] > 0 ? '+' : '' }}{{ $stats['goal_diff'] }}</span>
+                        </div>
+                    </div>
+                @else
+                    <p class="text-sm text-gray-500">Nog geen wedstrijden met resultaat.</p>
+                @endif
+            </div>
+
+            <!-- Coaches (1/3) -->
+            <div class="bg-white rounded-lg shadow p-4">
+                <h2 class="text-lg font-semibold mb-4">Coaches</h2>
+                @if($coaches->count() > 0)
+                    <div class="space-y-2">
+                        @foreach($coaches as $coach)
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="text-gray-900">{{ $coach->name }}</span>
+                            </div>
+                        @endforeach
+                    </div>
+                @else
+                    <p class="text-sm text-gray-500">Geen coaches gekoppeld aan dit team.</p>
+                @endif
+            </div>
+        </div>
+
         <!-- Matches -->
         <div class="bg-white rounded-lg shadow mb-6">
             <div class="p-4 border-b">
