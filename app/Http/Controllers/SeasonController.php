@@ -44,10 +44,17 @@ class SeasonController extends Controller
 
         $data['user_id'] = auth()->id();
         $data['team_id'] = session('current_team_id');
+
+        // Automatically generate share token
+        $data['share_token'] = Str::random(32);
+
         $season = Season::create($data);
 
         // Attach players from the most recent previous season (if any)
-        $prev = Season::where('end', '<', $season->start)->orderBy('end', 'desc')->first();
+        $prev = Season::where('end', '<', $season->start)
+            ->where('team_id', $data['team_id'])
+            ->orderBy('end', 'desc')
+            ->first();
         if ($prev) {
             $playerIds = \App\Models\Player::whereHas('seasons', function ($q) use ($prev) {
                 $q->where('seasons.id', $prev->id);
@@ -117,7 +124,7 @@ class SeasonController extends Controller
     {
         Gate::authorize('update', $season);
 
-        $season->share_token = Str::random(64);
+        $season->share_token = Str::random(32);
         $season->save();
 
         return redirect()->route('seasons.edit', $season)->with('success', 'Nieuwe deellink gegenereerd.');
