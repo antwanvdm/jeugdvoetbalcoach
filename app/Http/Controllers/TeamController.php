@@ -38,8 +38,9 @@ class TeamController extends Controller
             });
 
         $currentTeamId = session('current_team_id');
+        $onboardingInProgress = !auth()->user()->hasTeamOnboardingCompleted();
 
-        return view('teams.index', compact('teams', 'currentTeamId'));
+        return view('teams.index', compact('teams', 'currentTeamId', 'onboardingInProgress'));
     }
 
     /**
@@ -108,8 +109,8 @@ class TeamController extends Controller
         // Switch to this team
         session(['current_team_id' => $team->id]);
 
-        return redirect()->route('teams.index')
-            ->with('success', 'Team succesvol aangemaakt!');
+        return redirect()->route('dashboard')
+            ->with('success', 'Je nieuwe team is succesvol aangemaakt!');
     }
 
     /**

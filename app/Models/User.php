@@ -154,4 +154,24 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasMany(Formation::class);
     }
+
+    /**
+     * Check if team onboarding is complete (all 3 steps: seasons, players, matches).
+     */
+    public function hasTeamOnboardingCompleted($teamId = null): bool
+    {
+        $teamId = $teamId ?? session('current_team_id');
+        if (!$teamId) {
+            return false;
+        }
+
+        $team = $this->teams()->where('teams.id', $teamId)->first();
+        if (!$team) {
+            return false;
+        }
+
+        return $team->seasons()->exists() &&
+               $team->players()->exists() &&
+               $team->footballMatches()->exists();
+    }
 }

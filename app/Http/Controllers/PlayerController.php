@@ -42,7 +42,9 @@ class PlayerController extends Controller
             ->orderBy('name')
             ->paginate(15)->withQueryString();
 
-        return view('players.index', compact('players', 'seasons', 'activeSeason', 'seasonId'));
+        $onboardingInProgress = !auth()->user()->hasTeamOnboardingCompleted();
+
+        return view('players.index', compact('players', 'seasons', 'activeSeason', 'seasonId', 'onboardingInProgress'));
     }
 
     /**

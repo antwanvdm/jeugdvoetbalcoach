@@ -9,23 +9,10 @@
             <!-- Progress Steps -->
             <div class="mb-8">
                 <div class="flex items-center justify-between relative">
-                    <!-- Step 1 - Completed -->
-                    <div class="flex-1 text-center relative">
-                        <div class="w-10 h-10 mx-auto bg-green-500 text-white rounded-full flex items-center justify-center mb-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                            </svg>
-                        </div>
-                        <p class="text-sm font-medium text-green-600">Account aangemaakt</p>
-                    </div>
-
-                    <!-- Connector Line -->
-                    <div class="flex-1 border-t-2 border-gray-300 mx-2 -mt-8"></div>
-
                     <!-- Step 2 - Current -->
                     <div class="flex-1 text-center relative">
                         <div class="w-10 h-10 mx-auto bg-blue-600 text-white rounded-full flex items-center justify-center mb-2">
-                            <span class="font-bold">2</span>
+                            <span class="font-bold">1</span>
                         </div>
                         <p class="text-sm font-medium text-blue-600">Seizoen aanmaken</p>
                     </div>
@@ -36,7 +23,7 @@
                     <!-- Step 3 - Upcoming -->
                     <div class="flex-1 text-center relative">
                         <div class="w-10 h-10 mx-auto bg-gray-300 text-gray-600 rounded-full flex items-center justify-center mb-2">
-                            <span class="font-bold">3</span>
+                            <span class="font-bold">2</span>
                         </div>
                         <p class="text-sm font-medium text-gray-500">Spelers toevoegen</p>
                     </div>
@@ -47,7 +34,7 @@
                     <!-- Step 4 - Upcoming -->
                     <div class="flex-1 text-center relative">
                         <div class="w-10 h-10 mx-auto bg-gray-300 text-gray-600 rounded-full flex items-center justify-center mb-2">
-                            <span class="font-bold">4</span>
+                            <span class="font-bold">3</span>
                         </div>
                         <p class="text-sm font-medium text-gray-500">Wedstrijden plannen</p>
                     </div>

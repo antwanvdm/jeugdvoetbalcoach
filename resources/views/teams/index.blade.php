@@ -1,4 +1,13 @@
 <x-app-layout>
+    @if($onboardingInProgress)
+        <div class="mb-4 p-3 rounded-lg bg-blue-50 border border-blue-200 flex items-center justify-between">
+            <div class="text-sm text-blue-900">
+                <strong>Teamsetup voor huidige team nog niet afgerond</strong> — Voltooi alle stappen om aan de slag te gaan.
+            </div>
+            <a href="{{ route('dashboard') }}" class="text-xs px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 whitespace-nowrap ml-2">Ga verder →</a>
+        </div>
+    @endif
+
     <div class="flex items-center justify-between mb-4">
         <h1 class="text-2xl font-semibold">Mijn Teams</h1>
         <a href="{{ route('teams.create') }}" class="px-3 py-2 bg-blue-600 text-white rounded">Nieuw Team</a>

@@ -17,7 +17,9 @@ class SeasonController extends Controller
         Gate::authorize('viewAny', Season::class);
 
         $seasons = Season::orderByDesc('year')->orderByDesc('part')->paginate(15);
-        return view('seasons.index', compact('seasons'));
+        $onboardingInProgress = !auth()->user()->hasTeamOnboardingCompleted();
+
+        return view('seasons.index', compact('seasons', 'onboardingInProgress'));
     }
 
     public function create(): View
