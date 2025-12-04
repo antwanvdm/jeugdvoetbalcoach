@@ -22,7 +22,7 @@
             <dt class="text-gray-600 font-bold">Locatie</dt>
             <dd class="sm:col-span-2">
                 {{ $footballMatch->home ? 'Thuis' : 'Uit' }} (<a href="{{ $footballMatch->home ? $footballMatch->team->opponent->location_maps_link : $footballMatch->opponent->location_maps_link }}" target="_blank" rel="noopener"
-                   class="text-blue-600 hover:underline">{{ $locLabel ?? '📍 Kaart' }}</a>)
+                                                                 class="text-blue-600 hover:underline">{{ $locLabel ?? '📍 Kaart' }}</a>)
             </dd>
 
             <dt class="text-gray-600 font-bold">Datum</dt>
@@ -31,7 +31,11 @@
             <dt class="text-gray-600 font-bold">Uitslag</dt>
             <dd class="sm:col-span-2 font-bold result-{{$footballMatch->result}}">
                 @if($footballMatch->result !== 'O')
-                    {{ $footballMatch->goals_scored }} - {{ $footballMatch->goals_conceded }}
+                    @if($footballMatch->home)
+                        {{ $footballMatch->goals_scored }} - {{ $footballMatch->goals_conceded }}
+                    @else
+                        {{ $footballMatch->goals_conceded }} - {{ $footballMatch->goals_scored }}
+                    @endif
                 @else
                     <span class="text-gray-500">-</span>
                 @endif
@@ -49,6 +53,44 @@
             </div>
         </div>
     </div>
+
+    {{-- Goals --}}
+    @if($footballMatch->season && $footballMatch->season->track_goals && $footballMatch->goals->isNotEmpty())
+        <div class="mt-6 bg-white p-4 shadow rounded player-goals">
+            <h2 class="text-xl font-semibold mb-3">⚽ Doelpunten</h2>
+            <div class="space-y-2">
+                @foreach($footballMatch->goals->sortBy('minute') as $goal)
+                    <div class="flex items-center gap-3 p-2 bg-gray-50 rounded">
+                        @if($goal->minute)
+                            <span class="font-bold text-green-700">{{ $goal->minute }}'</span>
+                        @endif
+                        <div class="flex-1">
+                            <span class="font-semibold">{{ $goal->player?->name ?? 'Eigen goal' }}</span>
+                            @if($goal->assistPlayer)
+                                <span class="text-gray-600 text-sm">(assist: {{ $goal->assistPlayer->name }})</span>
+                            @endif
+                            @if($goal->subtype)
+                                <span class="ml-2 px-2 py-0.5 bg-blue-100 text-blue-800 text-xs rounded">{{ $goal->subtype }}</span>
+                            @endif
+                            @if($goal->notes)
+                                <p class="text-xs text-gray-600 mt-1">{{ $goal->notes }}</p>
+                            @endif
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    @endif
+
+    {{-- Coach Notes --}}
+    @auth
+        @if($footballMatch->notes)
+            <div class="mt-6 bg-yellow-50 border border-yellow-200 p-4 shadow rounded coach-notes">
+                <h2 class="text-lg font-semibold mb-2 text-yellow-900">📝 Coach notities</h2>
+                <p class="text-sm text-gray-700 whitespace-pre-wrap">{{ $footballMatch->notes }}</p>
+            </div>
+        @endif
+    @endauth
 
     @auth
         @if($footballMatch->share_token)
@@ -236,42 +278,4 @@
             </div>
         </div>
     </div>
-
-    {{-- Coach Notes --}}
-    @auth
-        @if($footballMatch->notes)
-            <div class="mt-6 bg-yellow-50 border border-yellow-200 p-4 shadow rounded">
-                <h2 class="text-lg font-semibold mb-2 text-yellow-900">📝 Coach notities</h2>
-                <p class="text-sm text-gray-700 whitespace-pre-wrap">{{ $footballMatch->notes }}</p>
-            </div>
-        @endif
-    @endauth
-
-    {{-- Goals --}}
-    @if($footballMatch->season && $footballMatch->season->track_goals && $footballMatch->goals->isNotEmpty())
-        <div class="mt-6 bg-white p-4 shadow rounded">
-            <h2 class="text-xl font-semibold mb-3">⚽ Doelpunten</h2>
-            <div class="space-y-2">
-                @foreach($footballMatch->goals->sortBy('minute') as $goal)
-                    <div class="flex items-center gap-3 p-2 bg-gray-50 rounded">
-                        @if($goal->minute)
-                            <span class="font-bold text-green-700">{{ $goal->minute }}'</span>
-                        @endif
-                        <div class="flex-1">
-                            <span class="font-semibold">{{ $goal->player?->name ?? 'Eigen goal' }}</span>
-                            @if($goal->assistPlayer)
-                                <span class="text-gray-600 text-sm">(assist: {{ $goal->assistPlayer->name }})</span>
-                            @endif
-                            @if($goal->subtype)
-                                <span class="ml-2 px-2 py-0.5 bg-blue-100 text-blue-800 text-xs rounded">{{ $goal->subtype }}</span>
-                            @endif
-                            @if($goal->notes)
-                                <p class="text-xs text-gray-600 mt-1">{{ $goal->notes }}</p>
-                            @endif
-                        </div>
-                    </div>
-                @endforeach
-            </div>
-        </div>
-    @endif
 </x-app-layout>

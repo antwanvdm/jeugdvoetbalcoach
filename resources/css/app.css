@@ -51,10 +51,13 @@
     main.football-matches-show .opponent-info,
     main.football-matches-show .line-up-header,
     main.football-matches-show .player-stats,
+    main.football-matches-show .coach-notes,
+    main.football-matches-show .player-goals,
     main.football-matches-share .top-row-actions,
     main.football-matches-share .opponent-info,
     main.football-matches-share .line-up-header,
-    main.football-matches-share .player-stats {
+    main.football-matches-share .player-stats,
+    main.football-matches-share .player-goals {
         display: none;
     }
 
