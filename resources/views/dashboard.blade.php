@@ -144,7 +144,8 @@
 
                     <a href="{{ route('football-matches.index') }}" class="flex items-center gap-4 p-4 bg-white rounded shadow hover:shadow-md">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6h13M9 6L5 3v18"/>
+                            <circle cx="12" cy="12" r="9" stroke-width="2"/>
+                            <path stroke-width="2" d="M12 3 C 8 6, 8 10, 12 12 M12 3 C 16 6, 16 10, 12 12 M12 21 C 8 18, 8 14, 12 12 M12 21 C 16 18, 16 14, 12 12 M3 12 C 6 8, 10 8, 12 12 M3 12 C 6 16, 10 16, 12 12 M21 12 C 18 8, 14 8, 12 12 M21 12 C 18 16, 14 16, 12 12"/>
                         </svg>
                         <span class="text-lg font-medium">Wedstrijden</span>
                     </a>
@@ -159,9 +160,9 @@
 
                     <a href="{{ route('teams.index') }}" class="flex items-center gap-4 p-4 bg-white rounded shadow hover:shadow-md">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8a9 9 0 11-9-9"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8C3 6 4 5 6 5L8 5C8 3 10 3 10 5L14 5C14 3 16 3 16 5L18 5C20 5 21 6 21 8L21 11C21 11 20 12 18 12L18 19L6 19L6 12C4 12 3 11 3 11L3 8Z"/>
                         </svg>
-                        <span class="text-lg font-medium">Al mijn Teams</span>
+                        <span class="text-lg font-medium">Teams beheren</span>
                     </a>
 
                 </div>
