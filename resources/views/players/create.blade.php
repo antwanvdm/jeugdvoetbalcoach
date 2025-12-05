@@ -8,7 +8,13 @@
             <div class="mb-4">
                 <h2 class="text-lg font-semibold mb-3">Spelers</h2>
                 <div class="mb-3">
-                    <div class="bg-blue-50 border border-blue-  200 text-blue-900 text-sm rounded p-3 flex items-start gap-2">
+                    <div class="bg-red-50 border border-red-200 text-red-900 text-sm rounded p-3 flex items-start gap-2 mb-2">
+                        <svg class="w-5 h-5 mt-0.5 flex-shrink-0 text-red-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg>
+                        <div>
+                            <strong>Privacy:</strong> Gebruik alleen de <u>voornaam</u> van de speler om privacy te beschermen.
+                        </div>
+                    </div>
+                    <div class="bg-blue-50 border border-blue-200 text-blue-900 text-sm rounded p-3 flex items-start gap-2">
                         <svg class="w-5 h-5 mt-0.5 flex-shrink-0 text-blue-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg>
                         <div>
                             <strong>Sterkere speler?</strong> Geef aan of een speler fysiek sterker is dan gemiddeld. Dit helpt om de teams per kwart zo eerlijk mogelijk te verdelen. Het algoritme houdt hier rekening mee bij het maken van de opstelling, zodat sterke en minder sterke spelers zo goed mogelijk worden gebalanceerd.
