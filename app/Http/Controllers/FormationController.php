@@ -15,7 +15,14 @@ class FormationController extends Controller
     {
         Gate::authorize('viewAny', Formation::class);
 
-        $formations = Formation::with('user')->orderBy('total_players')->paginate(15);
+        $query = Formation::with('user')->orderBy('total_players');
+
+        if (auth()->user()->isAdmin()){
+            $query->where('is_global', true);
+        }
+
+        $formations = $query->paginate(15);
+
         return view('formations.index', compact('formations'));
     }
 

@@ -1,4 +1,3 @@
-
 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
     <div>
         <label class="block text-sm text-gray-600">Totaal spelers (incl. keeper)</label>
