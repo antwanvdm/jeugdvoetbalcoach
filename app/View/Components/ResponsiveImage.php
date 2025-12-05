@@ -38,9 +38,7 @@ class ResponsiveImage extends Component
         // Check if the last part after dash looks like a Vite hash to strip and get the real image from metadata
         $imageMeta = $metadata[$nameWithoutExt . '.' . $extension] ?? null;
         if (!$imageMeta) {
-            $exceptionLastDash = strrpos($nameWithoutExt, '--');
-            $lastDash = $exceptionLastDash === false ? strrpos($nameWithoutExt, '-') : $exceptionLastDash;
-            $name = substr($nameWithoutExt, 0, $lastDash);
+            $name = substr($nameWithoutExt, 0, strlen($nameWithoutExt) - 9);
             $imageMeta = $metadata[$name . '.' . $extension];
         } else {
             $name = $nameWithoutExt;
