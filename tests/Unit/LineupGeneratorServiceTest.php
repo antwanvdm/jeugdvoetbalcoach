@@ -853,7 +853,6 @@ class LineupGeneratorServiceTest extends TestCase
         $minBenches = min($benchCounts);
         $maxBenches = max($benchCounts);
 
-        // Over 10 matches with 6 non-keepers and 40 bench slots total
         // Expected: ~6-7 benches per player (40/6 = 6.67 average)
         // A difference of 3 over 10 matches is acceptable and fair (7.5% variance)
         $this->assertLessThanOrEqual(3, $maxBenches - $minBenches,
@@ -899,7 +898,6 @@ class LineupGeneratorServiceTest extends TestCase
         $minBenches = min($benchCounts);
         $maxBenches = max($benchCounts);
 
-        // With identical weights, distribution should be very fair
         // With 7 non-keepers and 40 bench slots, difference of 2 is optimal
         $this->assertLessThanOrEqual(2, $maxBenches - $minBenches,
             'With identical weights, bench distribution should be fair (max 2 difference over 5 matches)');
@@ -1163,5 +1161,179 @@ class LineupGeneratorServiceTest extends TestCase
         // But we shouldn't see extreme imbalance (all light or no light) in most quarters
         $this->assertLessThan(50, $extremePercentage,
             "Extreme weight imbalance should occur in less than 50% of quarters (got {$extremePercentage}%)");
+    }
+
+    // --- EDGE CASES: 9 spelers, 2 keepers ---
+    public function test_nine_players_two_keepers_all_present()
+    {
+        [$user, $team] = $this->createUserAndTeam();
+        $season = $this->createSeasonWithFormation($team, '3-2-2', 8);
+        $players = $this->createPlayers($team, 9, keeperIndices: [0,1]);
+        $season->players()->sync($players->pluck('id'));
+        $match = $this->createMatch($season);
+        $this->generateLineup($match, $players->pluck('id')->all());
+        for ($q = 1; $q <= 4; $q++) {
+            $assignments = $match->players()->wherePivot('quarter', $q)->get();
+            $onField = $assignments->whereNotNull('pivot.position_id')->count();
+            $this->assertSame(8, $onField, "Quarter $q moet 8 spelers op het veld hebben");
+            $keepers = $assignments->where('pivot.position_id', 1)->count();
+            $this->assertSame(1, $keepers, "Quarter $q moet 1 keeper hebben");
+        }
+    }
+
+    public function test_nine_players_two_keepers_one_keeper_absent()
+    {
+        [$user, $team] = $this->createUserAndTeam();
+        $season = $this->createSeasonWithFormation($team, '3-2-2', 8);
+        $players = $this->createPlayers($team, 9, keeperIndices: [0,1]);
+        $season->players()->sync($players->pluck('id'));
+        $absent = $players[0]->id;
+        $available = $players->pluck('id')->filter(fn($id) => $id !== $absent)->values()->all();
+        $match = $this->createMatch($season);
+        $this->generateLineup($match, $available);
+        for ($q = 1; $q <= 4; $q++) {
+            $assignments = $match->players()->wherePivot('quarter', $q)->get();
+            $onField = $assignments->whereNotNull('pivot.position_id')->count();
+            $this->assertSame(8, $onField, "Quarter $q moet 8 spelers op het veld hebben");
+            $keepers = $assignments->where('pivot.position_id', 1)->pluck('id')->all();
+            $this->assertContains($players[1]->id, $keepers, "Alleen aanwezige keeper mag keepen");
+        }
+    }
+
+    public function test_nine_players_two_keepers_both_keepers_absent()
+    {
+        [$user, $team] = $this->createUserAndTeam();
+        $season = $this->createSeasonWithFormation($team, '3-2-2', 8);
+        $players = $this->createPlayers($team, 9, keeperIndices: [0,1]);
+        $season->players()->sync($players->pluck('id'));
+        $absent = [$players[0]->id, $players[1]->id];
+        $available = $players->pluck('id')->filter(fn($id) => !in_array($id, $absent))->values()->all();
+        $match = $this->createMatch($season);
+        $this->generateLineup($match, $available);
+        for ($q = 1; $q <= 4; $q++) {
+            $assignments = $match->players()->wherePivot('quarter', $q)->get();
+            $onField = $assignments->whereNotNull('pivot.position_id')->count();
+            $this->assertSame(7, $onField, "Quarter $q moet 7 spelers op het veld hebben");
+            $keepers = $assignments->where('pivot.position_id', 1)->pluck('id')->all();
+            $this->assertNotEmpty($keepers, "Quarter $q moet een keeper hebben");
+            foreach ($keepers as $kid) {
+                $this->assertNotContains($players[0]->id, [$kid]);
+                $this->assertNotContains($players[1]->id, [$kid]);
+            }
+        }
+    }
+
+    public function test_nine_players_zero_keepers()
+    {
+        [$user, $team] = $this->createUserAndTeam();
+        $season = $this->createSeasonWithFormation($team, '3-2-2', 8);
+        $players = $this->createPlayers($team, 9, keeperIndices: []);
+        $season->players()->sync($players->pluck('id'));
+        $match = $this->createMatch($season);
+        $this->generateLineup($match, $players->pluck('id')->all());
+        $keeperIds = [];
+        for ($q = 1; $q <= 4; $q++) {
+            $assignments = $match->players()->wherePivot('quarter', $q)->get();
+            $keepers = $assignments->where('pivot.position_id', 1)->pluck('id')->all();
+            $this->assertCount(1, $keepers, "Quarter $q moet 1 keeper hebben");
+            $keeperIds[] = $keepers[0];
+        }
+        $this->assertGreaterThan(1, count(array_unique($keeperIds)), "Meerdere spelers moeten keeper zijn geweest");
+    }
+
+    public function test_nine_players_two_keepers_one_player_absent()
+    {
+        [$user, $team] = $this->createUserAndTeam();
+        $season = $this->createSeasonWithFormation($team, '3-2-2', 8);
+        $players = $this->createPlayers($team, 10, keeperIndices: [0,1]);
+        $season->players()->sync($players->pluck('id'));
+        $absent = $players[9]->id;
+        $available = $players->pluck('id')->filter(fn($id) => $id !== $absent)->values()->all();
+        $match = $this->createMatch($season);
+        $this->generateLineup($match, $available);
+        for ($q = 1; $q <= 4; $q++) {
+            $assignments = $match->players()->wherePivot('quarter', $q)->get();
+            $onField = $assignments->whereNotNull('pivot.position_id')->count();
+            $this->assertSame(8, $onField, "Quarter $q moet 8 spelers op het veld hebben");
+        }
+    }
+
+    public function test_nine_players_two_keepers_variable_keeper_availability_over_three_matches()
+    {
+        [$user, $team] = $this->createUserAndTeam();
+        $season = $this->createSeasonWithFormation($team, '3-2-2', 8);
+        $players = $this->createPlayers($team, 9, keeperIndices: [0,1]);
+        $season->players()->sync($players->pluck('id'));
+        $availabilities = [
+            $players->pluck('id')->all(),
+            $players->pluck('id')->filter(fn($id) => $id !== $players[0]->id)->values()->all(),
+            $players->pluck('id')->filter(fn($id) => !in_array($id, [$players[0]->id, $players[1]->id]))->values()->all(),
+        ];
+        foreach ($availabilities as $available) {
+            $match = $this->createMatch($season);
+            $this->generateLineup($match, $available);
+            for ($q = 1; $q <= 4; $q++) {
+                $assignments = $match->players()->wherePivot('quarter', $q)->get();
+                $onField = $assignments->whereNotNull('pivot.position_id')->count();
+                $this->assertGreaterThanOrEqual(7, $onField, "Quarter $q moet minimaal 7 spelers op het veld hebben");
+            }
+        }
+    }
+
+    public function test_nine_players_two_keepers_never_outfield()
+    {
+        [$user, $team] = $this->createUserAndTeam();
+        $season = $this->createSeasonWithFormation($team, '3-2-2', 8);
+        $players = $this->createPlayers($team, 9, keeperIndices: [0,1]);
+        $season->players()->sync($players->pluck('id'));
+        $match = $this->createMatch($season);
+        $this->generateLineup($match, $players->pluck('id')->all());
+        for ($q = 1; $q <= 4; $q++) {
+            foreach ([0,1] as $k) {
+                $assignments = $match->players()->wherePivot('quarter', $q)->wherePivot('player_id', $players[$k]->id)->first();
+                if ($assignments) {
+                    $pos = $assignments->pivot->position_id;
+                    $this->assertTrue($pos === 1 || $pos === null, "Keeper mag alleen keeper of bank zijn");
+                }
+            }
+        }
+    }
+
+    public function test_nine_players_two_keepers_formation_applied()
+    {
+        [$user, $team] = $this->createUserAndTeam();
+        $season = $this->createSeasonWithFormation($team, '3-2-2', 8);
+        $players = $this->createPlayers($team, 9, keeperIndices: [0,1]);
+        $season->players()->sync($players->pluck('id'));
+        $match = $this->createMatch($season);
+        $this->generateLineup($match, $players->pluck('id')->all());
+        for ($q = 1; $q <= 4; $q++) {
+            $assignments = $match->players()->wherePivot('quarter', $q)->get();
+            $def = $assignments->where('pivot.position_id', 2)->count();
+            $mid = $assignments->where('pivot.position_id', 3)->count();
+            $att = $assignments->where('pivot.position_id', 4)->count();
+            $keep = $assignments->where('pivot.position_id', 1)->count();
+            $this->assertSame(3, $def, "Quarter $q moet 3 verdedigers hebben");
+            $this->assertSame(2, $mid, "Quarter $q moet 2 middenvelders hebben");
+            $this->assertSame(2, $att, "Quarter $q moet 2 aanvallers hebben");
+            $this->assertSame(1, $keep, "Quarter $q moet 1 keeper hebben");
+        }
+    }
+    // --- EDGE CASE: 6 spelers, 2 keepers ---
+    public function test_seven_players_two_keepers()
+    {
+        [$user, $team] = $this->createUserAndTeam();
+        $season = $this->createSeasonWithFormation($team, '2-1-2', 6);
+        $players = $this->createPlayers($team, 7, keeperIndices: [0,1]);
+        $season->players()->sync($players->pluck('id'));
+        $match = $this->createMatch($season);
+        $this->generateLineup($match, $players->pluck('id')->all());
+        for ($q = 1; $q <= 4; $q++) {
+            $assignments = $match->players()->wherePivot('quarter', $q)->get();
+            $onField = $assignments->whereNotNull('pivot.position_id')->count();
+            $this->assertSame(6, $onField, "Quarter $q moet 6 spelers op het veld hebben");
+            $keepers = $assignments->where('pivot.position_id', 1)->count();
+            $this->assertSame(1, $keepers, "Quarter $q moet 1 keeper hebben");
+        }
     }
 }

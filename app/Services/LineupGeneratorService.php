@@ -226,12 +226,27 @@ class LineupGeneratorService
                 $keeperBenchPlan[$keeper->id] = [$benchQuarter];
             }
         } elseif ($favoriteKeepersCount >= 2 && $totalBenchesNeeded > 0) {
-            // 2+ keepers: keepers also need bench turns (like other players)
-            // We treat them as non-keepers for bench rotation
+            // 2+ keepers: each keeper is benched in ALL their non-keeping quarters
+            $keepersByQuarter = [];
             foreach ($keepers as $index => $keeper) {
-                $keeperQuarter = ($index % 4) + 1; // Their keeper quarter
-                // They can't be benched in their keeper quarter, but can be in other quarters
-                // We let the normal distribution handle this later
+                for ($q = 1; $q <= 4; $q++) {
+                    if (($q - 1) % $favoriteKeepersCount === $index) {
+                        $keepersByQuarter[$keeper->id][] = $q;
+                    }
+                }
+            }
+            
+            foreach ($keepers as $keeper) {
+                $keepingQuarters = $keepersByQuarter[$keeper->id] ?? [];
+                $benchQuarters = [];
+                for ($q = 1; $q <= 4; $q++) {
+                    if (!in_array($q, $keepingQuarters)) {
+                        $benchQuarters[] = $q;
+                    }
+                }
+                if (!empty($benchQuarters)) {
+                    $keeperBenchPlan[$keeper->id] = $benchQuarters; // ALL non-keeping quarters
+                }
             }
         }
         // If $favoriteKeepersCount === 1: keeper gets NO bench quarter (stays empty in keeperBenchPlan)
@@ -243,15 +258,9 @@ class LineupGeneratorService
             $remainingPerQuarter[$q] = max(0, ($targetsPerQuarter[$q] ?? 0) - ($keeperBenchCounts[$q] ?? 0));
         }
 
-        // 3) Distribute remaining benches among non-keepers evenly and deterministically
-        // With 2+ favorite keepers, keepers must also participate in bench rotation
-        if ($favoriteKeepersCount >= 2) {
-            // All players (including keepers) participate in bench rotation
-            $playersForBenchRotation = $this->players;
-        } else {
-            // Keepers are already handled or not present, only non-keepers
-            $playersForBenchRotation = $this->players->reject(fn($p) => in_array($p->id, $keepers->pluck('id')->all(), true));
-        }
+        // 3) Distribute remaining benches among non-keepers only
+        // Keepers are already assigned their bench quarter above
+        $playersForBenchRotation = $this->players->reject(fn($p) => in_array($p->id, $keepers->pluck('id')->all(), true));
 
         $nonKeeperBenchPlan = $this->distributeNonKeeperBenches($playersForBenchRotation, $remainingPerQuarter, $keepers);
 
@@ -351,6 +360,7 @@ class LineupGeneratorService
         }
 
         while ($totalRemaining > 0) {
+            $assignmentsThisRound = 0;
             foreach ($ordered as $player) {
                 if ($totalRemaining <= 0) {
                     break;
@@ -370,6 +380,16 @@ class LineupGeneratorService
                 $benchPlan[$player->id] = array_values(array_unique(array_merge($already, [$quarter])));
                 $remainingPerQuarter[$quarter]--;
                 $totalRemaining--;
+                $assignmentsThisRound++;
+            }
+            
+            // Safety: if no assignments were made this round, we're stuck - break to avoid infinite loop
+            if ($assignmentsThisRound === 0) {
+                $this->debugLog('Warning: No bench assignments made in this round, breaking to avoid infinite loop', [
+                    'remaining' => $totalRemaining,
+                    'remainingPerQuarter' => $remainingPerQuarter,
+                ]);
+                break;
             }
         }
 
@@ -487,19 +507,12 @@ class LineupGeneratorService
             }
         }
 
-        // Ensure favorite keepers who aren't keeping this quarter are benched
-        if ($keeperId) {
-            $favoriteKeepers = $this->players->filter(fn($p) => $this->getPlayerFavoriteRole($p->position_id) === 'keeper');
-            foreach ($favoriteKeepers as $keeper) {
-                // If this keeper is not the designated keeper for this quarter and not already assigned, bench them
-                if ($keeper->id !== $keeperId && !$quarterData->isPlayerAssigned($keeper->id)) {
-                    $quarterData->addAssignment($keeper->id, null);
-                }
-            }
-        }
+        // Note: With proper bench planning, non-keeping keepers should already have their bench quarters
+        // assigned in the benchPlan above, so we don't need to force-bench them here.
+        // This was causing double-benching (keeper benched in benchPlan + auto-benched here)
 
         // Get available players (not benched)
-        $availablePlayers = $this->getAvailablePlayers($quarter, $benchPlan);
+        $availablePlayers = $this->getAvailablePlayers($quarter, $benchPlan, $keeperId);
 
         // Assign keeper
         $quarterData = $this->withAssignedKeeper($quarterData, $keeperByQuarter);
@@ -515,11 +528,23 @@ class LineupGeneratorService
 
     /**
      * Get players available to play this quarter (not benched)
+     * Excludes players in bench plan and keepers who aren't designated for this quarter
      */
-    private function getAvailablePlayers(int $quarter, array $benchPlan): Collection
+    private function getAvailablePlayers(int $quarter, array $benchPlan, int $keeperQuarter = null): Collection
     {
-        return $this->players->reject(function ($player) use ($benchPlan, $quarter) {
-            return in_array($quarter, $benchPlan[$player->id] ?? [], true);
+        return $this->players->reject(function ($player) use ($benchPlan, $quarter, $keeperQuarter) {
+            // Exclude if player is in bench plan for this quarter (they're benched)
+            if (in_array($quarter, $benchPlan[$player->id] ?? [], true)) {
+                return true;
+            }
+            
+            // Exclude keepers who aren't the designated keeper for this quarter
+            // UNLESS they're already handled in the benchPlan (they'll be benched separately)
+            if ($this->getPlayerFavoriteRole($player->position_id) === 'keeper' && $player->id !== $keeperQuarter) {
+                return true;
+            }
+            
+            return false;
         })->values();
     }
 
