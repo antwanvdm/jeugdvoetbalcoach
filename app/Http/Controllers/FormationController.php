@@ -32,7 +32,7 @@ class FormationController extends Controller
 
         $validated = $request->validate([
             'total_players' => ['required', 'integer', 'min:1'],
-            'lineup_formation' => ['required', 'string', 'max:255', new ValidFormation((int) $request->input('total_players'))],
+            'lineup_formation' => ['required', 'string', 'max:255', new ValidFormation((int)$request->input('total_players'))],
             'is_global' => ['sometimes', 'boolean'],
         ]);
 
@@ -57,7 +57,9 @@ class FormationController extends Controller
     {
         Gate::authorize('view', $formation);
 
-        return view('formations.show', compact('formation'));
+        list($defenders, $midfielders, $attackers) = explode('-', $formation->lineup_formation);
+
+        return view('formations.show', compact('formation', 'defenders', 'midfielders', 'attackers'));
     }
 
     public function edit(Formation $formation): View
@@ -73,7 +75,7 @@ class FormationController extends Controller
 
         $validated = $request->validate([
             'total_players' => ['required', 'integer', 'min:1'],
-            'lineup_formation' => ['required', 'string', 'max:255', new ValidFormation((int) $request->input('total_players'))],
+            'lineup_formation' => ['required', 'string', 'max:255', new ValidFormation((int)$request->input('total_players'))],
             'is_global' => ['sometimes', 'boolean'],
         ]);
 
