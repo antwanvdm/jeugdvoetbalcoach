@@ -1,5 +1,5 @@
 <x-app-layout>
-    <div class="flex items-center justify-between mb-4">
+    <div class="flex flex-col md:flex-row gap-4 items-center justify-between mb-4">
         <h1 class="text-2xl font-semibold">Wedstrijden</h1>
         <div class="flex items-center gap-4">
             <form method="GET" action="{{ route('football-matches.index') }}">

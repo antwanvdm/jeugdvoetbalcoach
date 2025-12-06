@@ -126,11 +126,6 @@
                             @else
                                 <span class="text-gray-500">—</span>
                             @endif
-                            @if($match->share_token)
-                                <a href="{{ route('football-matches.share', ['footballMatch' => $match, 'shareToken' => $match->share_token]) }}" target="_blank" class="px-3 py-1 text-sm bg-green-100 text-green-800 rounded hover:bg-green-200">
-                                    Bekijk openbaar
-                                </a>
-                            @endif
                             <a href="{{ route('football-matches.show', $match) }}" class="px-3 py-1 text-sm bg-blue-100 text-blue-800 rounded hover:bg-blue-200">
                                 Details
                             </a>
