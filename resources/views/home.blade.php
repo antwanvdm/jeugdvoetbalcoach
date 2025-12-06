@@ -389,7 +389,7 @@
                     is: coachen!
                 </p>
                 <div class="border-t pt-4 flex gap-4 items-center">
-                    <div class="w-20 h-20 bg-blue-600 rounded-full overflow-hidden flex items-center justify-center text-white font-bold text-2xl">
+                    <div class="min-w-20 w-20 h-20 bg-blue-600 rounded-full overflow-hidden flex items-center justify-center text-white font-bold text-2xl">
                         <x-responsive-image
                             class=""
                             alt="Coach Antwan aan het werk"

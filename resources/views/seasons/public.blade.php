@@ -1,3 +1,6 @@
+@push('head')
+    <meta name="robots" content="noindex,nofollow">
+@endpush
 <x-app-layout>
     <div class="max-w-5xl mx-auto px-4 py-8">
         <div class="flex items-center justify-between mb-6">

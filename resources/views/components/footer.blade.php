@@ -31,16 +31,16 @@
         </div>
 
         <!-- Bottom Bar -->
-        <div class="mt-8 pt-8 border-t border-gray-800 flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-gray-500">
-            <p class="text-gray-300">&copy; {{ date('Y') }} {{ config('app.name') }}. Alle rechten voorbehouden.</p>
+        <div class="mt-8 pt-8 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-500">
+            <p class="text-gray-300">&copy; {{ date('Y') }} <a href="/" class="hover:text-white underline transition">Jeugdvoetbalcoach.nl</a>. Alle rechten voorbehouden.</p>
             <div class="flex flex-wrap gap-4 items-center">
                 <a href="{{ route('privacy') }}" class="text-gray-300 hover:text-white transition">Privacy</a>
-                <a href="https://github.com/antwanvdm/jeugdvoetbalcoach" target="_blank" class="text-gray-300 hover:text-white transition inline-flex items-center gap-1">
-                    GitHub
+                <a href="https://www.knvb.nl/Pupillenvoetbal" target="_blank" class="text-gray-300 hover:text-white transition inline-flex items-center gap-1">
+                    KNVB
                     <svg class="size-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14 21 3"/></svg>
                 </a>
-                <a href="https://ko-fi.com/antwanvdm" target="_blank" class="text-pink-500 hover:text-pink-400 transition inline-flex items-center gap-1">
-                    Sponsor
+                <a href="https://www.voetbal.nl/" target="_blank" class="text-gray-300 hover:text-white transition inline-flex items-center gap-1">
+                    Voetbal.nl
                     <svg class="size-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14 21 3"/></svg>
                 </a>
             </div>

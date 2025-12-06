@@ -1,6 +1,15 @@
+@push('head')
+    <meta name="robots" content="noindex,nofollow">
+@endpush
 <x-app-layout>
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 top-row-actions">
-        <h1 class="text-xl sm:text-2xl font-semibold">Wedstrijd tegen {{ $footballMatch->opponent->name ?? 'Onbekend' }}</h1>
+        <h1 class="text-xl sm:text-2xl font-semibold">
+            @if($footballMatch->result !== 'O')
+                Wedstrijdverslag
+            @else
+                Wedstrijdplanning
+            @endif
+        </h1>
         <div class="flex flex-wrap gap-2">
             @auth
                 <a href="{{ route('football-matches.lineup', $footballMatch) }}" class="px-3 py-2 bg-indigo-600 text-white rounded text-sm">Verander Line-up</a>
