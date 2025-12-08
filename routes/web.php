@@ -16,28 +16,19 @@ use App\Http\Controllers\TeamController;
 use Illuminate\Support\Facades\Route;
 use Spatie\Honeypot\ProtectAgainstSpam;
 
-// Public home page
+//General routes
 Route::get('/', [HomeController::class, 'show'])->name('home');
-
-// Feedback form submission
 Route::post('/feedback', [HomeController::class, 'feedback'])->name('home.feedback')->middleware(ProtectAgainstSpam::class);
-
-// Privacy page
 Route::get('/privacy', [\App\Http\Controllers\PrivacyController::class, 'show'])->name('privacy');
 
-// Sitemap
-Route::get('/sitemap.xml', [\App\Http\Controllers\SitemapController::class, 'index'])->name('sitemap');
-
-// Public opponents search (autocomplete endpoint)
+//Public opponents search (autocomplete endpoint)
 Route::get('/api/opponents', OpponentSearchController::class)->name('api.opponents');
 
-// Public football match share (for parents)
+//Public share pages (for parents)
 Route::get('/football-matches/{footballMatch}/share/{shareToken}', [FootballMatchController::class, 'showPublic'])->name('football-matches.share');
-
-// Public season share (for parents)
 Route::get('/seasons/{season}/share/{shareToken}', [SeasonController::class, 'showPublic'])->name('seasons.share');
 
-// Public team join routes (accessible without authentication)
+//Public team join routes (accessible without authentication)
 Route::get('/teams/join/{inviteCode}', [TeamController::class, 'showJoin'])->name('teams.join.show');
 Route::post('/teams/join/{inviteCode}', [TeamController::class, 'join'])->middleware('auth')->name('teams.join');
 
@@ -89,5 +80,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::patch('admin/users/{user}', [AdminUserController::class, 'update'])->name('users.update');
     });
 });
+
+// Sitemap
+Route::withoutMiddleware('web')->get('/sitemap.xml', [\App\Http\Controllers\SitemapController::class, 'index'])->name('sitemap');
 
 require __DIR__.'/auth.php';

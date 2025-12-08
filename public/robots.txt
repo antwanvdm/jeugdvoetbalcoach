@@ -1,5 +1,4 @@
 User-agent: *
 Disallow:
 
-# Update de URL hieronder naar je daadwerkelijke domein
 Sitemap: https://jeugdvoetbalcoach.nl/sitemap.xml
