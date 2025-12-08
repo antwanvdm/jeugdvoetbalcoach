@@ -18,9 +18,9 @@
             <thead>
             <tr class="border-b">
                 <th class="text-left p-3">Team</th>
-                <th class="text-left p-3">Rol</th>
-                <th class="text-left p-3">Leden</th>
-                <th class="text-left p-3">Uitnodiging</th>
+                <th class="text-left p-3 hidden sm:table-cell">Rol</th>
+                <th class="text-left p-3 hidden sm:table-cell">Leden</th>
+                <th class="text-left p-3 hidden sm:table-cell">Uitnodiging</th>
                 <th class="text-left p-3">Status</th>
                 <th class="text-right p-3">Acties</th>
             </tr>
@@ -46,9 +46,9 @@
                             </div>
                         </div>
                     </td>
-                    <td class="p-3">{{ $team['role_label'] }}</td>
-                    <td class="p-3">{{ $team['users_count'] }}</td>
-                    <td class="p-3">
+                    <td class="p-3 hidden sm:table-cell">{{ $team['role_label'] }}</td>
+                    <td class="p-3 hidden sm:table-cell">{{ $team['users_count'] }}</td>
+                    <td class="p-3 hidden sm:table-cell">
                         <button
                             type="button"
                             data-copy-to-clipboard="{{ route('teams.join.show', $team['invite_code']) }}"
@@ -74,13 +74,13 @@
                         <a href="{{ route('teams.show', $team['id']) }}" class="text-blue-600 mr-2">Details</a>
 
                         @if(!$team['is_default'])
-                            <form method="POST" action="{{ route('teams.set-default', $team['id']) }}" class="inline">
+                            <form method="POST" action="{{ route('teams.set-default', $team['id']) }}" class="inline" onsubmit="return confirm('Weet je zeker dat je dit team als jouw standaard team wilt instellen?')">
                                 @csrf
                                 <button type="submit" class="text-red-600 mr-2 cursor-pointer">Maak standaard</button>
                             </form>
                         @endif
 
-                        <a href="{{ route('teams.edit', $team['id']) }}" class="text-yellow-600 mr-2">Bewerk</a>
+                        <a href="{{ route('teams.edit', $team['id']) }}" class="text-yellow-600 mr-2 hidden sm:inline">Bewerk</a>
 
                         @if($team['can_leave'])
                             <form method="POST" action="{{ route('teams.leave', $team['id']) }}" class="inline" onsubmit="return confirm('Weet je zeker dat je dit team wilt verlaten?')">
@@ -91,7 +91,7 @@
                         @endif
 
                         @if($team['role'] === 1)
-                            <form method="POST" action="{{ route('teams.destroy', $team['id']) }}" class="inline" onsubmit="return confirm('Weet je zeker dat je dit team wilt verwijderen? Alle data wordt verwijderd!')">
+                            <form method="POST" action="{{ route('teams.destroy', $team['id']) }}" class="hidden sm:inline" onsubmit="return confirm('Weet je zeker dat je dit team wilt verwijderen? Alle data wordt verwijderd!')">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="text-red-600">Verwijder</button>

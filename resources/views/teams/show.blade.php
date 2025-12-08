@@ -26,8 +26,8 @@
                         <tr>
                             <th class="text-left p-3 text-sm font-medium text-gray-700">Naam</th>
                             <th class="text-left p-3 text-sm font-medium text-gray-700">E-mail</th>
-                            <th class="text-left p-3 text-sm font-medium text-gray-700">Rol</th>
-                            <th class="text-left p-3 text-sm font-medium text-gray-700">Label</th>
+                            <th class="text-left p-3 text-sm font-medium text-gray-700 hidden sm:table-cell">Rol</th>
+                            <th class="text-left p-3 text-sm font-medium text-gray-700 hidden sm:table-cell">Label</th>
                             <th class="text-left p-3 text-sm font-medium text-gray-700">Lid sinds</th>
                         </tr>
                     </thead>
@@ -38,12 +38,12 @@
                                     <div class="font-medium">{{ $member['name'] }}</div>
                                 </td>
                                 <td class="p-3 text-gray-600">{{ $member['email'] }}</td>
-                                <td class="p-3">
+                                <td class="p-3 hidden sm:table-cell">
                                     <span class="px-2 py-1 text-xs rounded {{ $member['role'] === 1 ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800' }}">
                                         {{ $member['role_label'] }}
                                     </span>
                                 </td>
-                                <td class="p-3 text-gray-700">{{ $member['label'] ?? '—' }}</td>
+                                <td class="p-3 text-gray-700 hidden sm:table-cell">{{ $member['label'] ?? '—' }}</td>
                                 <td class="p-3 text-gray-600">{{ $member['joined_at']->format('d-m-Y') }}</td>
                             </tr>
                         @endforeach
