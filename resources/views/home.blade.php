@@ -39,7 +39,7 @@
                         @if(auth()->user()->isAdmin())
                             Ga naar het Admin Dashboard
                         @else
-                            Ga naar je teamoverzicht voor {{ $currentTeam->opponent->name }}
+                            Ga naar je overzicht voor {{ $currentTeam->opponent->name }}
                         @endif
                     </a>
                 @else
@@ -548,7 +548,7 @@
                     @if(auth()->user()->isAdmin())
                         Ga naar het Admin Dashboard
                     @else
-                        Ga naar je teamoverzicht voor {{ $currentTeam->opponent->name }}
+                        Ga naar je overzicht voor {{ $currentTeam->opponent->name }}
                     @endif
                 </a>
             </div>
