@@ -8,12 +8,11 @@
         </div>
     @endif
 
-    <div class="flex items-center justify-between mb-4">
+    <div class="flex flex-col sm:flex-row gap-4 sm:items-center justify-between mb-4">
         <h1 class="text-2xl font-semibold">Spelers</h1>
         <div class="flex items-center gap-4">
             <form method="GET" action="{{ route('players.index') }}">
                 <select name="season_id" onchange="this.form.submit()" class="border py-2 pl-2 pr-8 rounded">
-                    <option value="">Alle seizoenen</option>
                     @foreach($seasons as $s)
                         <option value="{{ $s->id }}" {{ (int)($seasonId ?? 0) === $s->id ? 'selected' : '' }}>{{ $s->year }}-{{ $s->year + 1 }}--{{ $s->part }}</option>
                     @endforeach
@@ -65,7 +64,7 @@
             <th class="text-left p-3">Naam</th>
             <th class="text-left p-3">Favoriete positie</th>
             <th class="text-left p-3">Sterkere speler</th>
-            <th class="text-left p-3">Keer gekeept</th>
+            <th class="text-left p-3 hidden sm:table-cell">Keer gekeept</th>
             <th class="text-right p-3"></th>
         </tr>
         </thead>
@@ -81,11 +80,11 @@
                         <span class="inline-block px-2 py-1 bg-gray-100 text-gray-800 rounded text-xs">Nee</span>
                     @endif
                 </td>
-                <td class="p-3">{{ $player->keeper_count ?? 0 }}</td>
+                <td class="p-3 hidden sm:table-cell">{{ $player->keeper_count ?? 0 }}</td>
                 <td class="p-3 text-right">
                     <a class="text-blue-600 mr-2" href="{{ route('players.show', $player) }}">Bekijk</a>
-                    <a class="text-yellow-600 mr-2" href="{{ route('players.edit', $player) }}">Bewerk</a>
-                    <form action="{{ route('players.destroy', $player) }}" method="POST" class="inline">
+                    <a class="text-yellow-600 mr-2 hidden md:inline" href="{{ route('players.edit', $player) }}">Bewerk</a>
+                    <form action="{{ route('players.destroy', $player) }}" method="POST" class="hidden md:inline">
                         @csrf
                         @method('DELETE')
                         <button class="text-red-600" onclick="return confirm('Deze speler verwijderen?')">Verwijder</button>

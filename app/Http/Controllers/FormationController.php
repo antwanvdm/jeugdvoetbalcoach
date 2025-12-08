@@ -15,7 +15,7 @@ class FormationController extends Controller
     {
         Gate::authorize('viewAny', Formation::class);
 
-        $query = Formation::with('user')->orderBy('total_players');
+        $query = Formation::with('user')->orderBy('is_global')->orderBy('total_players');
 
         if (auth()->user()->isAdmin()){
             $query->where('is_global', true);

@@ -1,9 +1,16 @@
 <x-app-layout>
     <div class="flex items-center justify-between mb-4">
         <h1 class="text-2xl font-semibold">Formatie {{ $formation->lineup_formation }}</h1>
-        <div>
+        <div class="flex gap-2">
             @can('update', $formation)
-                <a href="{{ route('formations.edit', $formation) }}" class="px-3 py-2 bg-yellow-600 text-white rounded mr-2">Bewerk</a>
+                <a href="{{ route('formations.edit', $formation) }}" class="px-3 py-2 bg-yellow-600 text-white rounded">Bewerk</a>
+            @endcan
+            @can('delete', $formation)
+                <form action="{{ route('formations.destroy', $formation) }}" method="POST" onsubmit="return confirm('Formatie verwijderen?')">
+                    @csrf
+                    @method('DELETE')
+                    <button class="px-3 py-2 bg-red-600 text-white rounded cursor-pointer">Verwijder</button>
+                </form>
             @endcan
             <a href="{{ route('formations.index') }}" class="px-3 py-2 bg-gray-200 rounded">Terug</a>
         </div>

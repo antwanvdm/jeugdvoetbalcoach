@@ -218,10 +218,15 @@
 
         @auth
             <!-- Actions -->
-            <div class="flex gap-2">
-                <a href="{{ route('seasons.edit', $season) }}" class="px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700">
+            <div class="flex flex-col sm:flex-row gap-2">
+                <a href="{{ route('seasons.edit', $season) }}" class="flex-1 px-4 py-2 bg-yellow-600 text-white text-center rounded hover:bg-yellow-700">
                     Seizoen bewerken
                 </a>
+                <form action="{{ route('seasons.destroy', $season) }}" method="POST" class="flex-1" onsubmit="return confirm('Verwijder seizoen inclusief alle wedstrijden?')">
+                    @csrf
+                    @method('DELETE')
+                    <button class="px-4 py-2 bg-red-600 text-white rounded cursor-pointer w-full">Seizoen verwijderen</button>
+                </form>
             </div>
         @endauth
     </div>

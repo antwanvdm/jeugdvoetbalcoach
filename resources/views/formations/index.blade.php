@@ -26,7 +26,7 @@
             <thead>
             <tr class="text-left text-gray-600 border-b">
                 <th class="py-2 pr-4 w-32"></th>
-                <th class="py-2 pr-4">Spelers</th>
+                <th class="py-2 pr-4 hidden sm:table-cell">Spelers</th>
                 <th class="py-2 pr-4">Opstelling</th>
                 <th class="py-2 pr-4"></th>
             </tr>
@@ -41,19 +41,12 @@
                             <span class="inline-flex items-center text-xs px-2 py-1 bg-yellow-100 rounded">Eigen formatie</span>
                         @endif
                     </td>
-                    <td class="py-2 pr-4 font-medium">{{ $f->total_players }}</td>
+                    <td class="py-2 pr-4 font-medium hidden sm:table-cell">{{ $f->total_players }}</td>
                     <td class="py-2 pr-4">{{ $f->lineup_formation }}</td>
                     <td class="py-2 pr-4 text-right">
                         <a href="{{ route('formations.show', $f) }}" class="text-blue-600 mr-2">Bekijk</a>
                         @can('update', $f)
-                            <a href="{{ route('formations.edit', $f) }}" class="text-yellow-600 mr-2">Bewerk</a>
-                        @endcan
-                        @can('delete', $f)
-                            <form action="{{ route('formations.destroy', $f) }}" method="POST" class="inline">
-                                @csrf
-                                @method('DELETE')
-                                <button class="text-red-600" onclick="return confirm('Formatie verwijderen?')">Verwijder</button>
-                            </form>
+                            <a href="{{ route('formations.edit', $f) }}" class="text-yellow-600 mr-2 hidden sm:inline">Bewerk</a>
                         @endcan
                     </td>
                 </tr>

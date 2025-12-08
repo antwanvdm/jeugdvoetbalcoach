@@ -1,5 +1,5 @@
 <x-app-layout>
-    <div class="flex flex-col md:flex-row gap-4 items-center justify-between mb-4">
+    <div class="flex flex-col sm:flex-row gap-4 sm:items-center justify-between mb-4">
         <h1 class="text-2xl font-semibold">Wedstrijden</h1>
         <div class="flex items-center gap-4">
             <form method="GET" action="{{ route('football-matches.index') }}">
@@ -20,7 +20,7 @@
         <tr class="border-b">
             <th class="text-left p-3">Datum</th>
             <th class="text-left p-3">Tegenstander</th>
-            <th class="text-left p-3">Locatie</th>
+            <th class="text-left p-3 hidden sm:table-cell">Locatie</th>
             <th class="text-left p-3">Uitslag</th>
             <th class="text-right p-3"></th>
         </tr>
@@ -29,8 +29,8 @@
         @forelse($footballMatches as $match)
             <tr class="border-b">
                 <td class="p-3">{{ $match->date?->translatedFormat('d-m-Y H:i') }}</td>
-                <td class="p-3">{{ $match->opponent->name ?? '-' }}</td>
-                <td class="p-3">{{ $match->home ? 'Thuis' : 'Uit' }}</td>
+                <td class="p-3">{{ $match->opponent->name }}</td>
+                <td class="p-3 hidden sm:table-cell">{{ $match->home ? 'Thuis' : 'Uit' }}</td>
                 <td class="p-3 font-bold result-{{$match->result}}">
                     @if($match->result !== 'O')
                         @if($match->home)
@@ -44,12 +44,6 @@
                 </td>
                 <td class="p-3 text-right">
                     <a class="text-blue-600 mr-2" href="{{ route('football-matches.show', $match) }}">Bekijk</a>
-                    <a class="text-yellow-600 mr-2" href="{{ route('football-matches.edit', $match) }}">Bewerk</a>
-                    <form action="{{ route('football-matches.destroy', $match) }}" method="POST" class="inline">
-                        @csrf
-                        @method('DELETE')
-                        <button class="text-red-600" onclick="return confirm('Deze wedstrijd verwijderen?')">Verwijder</button>
-                    </form>
                 </td>
             </tr>
         @empty
