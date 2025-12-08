@@ -162,7 +162,7 @@
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8C3 6 4 5 6 5L8 5C8 3 10 3 10 5L14 5C14 3 16 3 16 5L18 5C20 5 21 6 21 8L21 11C21 11 20 12 18 12L18 19L6 19L6 12C4 12 3 11 3 11L3 8Z"/>
                         </svg>
-                        <span class="text-lg font-medium">Teams beheren</span>
+                        <span class="text-lg font-medium">Teams</span>
                     </a>
 
                 </div>
