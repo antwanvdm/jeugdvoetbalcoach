@@ -1,6 +1,6 @@
 <x-app-layout>
     <h1 class="text-2xl font-semibold mb-4">Nieuwe speler(s)</h1>
-    <form action="{{ route('players.store') }}" method="POST" class="bg-white p-6 shadow rounded max-w-4xl">
+    <form action="{{ route('players.store') }}" method="POST" class="bg-white p-6 shadow rounded">
         @csrf
 
         <!-- Players List -->

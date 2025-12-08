@@ -169,13 +169,15 @@
 
                 <div class="bg-white border border-gray-200 p-6 shadow rounded mt-4">
                     <div class="flex items-start gap-4">
-                        <div class="flex-shrink-0">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        </div>
                         <div>
-                            <h3 class="text-lg font-semibold text-gray-900 mb-2">Eerlijke opstellingen, automatisch gebalanceerd</h3>
+                            <div class="flex items-center gap-3 mb-2">
+                                <div class="flex-shrink-0">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </div>
+                                <h3 class="text-lg font-semibold text-gray-900">Eerlijke opstellingen, automatisch gebalanceerd</h3>
+                            </div>
                             <p class="text-sm text-gray-700 mb-3">
                                 {{config('app.name')}} maakt het plannen van wedstrijden en het samenstellen van opstellingen eenvoudig. Het intelligente algoritme zorgt ervoor dat:
                             </p>

@@ -13,9 +13,6 @@
                     <p class="text-gray-600">{{ $season->start->format('d-m-Y') }} - {{ $season->end->format('d-m-Y') }}</p>
                 </div>
             </div>
-            @auth
-                <a href="{{ route('seasons.index') }}" class="px-3 py-2 bg-gray-200 rounded hover:bg-gray-300">Terug</a>
-            @endauth
         </div>
 
         <!-- Share Section (uniform with match share) -->
@@ -219,6 +216,7 @@
         @auth
             <!-- Actions -->
             <div class="flex flex-col sm:flex-row gap-2">
+                <a href="{{ route('seasons.index') }}" class="flex-1 px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 text-center">Alle seizoenen bekijken</a>
                 <a href="{{ route('seasons.edit', $season) }}" class="flex-1 px-4 py-2 bg-yellow-600 text-white text-center rounded hover:bg-yellow-700">
                     Seizoen bewerken
                 </a>

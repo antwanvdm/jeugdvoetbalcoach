@@ -1,5 +1,5 @@
 <x-app-layout>
-    <div class="flex items-center justify-between mb-4">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 top-row-actions">
         <h1 class="text-2xl font-semibold">Speler: {{ $player->name }}</h1>
         <div class="flex gap-2">
             <a href="{{ route('players.index') }}" class="px-3 py-2 bg-gray-200 rounded">Terug</a>

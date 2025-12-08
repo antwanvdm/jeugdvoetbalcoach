@@ -1,5 +1,5 @@
 <x-app-layout>
-    <div class="max-w-2xl mx-auto">
+    <div class="max-w-3xl mx-auto">
         <h1 class="text-2xl font-semibold mb-4">Seizoen bewerken</h1>
 
         <div class="bg-white p-4 shadow rounded">

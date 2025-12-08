@@ -1,7 +1,8 @@
 <x-app-layout>
-    <div class="flex items-center justify-between mb-4">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 top-row-actions">
         <h1 class="text-2xl font-semibold">Formatie {{ $formation->lineup_formation }}</h1>
         <div class="flex gap-2">
+            <a href="{{ route('formations.index') }}" class="px-3 py-2 bg-gray-200 rounded">Terug</a>
             @can('update', $formation)
                 <a href="{{ route('formations.edit', $formation) }}" class="px-3 py-2 bg-yellow-600 text-white rounded">Bewerk</a>
             @endcan
@@ -12,7 +13,6 @@
                     <button class="px-3 py-2 bg-red-600 text-white rounded cursor-pointer">Verwijder</button>
                 </form>
             @endcan
-            <a href="{{ route('formations.index') }}" class="px-3 py-2 bg-gray-200 rounded">Terug</a>
         </div>
     </div>
 
