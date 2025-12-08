@@ -36,7 +36,11 @@
             <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
                 @auth
                     <a href="{{ route('dashboard') }}" class="inline-flex items-center justify-center gap-2 rounded-md bg-blue-600 px-8 py-3 text-white font-semibold shadow hover:bg-blue-500 transition">
-                        Ga naar je teamoverzicht voor {{ $currentTeam->opponent->name }}
+                        @if(auth()->user()->isAdmin())
+                            Ga naar het Admin Dashboard
+                        @else
+                            Ga naar je teamoverzicht voor {{ $currentTeam->opponent->name }}
+                        @endif
                     </a>
                 @else
                     <a href="{{ route('register') }}" class="inline-flex items-center justify-center gap-2 rounded-md bg-blue-600 px-8 py-3 text-white font-semibold shadow hover:bg-blue-500 transition">Registreren</a>
@@ -387,7 +391,11 @@
                         d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"/>
                 </svg>
                 <p class="text-gray-700 text-lg leading-relaxed mb-6">
-                    Als beginnend jeugdcoach van <a href="https://www.vvor.nl/" target="_blank" class="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 transition">VVOR <svg class="size-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14 21 3"/></svg></a> liep ik als snel tegen hetzelfde probleem aan: het bijhouden van wissels en opstellingen in een Excel werd erg onoverzichtelijk. Wie heeft er
+                    Als beginnend jeugdcoach van <a href="https://www.vvor.nl/" target="_blank" class="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 transition">VVOR
+                        <svg class="size-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14 21 3"/>
+                        </svg>
+                    </a> liep ik als snel tegen hetzelfde probleem aan: het bijhouden van wissels en opstellingen in een Excel werd erg onoverzichtelijk. Wie heeft er
                     al gespeeld? Wie moet er nog keepen? Hoe zorg ik dat iedereen evenveel speeltijd krijgt?
                 </p>
                 <p class="text-gray-700 text-lg leading-relaxed mb-6">
@@ -537,7 +545,11 @@
             <p class="text-white mb-6 max-w-xl mx-auto">Ga weer verder met het managen van je team, en plan je volgende wedstrijd.</p>
             <div class="flex flex-col sm:flex-row gap-4 justify-center">
                 <a href="{{ route('dashboard') }}" class="px-7 py-3 rounded-md bg-white text-blue-700 font-semibold shadow hover:bg-blue-50">
-                    Ga naar je teamoverzicht voor {{ $currentTeam->opponent->name }}
+                    @if(auth()->user()->isAdmin())
+                        Ga naar het Admin Dashboard
+                    @else
+                        Ga naar je teamoverzicht voor {{ $currentTeam->opponent->name }}
+                    @endif
                 </a>
             </div>
         @else
