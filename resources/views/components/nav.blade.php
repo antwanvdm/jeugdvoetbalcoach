@@ -109,6 +109,7 @@
             @if(auth()->user()->isAdmin())
                 <a class="block py-2 px-3 rounded-md text-gray-700 hover:bg-gray-100 {{ request()->routeIs('formations.*') ? 'bg-gray-100' : '' }}" href="{{ route('formations.index') }}">Formaties</a>
                 <a class="block py-2 px-3 rounded-md text-gray-700 hover:bg-gray-100 {{ request()->routeIs('admin.positions.*') ? 'bg-gray-100' : '' }}" href="{{ route('admin.positions.index') }}">Posities</a>
+                <a class="block py-2 px-3 rounded-md text-gray-700 hover:bg-gray-100 {{ request()->routeIs('opponents.*') ? 'bg-gray-100' : '' }}" href="{{ route('opponents.index') }}">Clubs</a>
                 <a class="block py-2 px-3 rounded-md text-gray-700 hover:bg-gray-100 {{ request()->routeIs('admin.users.*') ? 'bg-gray-100' : '' }}" href="{{ route('admin.users.index') }}">Gebruikers</a>
             @else
                 {{-- Team switcher voor mobile --}}

@@ -1,7 +1,7 @@
 <footer class="bg-gray-900 text-gray-300 mt-auto">
     @unless(request()->routeIs('home'))
         <div class="bg-blue-700 text-white">
-            <div class="mx-auto max-w-2xl px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-sm">
+            <div class="mx-auto max-w-2xl px-6 py-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-sm">
                 <span class="text-center">Vragen, foutje gevonden of een compliment?</span>
                 <a href="{{ route('home') }}#feedback" class="inline-flex items-center justify-center gap-2 px-3 py-2 bg-white text-blue-700 font-semibold rounded hover:bg-gray-100 transition">
                     Ga naar het feedbackformulier
