@@ -146,8 +146,8 @@ Bij het seeden worden deze basisgegevens aangemaakt voor een snelle start:
 - **Formations** (globale presets):
     - 6 spelers: `2-1-2`
     - 8 spelers: `3-2-2`
-    - 11 spelers: `4-3-3`
-- **Opponents**: Globale tegenstanders (gedeeld tussen alle teams)
+- **Opponents**: 1 team VVOR
+- **Season**: 1 dummy seizeon
 - **Players**: 8 fake spelers
 
 Commands:
@@ -165,7 +165,7 @@ php artisan clubs:fetch
 
 ### Technische Stack
 
-- **Framework**: Laravel 11
+- **Framework**: Laravel 12
 - **Authenticatie**: Laravel Breeze
 - **Frontend**: Blade templates met Tailwind CSS (Vite + Tailwind v4)
 - **Database**: SQLite/MySQL met Eloquent ORM
@@ -367,28 +367,6 @@ php artisan make:migration create_example_table
     - Database opslag via pivot tabel met `quarter` en `position_id`
     - Real-time feedback en logging
 
-### Slimme Features
-
-**🧠 Weight Balancing**
-Voorkomt dat 5 spelers met fysiek niveau 1 tegelijk spelen door:
-
-- Penalty system voor clustering (>2 gelijk = zwaar gestraft)
-- Distributie optimalisatie over kwarten
-- Kandidaat selectie op basis van balans impact
-
-**🔄 Keeper Rotatie**
-Intelligente keeper verdeling die:
-
-- Laatste wedstrijd keepers excludeert
-- Historische counts balanceert
-- Fair play principes hanteert
-
-**📊 Real-time Monitoring**
-
-- Uitgebreide logging voor troubleshooting (zet `APP_DEBUG=true`)
-- Performance metrics en query optimalisatie
-- Debug mode voor development
-
 ## 📝 Documentatie
 
 - [LineupGeneratorService](docs/LineupGeneratorService.md) - Uitgebreide service documentatie
@@ -422,16 +400,17 @@ Bijdragen zijn welkom! Voor grote wijzigingen, open eerst een issue.
 -   [x] Opruimen van data als gebruiker account verwijderd
 -   [x] Statistieken voor admin over aantallen aan data in de DB
 -   [x] Unit tests voor line-up met meerdere scenario's maken en uitvoeren
+-   [x] Notities van trainers tonen onder wedstrijden
+-   [x] Mobile optimized styling met native share optie voor link van ouders
 
 ### 🔜 Toekomstige Features
 
--   [ ] Notities van trainers uitklaapbaar tonen onder wedstrijden
 -   [ ] Webservice maken zodat andere developers gemakkelijk voetbalclub data kunnen inladen
 -   [ ] JO13+ support met 11 spelers en twee helften i.p.v. 4 kwarten
 
 ## 📄 Licentie
 
-Dit project is gelicenseerd onder de MIT License - zie het [LICENSE](LICENSE) bestand voor details.
+Dit project is gebouwd op Laravel en gelicenseerd onder de MIT License - zie het [LICENSE](LICENSE) bestand voor details.
 
 ---
 
