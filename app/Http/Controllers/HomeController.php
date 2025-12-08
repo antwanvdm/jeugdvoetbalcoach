@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Mail\Feedback;
+use App\Models\Team;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -11,7 +12,9 @@ class HomeController extends Controller
 {
     public function show()
     {
-        return view('home');
+        $currentTeamId = session('current_team_id');
+        $currentTeam = Team::find($currentTeamId);
+        return view('home', compact('currentTeam'));
     }
 
     public function feedback(Request $request)

@@ -34,8 +34,14 @@
             <p class="text-xl md:text-2xl text-blue-200 font-medium mb-6">Slim teammanagement voor jeugdcoaches</p>
             <p class="mt-4 text-lg text-blue-100 max-w-2xl mx-auto">Automatische, eerlijke line-ups met slimme rotatie. Perfect voor trainers die wedstrijden in 4 kwarten spelen. Focus op coaching – wij doen de planning.</p>
             <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
-                <a href="{{ route('register') }}" class="inline-flex items-center justify-center gap-2 rounded-md bg-blue-600 px-8 py-3 text-white font-semibold shadow hover:bg-blue-500 transition">Registreren</a>
-                <a href="{{ route('login') }}" class="inline-flex items-center justify-center gap-2 rounded-md bg-white/10 backdrop-blur px-8 py-3 text-white font-medium ring-1 ring-inset ring-white/30 hover:bg-white/20 transition">Inloggen</a>
+                @auth
+                    <a href="{{ route('dashboard') }}" class="inline-flex items-center justify-center gap-2 rounded-md bg-blue-600 px-8 py-3 text-white font-semibold shadow hover:bg-blue-500 transition">
+                        Ga naar je teamoverzicht voor {{ $currentTeam->opponent->name }}
+                    </a>
+                @else
+                    <a href="{{ route('register') }}" class="inline-flex items-center justify-center gap-2 rounded-md bg-blue-600 px-8 py-3 text-white font-semibold shadow hover:bg-blue-500 transition">Registreren</a>
+                    <a href="{{ route('login') }}" class="inline-flex items-center justify-center gap-2 rounded-md bg-white/10 backdrop-blur px-8 py-3 text-white font-medium ring-1 ring-inset ring-white/30 hover:bg-white/20 transition">Inloggen</a>
+                @endauth
             </div>
         </div>
     </section>
@@ -472,7 +478,8 @@
                 <div class="grid gap-6 md:grid-cols-2">
                     <div>
                         <label for="name" class="block text-sm font-medium text-gray-700 mb-2">Naam</label>
-                        <input type="text" name="name" id="name" value="{{ old('name') }}" required class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 @error('name') border-red-300 @enderror">
+                        <input type="text" name="name" id="name" value="{{ old('name') ?? auth()?->user()?->name }}" required class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 @error('name') border-red-300
+                        @enderror">
                         @error('name')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
@@ -480,7 +487,8 @@
 
                     <div>
                         <label for="email" class="block text-sm font-medium text-gray-700 mb-2">E-mail</label>
-                        <input type="email" name="email" id="email" value="{{ old('email') }}" required class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 @error('email') border-red-300 @enderror">
+                        <input type="email" name="email" id="email" value="{{ old('email') ?? auth()?->user()?->email }}" required class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 @error('email')
+                        border-red-300 @enderror">
                         @error('email')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
@@ -524,11 +532,21 @@
 
     <!-- Call To Action -->
     <section class="mx-auto bg-blue-600 px-8 py-10 text-center shadow-md">
-        <h2 class="text-2xl font-bold text-white mb-3">Start vandaag nog</h2>
-        <p class="text-white mb-6 max-w-xl mx-auto">Maak gratis een account aan, nodig assistent-coaches uit en ervaar directe structuur in je wedstrijdvoorbereiding.</p>
-        <div class="flex flex-col sm:flex-row gap-4 justify-center">
-            <a href="{{ route('register') }}" class="px-7 py-3 rounded-md bg-white text-blue-700 font-semibold shadow hover:bg-blue-50">Gratis Registreren</a>
-            <a href="{{ route('login') }}" class="px-7 py-3 rounded-md bg-blue-800 text-white font-medium hover:bg-blue-400">Ik heb al een account</a>
-        </div>
+        @auth
+            <h2 class="text-2xl font-bold text-white mb-3">Welkom terug, {{ auth()->user()->name }}!</h2>
+            <p class="text-white mb-6 max-w-xl mx-auto">Ga weer verder met het managen van je team, en plan je volgende wedstrijd.</p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="{{ route('dashboard') }}" class="px-7 py-3 rounded-md bg-white text-blue-700 font-semibold shadow hover:bg-blue-50">
+                    Ga naar je teamoverzicht voor {{ $currentTeam->opponent->name }}
+                </a>
+            </div>
+        @else
+            <h2 class="text-2xl font-bold text-white mb-3">Start vandaag nog</h2>
+            <p class="text-white mb-6 max-w-xl mx-auto">Maak gratis een account aan, nodig assistent-coaches uit en ervaar directe structuur in je wedstrijdvoorbereiding.</p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="{{ route('register') }}" class="px-7 py-3 rounded-md bg-white text-blue-700 font-semibold shadow hover:bg-blue-50">Gratis Registreren</a>
+                <a href="{{ route('login') }}" class="px-7 py-3 rounded-md bg-blue-800 text-white font-medium hover:bg-blue-400">Ik heb al een account</a>
+            </div>
+        @endauth
     </section>
 </x-app-layout>
