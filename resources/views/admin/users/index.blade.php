@@ -13,7 +13,7 @@
             <tr class="border-b">
                 <th class="text-left p-3">Naam</th>
                 <th class="text-left p-3">Email</th>
-                <th class="text-left p-3">Team</th>
+                <th class="text-left p-3">Default Team</th>
                 <th class="text-left p-3">Actief</th>
                 <th class="text-right p-3">Acties</th>
             </tr>
@@ -23,7 +23,7 @@
                 <tr class="border-b">
                     <td class="p-3">{{ $user->name }}</td>
                     <td class="p-3">{{ $user->email }}</td>
-                    <td class="p-3">{{ $user->team_name ?? '—' }}</td>
+                    <td class="p-3">{{ $user->defaultTeam()->opponent->name ?? '—' }}</td>
                     <td class="p-3">
                         @if($user->is_active)
                             <span class="inline-flex items-center px-2 py-1 rounded text-xs bg-green-100 text-green-800">Actief</span>
