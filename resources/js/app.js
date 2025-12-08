@@ -1,15 +1,40 @@
-import.meta.glob(["../images/**"]);
+import.meta.glob(['../images/**']);
+
+/**
+ * Generic share button handler for season/match share
+ */
+function handleNativeShareButtonClick(e) {
+    const btn = e.currentTarget;
+    const inputId = btn.getAttribute('data-share-input');
+    const url = document.getElementById(inputId)?.value;
+    const title = btn.getAttribute('data-share-title') || 'Delen';
+    const text = btn.getAttribute('data-share-text') || '';
+    if (!url) return;
+    if (navigator.share) {
+        navigator.share({title, text, url});
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('[data-share-input]').forEach(btn => {
+        if (!navigator.share) {
+            btn.remove();
+        } else {
+            btn.addEventListener('click', handleNativeShareButtonClick);
+        }
+    });
+});
 
 /**
  * Initialize screenshot carousels with touch/swipe support
  */
 function initScreenshotCarousels() {
-    const carousels = document.querySelectorAll(".screenshot-carousel");
+    const carousels = document.querySelectorAll('.screenshot-carousel');
 
     carousels.forEach((carousel) => {
-        const slides = carousel.querySelectorAll(".carousel-slide");
-        const dots = carousel.querySelectorAll(".carousel-dot");
-        const slidesContainer = carousel.querySelector(".carousel-slides");
+        const slides = carousel.querySelectorAll('.carousel-slide');
+        const dots = carousel.querySelectorAll('.carousel-dot');
+        const slidesContainer = carousel.querySelector('.carousel-slides');
         let currentSlide = 0;
         let touchStartX = 0;
         let touchEndX = 0;
@@ -25,9 +50,9 @@ function initScreenshotCarousels() {
             // Update slides visibility
             slides.forEach((slide, i) => {
                 if (i === currentSlide) {
-                    slide.classList.remove("hidden");
+                    slide.classList.remove('hidden');
                 } else {
-                    slide.classList.add("hidden");
+                    slide.classList.add('hidden');
                 }
             });
 
@@ -36,19 +61,19 @@ function initScreenshotCarousels() {
                 const color = carousel.dataset.carousel;
                 const activeColor =
                     {
-                        step1: "bg-blue-600",
-                        step2: "bg-green-600",
-                        step3: "bg-purple-600",
-                        step4: "bg-orange-600",
-                    }[color] || "bg-blue-600";
+                        step1: 'bg-blue-600',
+                        step2: 'bg-green-600',
+                        step3: 'bg-purple-600',
+                        step4: 'bg-orange-600',
+                    }[color] || 'bg-blue-600';
 
                 const inactiveColor =
                     {
-                        step1: "bg-blue-300",
-                        step2: "bg-green-300",
-                        step3: "bg-purple-300",
-                        step4: "bg-orange-300",
-                    }[color] || "bg-blue-300";
+                        step1: 'bg-blue-300',
+                        step2: 'bg-green-300',
+                        step3: 'bg-purple-300',
+                        step4: 'bg-orange-300',
+                    }[color] || 'bg-blue-300';
 
                 if (i === currentSlide) {
                     dot.classList.remove(inactiveColor);
@@ -62,27 +87,27 @@ function initScreenshotCarousels() {
 
         // Dot click handlers
         dots.forEach((dot, index) => {
-            dot.addEventListener("click", () => {
+            dot.addEventListener('click', () => {
                 showSlide(index);
             });
         });
 
         // Touch/swipe handlers
         slidesContainer.addEventListener(
-            "touchstart",
+            'touchstart',
             (e) => {
                 touchStartX = e.changedTouches[0].screenX;
             },
-            { passive: true }
+            {passive: true}
         );
 
         slidesContainer.addEventListener(
-            "touchend",
+            'touchend',
             (e) => {
                 touchEndX = e.changedTouches[0].screenX;
                 handleSwipe();
             },
-            { passive: true }
+            {passive: true}
         );
 
         function handleSwipe() {
@@ -103,67 +128,67 @@ function initScreenshotCarousels() {
 }
 
 //Nav toggle
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener('DOMContentLoaded', function () {
     // Screenshot Carousel functionaliteit
     initScreenshotCarousels();
 
-    const btn = document.getElementById("nav-toggle");
-    const menu = document.getElementById("nav-menu");
+    const btn = document.getElementById('nav-toggle');
+    const menu = document.getElementById('nav-menu');
     if (!btn) return;
-    btn.addEventListener("click", function () {
-        menu.classList.toggle("hidden");
+    btn.addEventListener('click', function () {
+        menu.classList.toggle('hidden');
     });
 
     // Mobile menu toggle
-    const mobileMenuBtn = document.getElementById("mobile-menu-btn");
-    const navMenu = document.getElementById("nav-menu");
+    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+    const navMenu = document.getElementById('nav-menu');
 
     if (mobileMenuBtn && navMenu) {
-        mobileMenuBtn.addEventListener("click", function () {
-            navMenu.classList.toggle("hidden");
+        mobileMenuBtn.addEventListener('click', function () {
+            navMenu.classList.toggle('hidden');
         });
     }
 
     // Team dropdown toggle
-    const teamDropdownBtn = document.getElementById("team-dropdown-btn");
-    const teamDropdownMenu = document.getElementById("team-dropdown-menu");
+    const teamDropdownBtn = document.getElementById('team-dropdown-btn');
+    const teamDropdownMenu = document.getElementById('team-dropdown-menu');
 
     if (teamDropdownBtn && teamDropdownMenu) {
-        teamDropdownBtn.addEventListener("click", function (e) {
+        teamDropdownBtn.addEventListener('click', function (e) {
             e.stopPropagation();
-            teamDropdownMenu.classList.toggle("hidden");
+            teamDropdownMenu.classList.toggle('hidden');
         });
 
         // Close dropdown when clicking outside
-        document.addEventListener("click", function () {
-            if (!teamDropdownMenu.classList.contains("hidden")) {
-                teamDropdownMenu.classList.add("hidden");
+        document.addEventListener('click', function () {
+            if (!teamDropdownMenu.classList.contains('hidden')) {
+                teamDropdownMenu.classList.add('hidden');
             }
         });
 
         // Prevent closing when clicking inside dropdown
-        teamDropdownMenu.addEventListener("click", function (e) {
+        teamDropdownMenu.addEventListener('click', function (e) {
             e.stopPropagation();
         });
     }
 
     // Generic copy to clipboard functionality
-    document.addEventListener("click", function (e) {
+    document.addEventListener('click', function (e) {
         // Handle data-copy-to-clipboard (direct value in attribute)
-        if (e.target.matches("[data-copy-to-clipboard]")) {
-            const textToCopy = e.target.getAttribute("data-copy-to-clipboard");
+        if (e.target.matches('[data-copy-to-clipboard]')) {
+            const textToCopy = e.target.getAttribute('data-copy-to-clipboard');
             const message =
-                e.target.getAttribute("data-copy-message") || "Gekopieerd!";
+                e.target.getAttribute('data-copy-message') || 'Gekopieerd!';
 
             copyToClipboard(textToCopy, message);
         }
 
         // Handle data-copy-input (copy from input field by ID)
-        if (e.target.matches("[data-copy-input]")) {
-            const inputId = e.target.getAttribute("data-copy-input");
+        if (e.target.matches('[data-copy-input]')) {
+            const inputId = e.target.getAttribute('data-copy-input');
             const message =
-                e.target.getAttribute("data-copy-message") ||
-                "Link gekopieerd naar klembord!";
+                e.target.getAttribute('data-copy-message') ||
+                'Link gekopieerd naar klembord!';
             const input = document.getElementById(inputId);
 
             if (input) {
@@ -179,14 +204,14 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 // Helper function for copying to clipboard
-function copyToClipboard(text, message = "Gekopieerd!") {
+function copyToClipboard(text, message = 'Gekopieerd!') {
     navigator.clipboard
         .writeText(text)
         .then(() => {
             alert(message);
         })
         .catch((err) => {
-            console.error("Kopiëren mislukt:", err);
+            console.error('Kopiëren mislukt:', err);
         });
 }
 
@@ -194,8 +219,8 @@ function copyToClipboard(text, message = "Gekopieerd!") {
 window.openModal = function (name) {
     const modal = document.querySelector(`[data-modal="${name}"]`);
     if (!modal) return;
-    modal.style.display = "block";
-    document.body.classList.add("overflow-y-hidden");
+    modal.style.display = 'block';
+    document.body.classList.add('overflow-y-hidden');
     setTimeout(() => {
         const firstInput = modal.querySelector('input:not([type="hidden"])');
         if (firstInput) firstInput.focus();
@@ -205,51 +230,51 @@ window.openModal = function (name) {
 window.closeModal = function (name) {
     const modal = document.querySelector(`[data-modal="${name}"]`);
     if (!modal) return;
-    modal.style.display = "none";
-    document.body.classList.remove("overflow-y-hidden");
+    modal.style.display = 'none';
+    document.body.classList.remove('overflow-y-hidden');
 };
 
 // Escape key om modals te sluiten
-document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape") {
-        document.querySelectorAll("[data-modal]").forEach((modal) => {
-            modal.style.display = "none";
+document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') {
+        document.querySelectorAll('[data-modal]').forEach((modal) => {
+            modal.style.display = 'none';
         });
-        document.body.classList.remove("overflow-y-hidden");
+        document.body.classList.remove('overflow-y-hidden');
     }
 });
 
 // Autocomplete functie voor opponents
 function initOpponentAutocomplete() {
-    const inputs = document.querySelectorAll("[data-opponent-autocomplete]");
+    const inputs = document.querySelectorAll('[data-opponent-autocomplete]');
     if (!inputs.length) return;
 
     inputs.forEach((input) => {
         const hiddenTarget = document.getElementById(
-            input.getAttribute("data-target-hidden")
+            input.getAttribute('data-target-hidden')
         );
         if (!hiddenTarget) return;
 
-        const wrapper = document.createElement("div");
-        wrapper.className = "relative";
+        const wrapper = document.createElement('div');
+        wrapper.className = 'relative';
         input.parentNode.insertBefore(wrapper, input);
         wrapper.appendChild(input);
 
-        const list = document.createElement("div");
+        const list = document.createElement('div');
         list.className =
-            "absolute left-0 right-0 top-full z-30 bg-white border border-gray-200 rounded-md shadow mt-1 hidden";
+            'absolute left-0 right-0 top-full z-30 bg-white border border-gray-200 rounded-md shadow mt-1 hidden';
         wrapper.appendChild(list);
 
         let abortController = null;
-        let lastQuery = "";
+        let lastQuery = '';
         const debounceMs = 250;
         let timer = null;
 
-        input.addEventListener("input", () => {
+        input.addEventListener('input', () => {
             const q = input.value.trim();
             if (q.length < 2) {
-                list.classList.add("hidden");
-                hiddenTarget.value = "";
+                list.classList.add('hidden');
+                hiddenTarget.value = '';
                 return;
             }
             if (q === lastQuery) return;
@@ -258,13 +283,13 @@ function initOpponentAutocomplete() {
             timer = setTimeout(() => fetchOpponents(q), debounceMs);
         });
 
-        input.addEventListener("focus", () => {
-            if (list.children.length) list.classList.remove("hidden");
+        input.addEventListener('focus', () => {
+            if (list.children.length) list.classList.remove('hidden');
         });
 
-        document.addEventListener("click", (e) => {
+        document.addEventListener('click', (e) => {
             if (!wrapper.contains(e.target)) {
-                list.classList.add("hidden");
+                list.classList.add('hidden');
             }
         });
 
@@ -273,10 +298,10 @@ function initOpponentAutocomplete() {
             abortController = new AbortController();
             list.innerHTML =
                 '<div class="p-2 text-sm text-gray-500">Zoeken...</div>';
-            list.classList.remove("hidden");
+            list.classList.remove('hidden');
             fetch(`/api/opponents?q=${encodeURIComponent(q)}`, {
                 signal: abortController.signal,
-                headers: { Accept: "application/json" },
+                headers: {Accept: 'application/json'},
             })
                 .then((r) => r.json())
                 .then((items) => {
@@ -285,39 +310,39 @@ function initOpponentAutocomplete() {
                             '<div class="p-2 text-sm text-gray-500">Geen resultaten</div>';
                         return;
                     }
-                    list.innerHTML = "";
+                    list.innerHTML = '';
                     items.forEach((item) => {
-                        const el = document.createElement("button");
-                        el.type = "button";
+                        const el = document.createElement('button');
+                        el.type = 'button';
                         el.className =
-                            "w-full flex items-center gap-3 p-2 text-left hover:bg-blue-50 focus:bg-blue-100 text-sm";
+                            'w-full flex items-center gap-3 p-2 text-left hover:bg-blue-50 focus:bg-blue-100 text-sm';
                         el.innerHTML = `
                             ${
-                                item.logo_url
-                                    ? `<img src="${item.logo_url}" alt="" class="h-8 w-8 object-contain">`
-                                    : `<div class="h-8 w-8 flex items-center justify-center bg-gray-100 rounded text-gray-400">?</div>`
-                            }
+                            item.logo_url
+                                ? `<img src="${item.logo_url}" alt="" class="h-8 w-8 object-contain">`
+                                : `<div class="h-8 w-8 flex items-center justify-center bg-gray-100 rounded text-gray-400">?</div>`
+                        }
                             <span class="flex-1">
                                 <span class="font-medium">${escapeHtml(
-                                    item.name
-                                )}</span>
+                            item.name
+                        )}</span>
                                 <span class="block text-xs text-gray-600">${escapeHtml(
-                                    item.location || ""
-                                )}</span>
+                            item.location || ''
+                        )}</span>
                             </span>
                         `;
-                        el.addEventListener("click", () => {
+                        el.addEventListener('click', () => {
                             hiddenTarget.value = item.id;
                             input.value =
-                                item.name + " (" + item.location + ")";
-                            list.classList.add("hidden");
-                            list.innerHTML = "";
+                                item.name + ' (' + item.location + ')';
+                            list.classList.add('hidden');
+                            list.innerHTML = '';
                         });
                         list.appendChild(el);
                     });
                 })
                 .catch((e) => {
-                    if (e.name === "AbortError") return;
+                    if (e.name === 'AbortError') return;
                     list.innerHTML =
                         '<div class="p-2 text-sm text-red-600">Fout bij zoeken</div>';
                 });
@@ -327,17 +352,17 @@ function initOpponentAutocomplete() {
 
 function escapeHtml(str) {
     return str
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
 }
 
 // Dynamic Player Rows Management
-document.addEventListener("DOMContentLoaded", function () {
-    const playersContainer = document.getElementById("players-rows");
-    const addPlayerBtn = document.getElementById("add-player-btn");
+document.addEventListener('DOMContentLoaded', function () {
+    const playersContainer = document.getElementById('players-rows');
+    const addPlayerBtn = document.getElementById('add-player-btn');
 
     if (!playersContainer || !addPlayerBtn) return;
 
@@ -345,31 +370,31 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Function to update remove button visibility
     function updateRemoveButtons() {
-        const rows = playersContainer.querySelectorAll(".player-row");
+        const rows = playersContainer.querySelectorAll('.player-row');
         const removeBtns =
-            playersContainer.querySelectorAll(".remove-player-btn");
+            playersContainer.querySelectorAll('.remove-player-btn');
 
         // Show remove buttons only if there's more than 1 row
         removeBtns.forEach((btn) => {
             if (rows.length > 1) {
-                btn.classList.remove("hidden");
+                btn.classList.remove('hidden');
             } else {
-                btn.classList.add("hidden");
+                btn.classList.add('hidden');
             }
         });
     }
 
     // Function to create a new player row
     function createPlayerRow(index) {
-        const row = document.createElement("div");
-        row.className = "player-row mb-3 p-3 border rounded bg-gray-50";
-        row.setAttribute("data-row-index", index);
+        const row = document.createElement('div');
+        row.className = 'player-row mb-3 p-3 border rounded bg-gray-50';
+        row.setAttribute('data-row-index', index);
 
         // Get positions from the first select element
         const firstSelect = playersContainer.querySelector(
             'select[name$="[position_id]"]'
         );
-        const positionsHTML = firstSelect ? firstSelect.innerHTML : "";
+        const positionsHTML = firstSelect ? firstSelect.innerHTML : '';
 
         row.innerHTML = `
             <div class="grid grid-cols-1 sm:grid-cols-[2fr_1.5fr_1fr_auto] gap-3 items-start">
@@ -405,7 +430,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // Add player button click handler
-    addPlayerBtn.addEventListener("click", function () {
+    addPlayerBtn.addEventListener('click', function () {
         const newRow = createPlayerRow(rowIndex);
         playersContainer.appendChild(newRow);
         rowIndex++;
@@ -419,11 +444,11 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     // Remove player button click handler (event delegation)
-    playersContainer.addEventListener("click", function (e) {
-        const removeBtn = e.target.closest(".remove-player-btn");
+    playersContainer.addEventListener('click', function (e) {
+        const removeBtn = e.target.closest('.remove-player-btn');
         if (removeBtn) {
-            const row = removeBtn.closest(".player-row");
-            const rows = playersContainer.querySelectorAll(".player-row");
+            const row = removeBtn.closest('.player-row');
+            const rows = playersContainer.querySelectorAll('.player-row');
 
             // Only remove if more than 1 row exists
             if (rows.length > 1 && row) {
@@ -438,24 +463,24 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 // Dynamic Goal Rows Management (Football Match Goals)
-document.addEventListener("DOMContentLoaded", function () {
-    const goalsContainer = document.getElementById("goals-container");
-    const addGoalBtn = document.getElementById("add-goal-btn");
+document.addEventListener('DOMContentLoaded', function () {
+    const goalsContainer = document.getElementById('goals-container');
+    const addGoalBtn = document.getElementById('add-goal-btn');
 
     if (!goalsContainer || !addGoalBtn) return;
 
-    let goalIndex = goalsContainer.querySelectorAll(".goal-row").length;
+    let goalIndex = goalsContainer.querySelectorAll('.goal-row').length;
 
     // Add goal button click handler
-    addGoalBtn.addEventListener("click", function () {
-        const template = document.getElementById("goal-row-template");
+    addGoalBtn.addEventListener('click', function () {
+        const template = document.getElementById('goal-row-template');
         if (!template) return;
 
         const templateContent = template.innerHTML.replace(
             /__INDEX__/g,
             goalIndex
         );
-        const tempDiv = document.createElement("div");
+        const tempDiv = document.createElement('div');
         tempDiv.innerHTML = templateContent;
         const newRow = tempDiv.firstElementChild;
 
@@ -464,19 +489,19 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     // Remove goal button click handler (event delegation)
-    goalsContainer.addEventListener("click", function (e) {
-        const removeBtn = e.target.closest(".remove-goal-btn");
+    goalsContainer.addEventListener('click', function (e) {
+        const removeBtn = e.target.closest('.remove-goal-btn');
         if (removeBtn) {
-            const row = removeBtn.closest(".goal-row");
+            const row = removeBtn.closest('.goal-row');
             if (row) {
                 // Check if this is an existing goal (has an ID)
-                const idInput = row.querySelector("input[name$='[id]']");
+                const idInput = row.querySelector('input[name$=\'[id]\']');
                 if (idInput && idInput.value) {
                     // Mark for deletion instead of removing
-                    const deleteFlag = row.querySelector(".delete-flag");
+                    const deleteFlag = row.querySelector('.delete-flag');
                     if (deleteFlag) {
-                        deleteFlag.value = "1";
-                        row.style.display = "none";
+                        deleteFlag.value = '1';
+                        row.style.display = 'none';
                     }
                 } else {
                     // New row, just remove it
@@ -488,31 +513,32 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 //Season page year preview
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener('DOMContentLoaded', function () {
     // Year preview
-    const yearInput = document.getElementById("season-year");
-    const yearPreview = document.getElementById("season-year-preview");
+    const yearInput = document.getElementById('season-year');
+    const yearPreview = document.getElementById('season-year-preview');
     if (yearInput && yearPreview) {
         function updateYearPreview() {
             const jaar = parseInt(yearInput.value);
             if (!isNaN(jaar) && jaar >= 2000 && jaar <= 2100) {
-                yearPreview.textContent = jaar + "-" + (jaar + 1);
+                yearPreview.textContent = jaar + '-' + (jaar + 1);
             } else {
-                yearPreview.textContent = "";
+                yearPreview.textContent = '';
             }
         }
-        yearInput.addEventListener("input", updateYearPreview);
+
+        yearInput.addEventListener('input', updateYearPreview);
         updateYearPreview();
     }
 
     // Fase validation
-    window.validatePhaseInput = function(input) {
-        const errorDiv = document.getElementById("phase-error");
+    window.validatePhaseInput = function (input) {
+        const errorDiv = document.getElementById('phase-error');
         const value = parseInt(input.value);
         if (isNaN(value) || value < 1 || value > 4) {
-            errorDiv.style.display = "block";
+            errorDiv.style.display = 'block';
         } else {
-            errorDiv.style.display = "none";
+            errorDiv.style.display = 'none';
         }
     };
 });

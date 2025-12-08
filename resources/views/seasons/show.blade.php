@@ -6,7 +6,7 @@
         <div class="flex items-center justify-between mb-6">
             <div class="flex items-center gap-4">
                 @if($season->team->opponent?->logo)
-                    <img src="{{ asset('storage/' . $season->team->opponent->logo) }}" alt="{{ $season->team->opponent->name }}" class="h-16 w-16 object-contain">
+                    <img src="{{ asset('storage/' . $season->team->opponent->logo) }}" alt="{{ $season->team->opponent->name }} logo" class="h-16 w-16 object-contain">
                 @endif
                 <div>
                     <h1 class="text-3xl font-bold">Seizoen {{ $season->year }}/{{ $season->year + 1 }} - Fase {{ $season->part }}</h1>
@@ -38,6 +38,15 @@
                             class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition whitespace-nowrap cursor-pointer"
                         >
                             Kopieer
+                        </button>
+                        <button
+                            type="button"
+                            data-share-input="seasonShareLink"
+                            data-share-title="Seizoen delen"
+                            data-share-text="Bekijk {{ $season->team->opponent->name }} Seizoen {{ $season->year }}/{{ $season->year + 1 }} - Fase {{ $season->part }}"
+                            class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition whitespace-nowrap cursor-pointer"
+                        >
+                            Deel
                         </button>
                     </div>
                     <p class="text-xs text-blue-700 mt-2">💡 Deze link is uniek en privé - deel alleen met betrokken ouders.</p>
