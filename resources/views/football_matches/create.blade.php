@@ -43,12 +43,13 @@
                 <div class="mb-4">
                     <div class="flex justify-between items-center mb-2">
                         <label class="block text-sm font-medium">Aanwezige spelers</label>
+                        <span class="text-xs text-gray-600">(Minimaal {{ $season->formation->total_players }} spelers)</span>
                     </div>
                     <div class="border rounded p-3 bg-gray-50 overflow-y-auto max-h-96">
                         @if($players->isEmpty())
                             <p class="text-sm text-gray-500">Geen spelers beschikbaar voor dit seizoen</p>
                         @else
-                            <div class="grid grid-cols-1 gap-2">
+                            <div class="grid grid-cols-2 gap-2">
                                 @foreach($players as $player)
                                     <label class="inline-flex items-center gap-2 hover:bg-gray-100 p-1 rounded cursor-pointer">
                                         <input

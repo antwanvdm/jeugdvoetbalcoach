@@ -200,6 +200,9 @@ class FootballMatchController extends Controller
             ];
         }
 
+        // Track which players are already linked to this match (for default presence in regenerate form)
+        $currentPlayerIds = $footballMatch->players()->pluck('players.id')->toArray();
+
         // Sort: players with quarters played first (by quarters desc, then name), then absent players by name
         usort($playersWithQuarters, function ($a, $b) {
             if ($a['quarters_played'] == 0 && $b['quarters_played'] == 0) {
@@ -219,6 +222,7 @@ class FootballMatchController extends Controller
             'positionNames' => $positionNames,
             'assignmentsByQuarter' => $assignmentsByQuarter,
             'playersWithQuarters' => $playersWithQuarters,
+            'currentPlayerIds' => $currentPlayerIds,
         ];
     }
 
@@ -418,5 +422,38 @@ class FootballMatchController extends Controller
         if (!empty($existingIds)) {
             $footballMatch->goals()->whereNotIn('id', $existingIds)->delete();
         }
+    }
+
+    /**
+     * Regenerate the lineup for a match.
+     */
+    public function regenerateLineup(Request $request, FootballMatch $footballMatch, LineupGeneratorService $lineupGenerator): RedirectResponse
+    {
+        Gate::authorize('update', $footballMatch);
+
+        $season = $footballMatch->season;
+        if (!$season) {
+            abort(422, 'Dit seizoen hoort niet tot deze wedstrijd.');
+        }
+
+        // Validate that minimum required players are selected
+        $validated = $request->validate([
+            'available_players' => ['required', 'array', 'min:' . $season->formation->total_players],
+            'available_players.*' => ['exists:players,id'],
+        ], [
+            'available_players.min' => "Je hebt minimaal {$season->formation->total_players} spelers nodig voor formatie {$season->formation->lineup_formation}.",
+        ]);
+
+        // Delete all existing player assignments for this match
+        $footballMatch->players()->detach();
+
+        // Get selected (available) players
+        $availablePlayerIds = $request->input('available_players', []);
+
+        // Generate new lineup using the service with available players
+        $lineupGenerator->generateLineup($footballMatch, $availablePlayerIds);
+
+        return redirect()->route('football-matches.show', $footballMatch)
+            ->with('success', 'Line-up opnieuw gegenereerd met de geselecteerde beschikbare spelers.');
     }
 }

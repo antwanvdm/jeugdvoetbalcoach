@@ -137,6 +137,61 @@
         @endif
     @endauth
 
+    {{-- Regenerate lineup section --}}
+    @auth
+        @if($footballMatch->result === 'O')
+            <div class="mt-6 bg-white p-4 shadow rounded regenerate-section">
+                <button class="w-full text-left font-semibold text-lg flex items-center gap-2 hover:text-blue-600 transition cursor-pointer">
+                    <span class="inline-block transition-transform duration-200">▶</span>
+                    🔄 Opstelling opnieuw maken
+                </button>
+                <div class="hidden border-t pt-4 mt-4 regenerate-form-content">
+                    <p class="text-sm text-gray-600 mb-4">
+                        Wijzigingen in aanwezigheid, teveel werk in handmatige aanpassingen of even een frisse blik nodig?
+                        Vink de spelers uit die afwezig zijn. Er wordt automatisch een nieuwe, gebalanceerde opstelling gegenereerd.
+                    </p>
+                    <form action="{{ route('football-matches.regenerate-lineup', $footballMatch) }}" method="POST">
+                        @csrf
+
+                        <div class="mb-4">
+                            <div class="flex justify-between items-center mb-2">
+                                <label class="block text-sm font-medium">Aanwezige spelers</label>
+                                <span class="text-xs text-gray-600">(Minimaal {{ $footballMatch->season->formation->total_players }} spelers)</span>
+                            </div>
+                            <div class="border rounded p-3 bg-gray-50 overflow-y-auto">
+                                @if($footballMatch->season->players->isEmpty())
+                                    <p class="text-sm text-gray-500">Geen spelers beschikbaar voor dit seizoen</p>
+                                @else
+                                    <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
+                                        @foreach($footballMatch->season->players as $player)
+                                            <label class="inline-flex items-center gap-2 hover:bg-gray-100 p-1 rounded cursor-pointer">
+                                                <input
+                                                    type="checkbox"
+                                                    name="available_players[]"
+                                                    value="{{ $player->id }}"
+                                                    class="player-checkbox"
+                                                    {{ in_array($player->id, $currentPlayerIds ?? []) ? 'checked' : '' }}
+                                                >
+                                                <span class="text-sm">{{ $player->name }}</span>
+                                            </label>
+                                        @endforeach
+                                    </div>
+                                @endif
+                            </div>
+                            @error('available_players')
+                            <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div class="flex gap-2 pt-3 border-t">
+                            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm cursor-pointer">Nieuwe opstelling maken</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        @endif
+    @endauth
+
     {{-- Lineup overview table --}}
     <div class="mt-6 bg-white p-4 shadow rounded">
         <div class="flex flex-col sm:flex-row sm:justify-between gap-2 sm:items-center line-up-header">

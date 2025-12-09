@@ -59,6 +59,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Football match lineup routes
     Route::get('football-matches/{footballMatch}/lineup', [FootballMatchController::class, 'lineup'])->name('football-matches.lineup');
     Route::post('football-matches/{footballMatch}/lineup', [FootballMatchController::class, 'lineupUpdate'])->name('football-matches.lineup.update');
+    Route::post('football-matches/{footballMatch}/regenerate-lineup', [FootballMatchController::class, 'regenerateLineup'])->name('football-matches.regenerate-lineup');
 
     // Resource routes
     Route::resources([

@@ -16,7 +16,7 @@ function handleNativeShareButtonClick(e) {
 }
 
 document.addEventListener('DOMContentLoaded', function () {
-    document.querySelectorAll('[data-share-input]').forEach(btn => {
+    document.querySelectorAll('[data-share-input]').forEach((btn) => {
         if (!navigator.share) {
             btn.remove();
         } else {
@@ -541,4 +541,31 @@ document.addEventListener('DOMContentLoaded', function () {
             errorDiv.style.display = 'none';
         }
     };
+});
+
+// Regenerate lineup section toggle
+document.addEventListener('DOMContentLoaded', function () {
+    const regenerateSection = document.querySelector('.regenerate-section');
+    if (regenerateSection) {
+        const button = regenerateSection.querySelector('button');
+        const arrow = button.querySelector('span');
+        const formContent = regenerateSection.querySelector(
+            '.regenerate-form-content'
+        );
+        const cancelButton = formContent.querySelector('button[type="button"]');
+
+        // Toggle form visibility
+        button.addEventListener('click', function () {
+            formContent.classList.toggle('hidden');
+            arrow.classList.toggle('rotate-90');
+        });
+
+        // Cancel button closes the form
+        if (cancelButton) {
+            cancelButton.addEventListener('click', function () {
+                formContent.classList.add('hidden');
+                arrow.classList.remove('rotate-90');
+            });
+        }
+    }
 });
