@@ -2,7 +2,7 @@
     <div class="flex flex-col sm:flex-row gap-4 sm:items-center justify-between mb-4">
         <h1 class="text-2xl font-semibold">Tegenstanders</h1>
         @if(auth()->user()->isAdmin())
-            <a href="{{ route('opponents.create') }}" class="px-3 py-2 bg-blue-600 text-white rounded text-center">Nieuwe tegenstander</a>
+            <a href="{{ route('admin.opponents.create') }}" class="px-3 py-2 bg-blue-600 text-white rounded text-center">Nieuwe tegenstander</a>
         @endif
     </div>
 
@@ -28,7 +28,7 @@
                     </td>
                     @if(auth()->user()->isAdmin())
                         <td class="p-3 text-right">
-                            <a class="text-blue-600 mr-2" href="{{ route('opponents.show', $opponent) }}">Bekijk</a>
+                            <a class="text-blue-600 mr-2" href="{{ route('admin.opponents.show', $opponent) }}">Bekijk</a>
                         </td>
                     @endif
                 </tr>

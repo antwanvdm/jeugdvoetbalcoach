@@ -6,12 +6,14 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Gate;
 
 class UserController extends Controller
 {
     public function index()
     {
+        Gate::authorize('viewAny', User::class);
+
         $users = User::where('role', '=', 2)
             ->orderByDesc('role')
             ->orderBy('name')
@@ -22,10 +24,11 @@ class UserController extends Controller
 
     public function update(Request $request, User $user): RedirectResponse
     {
+        Gate::authorize('update', $user);
+
         // Prevent admin from deactivating themselves or demoting the last admin
         $validated = $request->validate([
             'is_active' => ['nullable', 'boolean'],
-            'team_name' => ['nullable', 'string', 'max:255'],
         ]);
 
         // Prevent deactivating self
@@ -37,7 +40,6 @@ class UserController extends Controller
 
         $user->fill([
             'is_active' => $validated['is_active'] ?? $user->is_active,
-            'team_name' => $validated['team_name'] ?? $user->team_name,
         ])->save();
 
         return back()->with('status', 'user-updated');

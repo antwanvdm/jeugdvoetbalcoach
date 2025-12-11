@@ -2,10 +2,10 @@
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 top-row-actions">
         <h1 class="text-2xl font-semibold">Tegenstander: {{ $opponent->name }}</h1>
         <div class="flex gap-2">
-            <a href="{{ route('opponents.index') }}" class="px-3 py-2 bg-gray-200 rounded">Terug</a>
+            <a href="{{ route('admin.opponents.index') }}" class="px-3 py-2 bg-gray-200 rounded">Terug</a>
             @if(auth()->user()->isAdmin())
-                <a href="{{ route('opponents.edit', $opponent) }}" class="px-3 py-2 bg-yellow-500 text-white rounded">Bewerk</a>
-                <form action="{{ route('opponents.destroy', $opponent) }}" method="POST" onsubmit="return confirm('Deze tegenstander verwijderen?')">
+                <a href="{{ route('admin.opponents.edit', $opponent) }}" class="px-3 py-2 bg-yellow-500 text-white rounded">Bewerk</a>
+                <form action="{{ route('admin.opponents.destroy', $opponent) }}" method="POST" onsubmit="return confirm('Deze tegenstander verwijderen?')">
                     @csrf
                     @method('DELETE')
                     <button class="px-3 py-2 bg-red-600 text-white rounded">Verwijder</button>

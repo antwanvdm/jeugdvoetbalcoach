@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Position;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 
 class PositionController extends Controller
@@ -15,6 +16,8 @@ class PositionController extends Controller
      */
     public function index(): View
     {
+        Gate::authorize('viewAny', Position::class);
+
         $positions = Position::orderBy('name')->paginate(15);
         return view('positions.index', compact('positions'));
     }
@@ -24,6 +27,8 @@ class PositionController extends Controller
      */
     public function create(): View
     {
+        Gate::authorize('create', Position::class);
+
         return view('positions.create');
     }
 
@@ -32,6 +37,8 @@ class PositionController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        Gate::authorize('create', Position::class);
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
         ]);
@@ -44,6 +51,8 @@ class PositionController extends Controller
      */
     public function show(Position $position): View
     {
+        Gate::authorize('view', $position);
+
         return view('positions.show', compact('position'));
     }
 
@@ -52,6 +61,8 @@ class PositionController extends Controller
      */
     public function edit(Position $position): View
     {
+        Gate::authorize('update', $position);
+
         return view('positions.edit', compact('position'));
     }
 
@@ -60,6 +71,8 @@ class PositionController extends Controller
      */
     public function update(Request $request, Position $position): RedirectResponse
     {
+        Gate::authorize('update', $position);
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
         ]);
@@ -72,6 +85,8 @@ class PositionController extends Controller
      */
     public function destroy(Position $position): RedirectResponse
     {
+        Gate::authorize('delete', $position);
+
         $position->delete();
         return redirect()->route('positions.index')->with('success', 'Positie verwijder.');
     }

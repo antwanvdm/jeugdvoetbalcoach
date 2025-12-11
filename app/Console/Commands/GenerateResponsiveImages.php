@@ -24,7 +24,15 @@ class GenerateResponsiveImages extends Command
 
         foreach ($files as $file) {
             //Define sizes based on orientation
-            [$width, $height] = explode(' ', trim(shell_exec("magick identify -format \"%w %h\" \"$file\"")));
+            $identify = new Process(['magick', 'identify', '-format', '%w %h', $file]);
+            $identify->run();
+
+            if (!$identify->isSuccessful()) {
+                $this->error("Failed to identify image dimensions for {$file}");
+                continue;
+            }
+
+            [$width, $height] = explode(' ', trim($identify->getOutput()));
             $sizes = [
                 (int)($width / 3) => 'small',
                 (int)($width / 2) => 'medium',

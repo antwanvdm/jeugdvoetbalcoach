@@ -1,6 +1,6 @@
 <x-app-layout>
     <h1 class="text-2xl font-semibold mb-4">Nieuwe tegenstander</h1>
-    <form action="{{ route('opponents.store') }}" method="POST" enctype="multipart/form-data" class="bg-white p-4 shadow rounded max-w-2xl">
+    <form action="{{ route('admin.opponents.store') }}" method="POST" enctype="multipart/form-data" class="bg-white p-4 shadow rounded max-w-2xl">
         @csrf
         <div class="mb-3">
             <label class="block text-sm font-medium mb-1">Naam</label>
@@ -26,7 +26,7 @@
         </div>
         <div class="flex gap-2">
             <button class="px-3 py-2 bg-blue-600 text-white rounded">Opslaan</button>
-            <a href="{{ route('opponents.index') }}" class="px-3 py-2 bg-gray-200 rounded">Annuleren</a>
+            <a href="{{ route('admin.opponents.index') }}" class="px-3 py-2 bg-gray-200 rounded">Annuleren</a>
         </div>
     </form>
 </x-app-layout>

@@ -138,7 +138,7 @@ class SeasonController extends Controller
      */
     public function showPublic(Season $season, string $shareToken): View
     {
-        abort_if($season->share_token !== $shareToken, 404);
+        abort_if(!hash_equals($season->share_token ?? '', $shareToken), 404);
 
         $matches = $season->footballMatches()
             ->with('opponent')

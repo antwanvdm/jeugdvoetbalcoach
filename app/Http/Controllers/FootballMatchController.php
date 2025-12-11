@@ -150,8 +150,10 @@ class FootballMatchController extends Controller
         // Validate share token - use withoutGlobalScope to bypass team scope
         $match = FootballMatch::withoutGlobalScope('team')
             ->where('id', $footballMatch->id)
-            ->where('share_token', $shareToken)
             ->firstOrFail();
+
+        // Timing-safe token comparison
+        abort_if(!hash_equals($match->share_token ?? '', $shareToken), 404);
 
         $data = $this->getMatchViewData($match);
         $data['isPublicView'] = true;

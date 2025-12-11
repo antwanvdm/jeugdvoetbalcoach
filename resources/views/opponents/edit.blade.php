@@ -1,6 +1,6 @@
 <x-app-layout>
     <h1 class="text-2xl font-semibold mb-4">Bewerk tegenstander</h1>
-    <form action="{{ route('opponents.update', $opponent) }}" method="POST" enctype="multipart/form-data" class="bg-white p-4 shadow rounded max-w-2xl">
+    <form action="{{ route('admin.opponents.update', $opponent) }}" method="POST" enctype="multipart/form-data" class="bg-white p-4 shadow rounded max-w-2xl">
         @csrf
         @method('PUT')
         <div class="mb-3">
@@ -33,7 +33,7 @@
         </div>
         <div class="flex gap-2">
             <button class="px-3 py-2 bg-blue-600 text-white rounded">Opslaan</button>
-            <a href="{{ route('opponents.show', $opponent) }}" class="px-3 py-2 bg-gray-200 rounded">Annuleren</a>
+            <a href="{{ route('admin.opponents.show', $opponent) }}" class="px-3 py-2 bg-gray-200 rounded">Annuleren</a>
         </div>
     </form>
 </x-app-layout>

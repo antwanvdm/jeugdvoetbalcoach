@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Mail\Feedback;
 use App\Models\Team;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
@@ -26,7 +27,9 @@ class HomeController extends Controller
             'message' => 'required|string|max:2000',
         ]);
 
-        Log::info('Feedback ontvangen', $validated);
+        // Log feedback without email for GDPR compliance
+        $logData = Arr::except($validated, ['email']);
+        Log::info('Feedback ontvangen', $logData);
 
         // To administrator
         if (config('mail.default_to')) {

@@ -82,6 +82,8 @@ class FetchClubs extends Command
                 $firstLetter = strtolower(substr($teamSlug, 0, 1));
                 $clubUrl = "https://www.hollandsevelden.nl/clubs/{$firstLetter}/{$teamSlug}/";
 
+                $allowedDomains = ['www.hollandsevelden.nl', 'hollandsevelden.nl', 'cdn.hollandsevelden.nl'];
+
                 $htmlResp = Http::timeout(10)->withHeaders([
                     'User-Agent' => 'Mozilla/5.0 (compatible; VVORBot/1.0; +https://example.com/bot)'
                 ])->get($clubUrl);
@@ -89,15 +91,23 @@ class FetchClubs extends Command
                 if ($htmlResp->ok()) {
                     $crawler = new Crawler($htmlResp->body(), $clubUrl);
                     $logoUrl = $this->extractHollandseVeldenLogo($crawler, $clubUrl);
-                    if ($logoUrl) {
+                    $host = $logoUrl ? (parse_url($logoUrl, PHP_URL_HOST) ?? '') : '';
+                    if ($logoUrl && in_array($host, $allowedDomains, true)) {
                         $logoContentResp = Http::timeout(15)->get($logoUrl);
                         if ($logoContentResp->ok()) {
-                            $finalFilename = $slug . '.webp';
-                            $diskPath = 'logos/' . $finalFilename;
-                            Storage::disk('public')->put($diskPath, $logoContentResp->body());
-                            $logoPathRelative = $diskPath;
-                            $this->info("[$slug] Logo opgeslagen: $diskPath");
+                            $contentType = $logoContentResp->header('Content-Type');
+                            if (!is_string($contentType) || !str_starts_with($contentType, 'image/')) {
+                                $this->warn("[$slug] Ongeldig content-type voor logo: {$contentType}");
+                            } else {
+                                $finalFilename = $slug . '.webp';
+                                $diskPath = 'logos/' . $finalFilename;
+                                Storage::disk('public')->put($diskPath, $logoContentResp->body());
+                                $logoPathRelative = $diskPath;
+                                $this->info("[$slug] Logo opgeslagen: $diskPath");
+                            }
                         }
+                    } elseif ($logoUrl) {
+                        $this->warn("[$slug] Domein niet toegestaan voor logo: {$logoUrl}");
                     } else {
                         $this->warn("[$slug] Geen logo gevonden op Hollandse Velden pagina");
                     }
