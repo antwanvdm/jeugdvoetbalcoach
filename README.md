@@ -54,7 +54,7 @@ De applicatie ondersteunt meerdere teams en gebruikers met een robuust autorisat
 - Coach labels voor rolbeschrijvingen binnen teams
 - Gebruikersbeheer met rollen en teamprofielen
 - Spelersbeheer met posities en fysieke eigenschappen
-- Tegenstander administratie
+- Uitgebreide tegenstander administratie (naam, adres, website, logo, coördinaten)
 - Wedstrijd planning en resultaten
 - Notities per wedstrijd voor extra context
 - Handmatige line-up aanpassingen mogelijk
@@ -402,6 +402,8 @@ Bijdragen zijn welkom! Voor grote wijzigingen, open eerst een issue.
 -   [x] Unit tests voor line-up met meerdere scenario's maken en uitvoeren
 -   [x] Notities van trainers tonen onder wedstrijden
 -   [x] Mobile optimized styling met native share optie voor link van ouders
+-   [x] Resultaten security audit Opus 4.5 verwerkt
+-   [x] Tegenstander details uitbreiden (adres, website, officiële clubnaam)
 
 ### 🔜 Toekomstige Features
 

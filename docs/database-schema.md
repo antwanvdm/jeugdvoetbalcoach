@@ -245,7 +245,10 @@ Globale tegenstanders (gedeeld tussen alle teams).
 |-----------------|-----------------|----------|----------------|---------------------------------------|
 | `id`            | bigint unsigned | NO       | AUTO_INCREMENT | Primary key                           |
 | `name`          | varchar(255)    | NO       |                | Naam van de tegenstander/vereniging   |
+| `real_name`     | varchar(255)    | YES      | NULL           | Officiële volledige naam van club     |
 | `location`      | varchar(255)    | NO       |                | Plaatsnaam                            |
+| `address`       | varchar(255)    | YES      | NULL           | Volledig adres van de club            |
+| `website`       | varchar(255)    | YES      | NULL           | Website URL van de club               |
 | `logo`          | varchar(255)    | YES      | NULL           | URL naar logo afbeelding              |
 | `latitude`      | decimal(10,8)   | NO       | 0.0            | Breedtegraad                          |
 | `longitude`     | decimal(11,8)   | NO       | 0.0            | Lengtegraad                           |
@@ -670,6 +673,11 @@ Migraties zijn te vinden in `/database/migrations/` en worden uitgevoerd in chro
 29. `2025_11_29_100001_add_notes_and_share_token_to_football_matches_table.php` - Notities toevoegen aan wedstrijden
 30. `2025_11_29_100002_add_share_token_to_seasons_table.php` - Share token voor publieke seizoen toegang
 31. `2025_11_29_100003_create_match_goals_table.php` - Goals en assists tracking per wedstrijd
+
+### Opponent Club Details Enhancement (11-12 December 2025)
+
+32. `2025_12_11_102604_add_address_and_website_to_opponents_table.php` - Adres en website velden toevoegen aan tegenstanders
+33. `2025_12_12_095734_add_real_name_to_opponents_table.php` - Officiële volledige naam van club toevoegen
 
 Voor een fresh installatie:
 
