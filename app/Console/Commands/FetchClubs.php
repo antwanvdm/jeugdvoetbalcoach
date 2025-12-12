@@ -143,7 +143,6 @@ class FetchClubs extends Command
                     $this->warn("[$slug] Address/website scraping mislukt: " . $e->getMessage());
                 }
             }
-            dump($address);
 
             $data = [
                 'name' => $name,
