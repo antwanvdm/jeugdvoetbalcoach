@@ -42,7 +42,10 @@ class OpponentController extends Controller
 
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
+            'real_name' => ['nullable', 'string', 'max:255'],
             'location' => ['required', 'string', 'max:255'],
+            'address' => ['nullable', 'string'],
+            'website' => ['nullable', 'url'],
             'logo_file' => ['required', 'image', 'max:4096'], // upload verplicht
             'latitude' => ['required', 'numeric'],
             'longitude' => ['required', 'numeric'],
@@ -55,7 +58,10 @@ class OpponentController extends Controller
 
         $payload = [
             'name' => $validated['name'],
+            'real_name' => $validated['real_name'],
             'location' => $validated['location'],
+            'address' => $validated['address'],
+            'website' => $validated['website'],
             'logo' => $storedLogo,
             'latitude' => $validated['latitude'],
             'longitude' => $validated['longitude']
@@ -94,7 +100,10 @@ class OpponentController extends Controller
 
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
+            'real_name' => ['nullable', 'string', 'max:255'],
             'location' => ['required', 'string', 'max:255'],
+            'address' => ['nullable', 'string'],
+            'website' => ['nullable', 'url'],
             'logo_file' => ['nullable', 'image', 'max:4096'], // upload optioneel bij bewerken
             'latitude' => ['required', 'numeric'],
             'longitude' => ['required', 'numeric'],
@@ -117,7 +126,10 @@ class OpponentController extends Controller
 
         $payload = [
             'name' => $validated['name'],
+            'real_name' => $validated['real_name'],
             'location' => $validated['location'],
+            'address' => $validated['address'],
+            'website' => $validated['website'],
             'logo' => $storedLogo,
             'latitude' => $validated['latitude'],
             'longitude' => $validated['longitude'],

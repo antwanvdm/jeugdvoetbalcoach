@@ -12,16 +12,10 @@ use Symfony\Component\DomCrawler\Crawler;
 class FetchClubs extends Command
 {
     protected $signature = 'clubs:fetch';
-    protected $description = 'Fetch Dutch football clubs using Google Places and store them in opponents table';
+    protected $description = 'Fetch Dutch football clubs using CSV + web scraping and store them in opponents table';
 
     public function handle(): int
     {
-        $apiKey = config('app.apiKeys.googlePlaces');
-        if (!$apiKey) {
-            $this->error('Google Places API key ontbreekt (config app.apiKeys.googlePlaces).');
-            return self::FAILURE;
-        }
-
         $csvPath = storage_path('app/private/clubs.csv');
         if (!is_file($csvPath)) {
             $this->error('clubs.csv niet gevonden op: ' . $csvPath);
@@ -51,78 +45,114 @@ class FetchClubs extends Command
             // Check of opponent al bestaat (match op name + location)
             $opponent = Opponent::where('name', $name)->where('location', $location)->first();
 
-            // Verrijk via Google Places
-//            $geo = null;
-//            try {
-//                $query = urlencode($name . ' ' . $location . ' Netherlands');
-//                $searchUrl = 'https://maps.googleapis.com/maps/api/place/textsearch/json?query=' . $query . '&key=' . $apiKey;
-//                $searchResp = Http::timeout(10)->get($searchUrl);
-//                if ($searchResp->ok() && ($searchResp->json('results.0.place_id'))) {
-//                    $placeId = $searchResp->json('results.0.place_id');
-//                    $detailsUrl = 'https://maps.googleapis.com/maps/api/place/details/json?place_id=' . $placeId . '&fields=geometry&key=' . $apiKey;
-//                    $detailsResp = Http::timeout(10)->get($detailsUrl);
-//                    if ($detailsResp->ok()) {
-//                        $geo = $detailsResp->json('result.geometry.location');
-//                    }
-//                }else {
-//                    $this->warn($query);
-//                }
-//            } catch (\Throwable $e) {
-//                $this->warn("[$slug] Fout bij Places API: " . $e->getMessage());
-//            }
-//
-//            $latitude = $geo['lat'] ?? 0.0;
-//            $longitude = $geo['lng'] ?? 0.0;
+            // Build the club URL based on the first letter of the team name
+            $teamSlug = Str::slug($name);
+            $firstLetter = strtolower(substr($teamSlug, 0, 1));
+            $clubUrl = "https://www.hollandsevelden.nl/clubs/{$firstLetter}/{$teamSlug}/";
 
             // Logo scraping from Hollandse Velden website
             $logoPathRelative = null;
-            try {
-                // Build the club URL based on the first letter of the team name
-                $teamSlug = Str::slug($name);
-                $firstLetter = strtolower(substr($teamSlug, 0, 1));
-                $clubUrl = "https://www.hollandsevelden.nl/clubs/{$firstLetter}/{$teamSlug}/";
+            // Only fetch logo if opponent doesn't already have one
+            if (!$opponent || !$opponent->logo) {
+                try {
+                    $allowedDomains = ['www.hollandsevelden.nl', 'hollandsevelden.nl', 'cdn.hollandsevelden.nl'];
 
-                $allowedDomains = ['www.hollandsevelden.nl', 'hollandsevelden.nl', 'cdn.hollandsevelden.nl'];
+                    $htmlResp = Http::timeout(10)->withHeaders([
+                        'User-Agent' => 'Mozilla/5.0 (compatible; FetchBot/1.0; +https://example.com/bot)'
+                    ])->get($clubUrl);
 
-                $htmlResp = Http::timeout(10)->withHeaders([
-                    'User-Agent' => 'Mozilla/5.0 (compatible; VVORBot/1.0; +https://example.com/bot)'
-                ])->get($clubUrl);
+                    if ($htmlResp->ok()) {
+                        $crawler = new Crawler($htmlResp->body(), $clubUrl);
+                        $logoUrl = $this->extractHollandseVeldenLogo($crawler, $clubUrl);
+                        $host = $logoUrl ? (parse_url($logoUrl, PHP_URL_HOST) ?? '') : '';
+                        if ($logoUrl && in_array($host, $allowedDomains, true)) {
+                            $logoContentResp = Http::timeout(15)->get($logoUrl);
+                            if ($logoContentResp->ok()) {
+                                $contentType = $logoContentResp->header('Content-Type');
+                                if (!is_string($contentType) || !str_starts_with($contentType, 'image/')) {
+                                    $this->warn("[$slug] Ongeldig content-type voor logo: {$contentType}");
+                                } else {
+                                    $finalFilename = $slug . '.webp';
+                                    $diskPath = 'logos/' . $finalFilename;
+                                    Storage::disk('public')->put($diskPath, $logoContentResp->body());
+                                    $logoPathRelative = $diskPath;
+                                    $this->info("[$slug] Logo opgeslagen: $diskPath");
+                                }
+                            }
+                        } elseif ($logoUrl) {
+                            $this->warn("[$slug] Domein niet toegestaan voor logo: {$logoUrl}");
+                        } else {
+                            $this->warn("[$slug] Geen logo gevonden op Hollandse Velden pagina");
+                        }
+                    } else {
+                        $this->warn("[$slug] Hollandse Velden pagina niet bereikbaar: $clubUrl");
+                    }
+                } catch (\Throwable $e) {
+                    $this->warn("[$slug] Logo scraping mislukt: " . $e->getMessage());
+                }
+            }
 
-                if ($htmlResp->ok()) {
-                    $crawler = new Crawler($htmlResp->body(), $clubUrl);
-                    $logoUrl = $this->extractHollandseVeldenLogo($crawler, $clubUrl);
-                    $host = $logoUrl ? (parse_url($logoUrl, PHP_URL_HOST) ?? '') : '';
-                    if ($logoUrl && in_array($host, $allowedDomains, true)) {
-                        $logoContentResp = Http::timeout(15)->get($logoUrl);
-                        if ($logoContentResp->ok()) {
-                            $contentType = $logoContentResp->header('Content-Type');
-                            if (!is_string($contentType) || !str_starts_with($contentType, 'image/')) {
-                                $this->warn("[$slug] Ongeldig content-type voor logo: {$contentType}");
-                            } else {
-                                $finalFilename = $slug . '.webp';
-                                $diskPath = 'logos/' . $finalFilename;
-                                Storage::disk('public')->put($diskPath, $logoContentResp->body());
-                                $logoPathRelative = $diskPath;
-                                $this->info("[$slug] Logo opgeslagen: $diskPath");
+            // Scrape real name, address and website from Hollandse Velden
+            $realName = null;
+            $address = null;
+            $website = null;
+            // Only scrape real name, address and website if the opponent doesn't have them
+            if (!$opponent || !$opponent->address || !$opponent->address || !$opponent->real_name) {
+                try {
+                    $htmlResp = Http::timeout(10)->withHeaders([
+                        'User-Agent' => 'Mozilla/5.0 (compatible; FetchBot/1.0; +https://example.com/bot)'
+                    ])->get($clubUrl);
+
+                    if ($htmlResp->ok()) {
+                        $crawler = new Crawler($htmlResp->body(), $clubUrl);
+
+                        // Extract address from <address> element
+                        $addressElement = $crawler->filter('address')->first();
+                        if ($addressElement->count()) {
+                            $addressHtml = $addressElement->html();
+                            // Extract real_name from <strong> tags before removing them
+                            if (preg_match('/<strong[^>]*>(.*?)<\/strong>/i', $addressHtml, $matches)) {
+                                $realNameRaw = strip_tags($matches[1]);
+                                $realName = trim(preg_replace('/\s+/', ' ', $realNameRaw)) ?: null;
+                            }
+                            // Remove <strong> tags and their content (club name)
+                            $addressHtml = preg_replace('/<strong[^>]*>.*?<\/strong>/i', '', $addressHtml);
+                            // Remove everything up to and including "Sportpark ...," pattern and the <br> tag
+                            $addressHtml = preg_replace('/.*?Sportpark\s+[^<]+<br\s*\/?>/i', '', $addressHtml);
+                            // Replace <br> tags with commas
+                            $addressText = preg_replace('/<br\s*\/?>/i', ', ', $addressHtml);
+                            // Strip remaining HTML tags
+                            $addressText = strip_tags($addressText);
+                            // Clean up non-breaking spaces and multiple spaces
+                            $addressText = str_replace("\u{A0}", ' ', $addressText);
+                            $addressText = trim(preg_replace('/\s+/', ' ', $addressText));
+                            $addressText = trim($addressText, ', ');
+                            $address = $addressText ?: null;
+
+                            // Extract website from p > a[target="_blank"] after address
+                            $pAfterAddress = $addressElement->nextAll()->filter('p')->first();
+                            if ($pAfterAddress->count()) {
+                                $websiteLink = $pAfterAddress->filter('a[target="_blank"]')->first();
+                                if ($websiteLink->count()) {
+                                    $website = $websiteLink->attr('href');
+                                }
                             }
                         }
-                    } elseif ($logoUrl) {
-                        $this->warn("[$slug] Domein niet toegestaan voor logo: {$logoUrl}");
-                    } else {
-                        $this->warn("[$slug] Geen logo gevonden op Hollandse Velden pagina");
                     }
-                } else {
-                    $this->warn("[$slug] Hollandse Velden pagina niet bereikbaar: $clubUrl");
+                } catch (\Throwable $e) {
+                    $this->warn("[$slug] Address/website scraping mislukt: " . $e->getMessage());
                 }
-            } catch (\Throwable $e) {
-                $this->warn("[$slug] Logo scraping mislukt: " . $e->getMessage());
             }
+            dump($address);
 
             $data = [
                 'name' => $name,
+                'real_name' => $realName ?? $opponent?->real_name,
                 'location' => $location,
-                'latitude' => $latitude ?? $opponent?->latitude,
-                'longitude' => $longitude ?? $opponent?->longitude,
+                'address' => $address ?? $opponent?->address,
+                'website' => $website ?? $opponent?->website,
+                'latitude' => $opponent?->latitude ?? 0,
+                'longitude' => $opponent?->longitude ?? 0,
                 'logo' => $logoPathRelative ?? $opponent?->logo,
                 'kit_reference' => $kitRef !== '' ? $kitRef : ($opponent?->kit_reference ?? null),
             ];
@@ -137,7 +167,7 @@ class FetchClubs extends Command
                 $this->line("[CREATE] $name ($location)");
             }
 
-            // Klein throttle om limieten te respecteren
+            // Limit throttle
             usleep(250_000); // 250ms
         }
 

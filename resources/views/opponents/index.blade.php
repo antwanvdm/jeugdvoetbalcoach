@@ -21,7 +21,13 @@
             <tbody>
             @forelse($opponents as $opponent)
                 <tr class="border-b">
-                    <td class="p-3"><img src="{{ asset('storage/' . $opponent->logo) }}" alt="{{ $opponent->name }} logo" class="h-8 min-w-8"></td>
+                    <td class="p-3">
+                        @if($opponent->logo)
+                            <img src="{{ asset('storage/' . $opponent->logo) }}" alt="{{ $opponent->name }} logo" class="h-8 min-w-8">
+                        @else
+                            <div class="h-8 w-8 flex items-center justify-center bg-gray-100 rounded text-gray-400">?</div>
+                        @endif
+                    </td>
                     <td class="p-3">{{ $opponent->name }}</td>
                     <td class="p-3 hidden sm:table-cell">
                         <a href="{{ $opponent->location_maps_link }}" target="_blank" rel="noopener" class="text-blue-600 hover:underline">{{ $opponent->location }}</a>

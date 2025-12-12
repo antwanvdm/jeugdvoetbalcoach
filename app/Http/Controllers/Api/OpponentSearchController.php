@@ -21,6 +21,7 @@ class OpponentSearchController extends Controller
             return Opponent::query()
                 ->where(function ($w) use ($q) {
                     $w->where('name', 'like', '%' . $q . '%')
+                      ->orWhere('real_name', 'like', '%' . $q . '%')
                       ->orWhere('location', 'like', '%' . $q . '%');
                 })
                 ->orderBy('name')
@@ -32,8 +33,6 @@ class OpponentSearchController extends Controller
                         'name' => $o->name,
                         'location' => $o->location,
                         'logo_url' => $o->logo ? asset('storage/' . $o->logo) : null,
-                        'latitude' => $o->latitude,
-                        'longitude' => $o->longitude,
                     ];
                 })
                 ->all();

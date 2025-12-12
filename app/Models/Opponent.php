@@ -12,7 +12,10 @@ class Opponent extends Model
 {
     protected $fillable = [
         'name',
+        'real_name',
         'location',
+        'address',
+        'website',
         'logo',
         'latitude',
         'longitude',
@@ -24,10 +27,33 @@ class Opponent extends Model
         return $this->hasMany(FootballMatch::class);
     }
 
+    protected function name(): Attribute
+    {
+        return Attribute::make(
+            get: fn(mixed $value, $attributes) => $attributes['real_name'] ?? $value
+        );
+    }
+
+    protected function systemName(): Attribute
+    {
+        return Attribute::make(
+            get: fn(mixed $value, $attributes) => $attributes['name']
+        );
+    }
+
+    protected function kitUrl(): Attribute
+    {
+        return Attribute::make(
+            get: fn(mixed $value, $attributes) => $attributes['kit_reference']
+                ? asset('storage/kits/t_' . $attributes['kit_reference'] . '.png')
+                : null
+        );
+    }
+
     protected function locationMapsLink(): Attribute
     {
         return Attribute::make(
-            get: fn(mixed $value, $attributes) => 'https://www.google.com/maps?q=' . urlencode($attributes['latitude'] . ',' . $attributes['longitude'])
+            get: fn(mixed $value, $attributes) => 'https://www.google.com/maps?q=' . urlencode($attributes['address'] ?? ($attributes['latitude'] . ',' . $attributes['longitude']))
         );
     }
 }

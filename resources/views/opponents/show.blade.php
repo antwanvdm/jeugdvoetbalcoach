@@ -21,18 +21,22 @@
 
             <dt class="font-medium text-gray-600">Locatie</dt>
             <dd class="col-span-2">
-                @php
-                    $hasCoords = !is_null($opponent->latitude) && !is_null($opponent->longitude);
-                    $mapsUrl = $hasCoords
-                        ? 'https://www.google.com/maps?q=' . urlencode($opponent->latitude . ',' . $opponent->longitude)
-                        : ( $opponent->location ? 'https://www.google.com/maps?q=' . urlencode($opponent->location) : null );
-                @endphp
-                @if($mapsUrl)
-                    <a href="{{ $mapsUrl }}" target="_blank" rel="noopener" class="text-blue-600 hover:underline">{{ $opponent->location ?: ($opponent->latitude . ', ' . $opponent->longitude) }}</a>
-                @else
-                    <span class="text-gray-500">-</span>
-                @endif
+                <a href="{{ $opponent->locationMapsLink }}" target="_blank" rel="noopener" class="text-blue-600 hover:underline">📍 Kaart</a>
             </dd>
+
+            @if($opponent->address)
+                <dt class="font-medium text-gray-600">Adres</dt>
+                <dd class="col-span-2">
+                    {!! str_replace(', ', '<br>', $opponent->address) !!}
+                </dd>
+            @endif
+
+            @if($opponent->website)
+                <dt class="font-medium text-gray-600">Website</dt>
+                <dd class="col-span-2">
+                    <a href="{{ $opponent->website }}" target="_blank" rel="noopener" class="text-blue-600 hover:underline">{{ $opponent->website }}</a>
+                </dd>
+            @endif
 
             <dt class="font-medium text-gray-600">Logo</dt>
             <dd class="col-span-2">
@@ -42,6 +46,13 @@
                     <span class="text-gray-500">-</span>
                 @endif
             </dd>
+
+            @if($opponent->kitUrl)
+                <dt class="font-medium text-gray-600">Tenue</dt>
+                <dd class="col-span-2">
+                    <img src="{{ $opponent->kitUrl }}" alt="{{ $opponent->name }} kit" class="h-12">
+                </dd>
+            @endif
         </dl>
     </div>
 </x-app-layout>

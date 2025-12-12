@@ -4,12 +4,24 @@
         @csrf
         @method('PUT')
         <div class="mb-3">
-            <label class="block text-sm font-medium mb-1">Naam</label>
-            <input type="text" name="name" value="{{ old('name', $opponent->name) }}" class="w-full border rounded p-2" required>
+            <label class="block text-sm font-medium mb-1">Systeem import naam</label>
+            <input type="text" name="name" value="{{ old('name', $opponent->systemName) }}" class="w-full border rounded p-2 bg-gray-100" disabled>
         </div>
         <div class="mb-3">
             <label class="block text-sm font-medium mb-1">Locatie</label>
-            <input type="text" name="location" value="{{ old('location', $opponent->location) }}" class="w-full border rounded p-2" required>
+            <input type="text" name="location" value="{{ old('location', $opponent->location) }}" class="w-full border rounded p-2 bg-gray-100" disabled>
+        </div>
+        <div class="mb-3">
+            <label class="block text-sm font-medium mb-1">Echte naam</label>
+            <input type="text" name="real_name" value="{{ old('real_name', $opponent->real_name) }}" class="w-full border rounded p-2 bg-gray-100" disabled>
+        </div>
+        <div class="mb-3">
+            <label class="block text-sm font-medium mb-1">Adres</label>
+            <input type="text" name="address" value="{{ old('address', $opponent->address) }}" class="w-full border rounded p-2">
+        </div>
+        <div class="mb-3">
+            <label class="block text-sm font-medium mb-1">Website</label>
+            <input type="url" name="website" value="{{ old('website', $opponent->website) }}" class="w-full border rounded p-2">
         </div>
         <div class="mb-3">
             <label class="block text-sm font-medium mb-1">Huidig logo</label>

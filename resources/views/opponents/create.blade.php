@@ -11,6 +11,18 @@
             <input type="text" name="location" value="{{ old('location') }}" class="w-full border rounded p-2" required>
         </div>
         <div class="mb-3">
+            <label class="block text-sm font-medium mb-1">Echte naam (Real name)</label>
+            <input type="text" name="real_name" value="{{ old('real_name') }}" class="w-full border rounded p-2">
+        </div>
+        <div class="mb-3">
+            <label class="block text-sm font-medium mb-1">Adres</label>
+            <input type="text" name="address" value="{{ old('address') }}" class="w-full border rounded p-2">
+        </div>
+        <div class="mb-3">
+            <label class="block text-sm font-medium mb-1">Website</label>
+            <input type="url" name="website" value="{{ old('website') }}" class="w-full border rounded p-2">
+        </div>
+        <div class="mb-3">
             <label class="block text-sm font-medium mb-1">Logo upload</label>
             <input type="file" name="logo_file" accept="image/*" class="w-full border rounded p-2" required>
         </div>
