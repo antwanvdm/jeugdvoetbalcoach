@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Season;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 class SeasonSeeder extends Seeder
 {
@@ -19,13 +20,14 @@ class SeasonSeeder extends Seeder
         $teamId = $user->defaultTeam()->id;
 
         $seasons = [
-            ['year' => date('Y'), 'part' => 1, 'start' => now(), 'end' => now(), 'formation_id' => 1],
+            ['year' => date('Y'), 'part' => 1, 'start' => now(), 'end' => now(), 'formation_id' => 1, 'track_goals' => 1],
         ];
 
         foreach ($seasons as $season) {
             Season::create(array_merge($season, [
                 'user_id' => $user->id,
                 'team_id' => $teamId,
+                'share_token' => Str::random(32)
             ]));
         }
     }
