@@ -28,6 +28,9 @@
             <dt class="text-gray-600 font-bold">Tegenstander</dt>
             <dd class="sm:col-span-2">{{ $footballMatch->opponent->name ?? '-' }}</dd>
 
+            <dt class="text-gray-600 font-bold">Seizoen</dt>
+            <dd class="sm:col-span-2">{{ $footballMatch->season->year }}/{{ $footballMatch->season->year + 1 }} - Fase {{ $footballMatch->season->part }}</dd>
+
             <dt class="text-gray-600 font-bold">Locatie</dt>
             <dd class="sm:col-span-2">
                 {{ $footballMatch->home ? 'Thuis' : 'Uit' }} (<a href="{{ $footballMatch->home ? $footballMatch->team->opponent->location_maps_link : $footballMatch->opponent->location_maps_link }}" target="_blank" rel="noopener"

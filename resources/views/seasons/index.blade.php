@@ -29,7 +29,7 @@
             <tbody>
             @foreach($seasons as $season)
                 <tr class="border-t">
-                    <td class="py-2 pr-4 font-medium">{{ $season->year }}-{{ $season->year + 1 }}</td>
+                    <td class="py-2 pr-4 font-medium">{{ $season->year }}/{{ $season->year + 1 }}</td>
                     <td class="py-2 pr-4">{{ $season->part }}</td>
                     <td class="py-2 pr-4 hidden sm:table-cell">{{ $season->start->format('Y-m-d') }}</td>
                     <td class="py-2 pr-4 hidden sm:table-cell">{{ $season->end->format('Y-m-d') }}</td>

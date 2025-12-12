@@ -1,7 +1,7 @@
 <x-app-layout>
     <div class="mb-6">
         <h1 class="text-2xl font-semibold mb-2">Plan volgende wedstrijd</h1>
-        <p class="text-sm text-gray-600">Seizoen: <span class="font-medium">{{ $season->year }}-{{ $season->year + 1 }} / {{ $season->part }}</span></p>
+        <p class="text-sm text-gray-600">Seizoen: <span class="font-medium">{{ $season->year }}/{{ $season->year + 1 }} - Fase {{ $season->part }}</span></p>
         <p class="text-sm text-blue-900 bg-blue-50 border border-blue-200 rounded p-3 mt-2 mb-4">Je vult hier de basisgegevens in voor de volgende wedstrijd. Op basis hiervan wordt automatisch een gebalanceerde opstelling gegenereerd. Doelpunten kun
             je na afloop invullen.</p>
     </div>

@@ -1,7 +1,8 @@
 <x-app-layout>
     <div class="mb-6">
         <h1 class="text-2xl font-semibold mb-2">Resultaat doorvoeren</h1>
-        <p class="text-sm text-gray-600">Seizoen: <span class="font-medium">{{ $footballMatch->season->year }}-{{ $footballMatch->season->year + 1 }} / {{ $footballMatch->season->part }}</span> • Tegenstander: <span class="font-medium">{{ $footballMatch->opponent->name }}</span></p>
+        <p class="text-sm text-gray-600">Seizoen: <span class="font-medium">{{ $footballMatch->season->year }}/{{ $footballMatch->season->year + 1 }} - Fase {{ $footballMatch->season->part }}</span></p>
+        <p class="text-sm text-gray-600">Tegenstander: <span class="font-medium">{{$footballMatch->opponent->name }}</span></p>
     </div>
 
     <form action="{{ route('football-matches.update', $footballMatch) }}" method="POST" class="bg-white p-4 shadow rounded max-w-5xl">

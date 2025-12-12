@@ -270,7 +270,7 @@
                         <h2 class="text-lg font-semibold mb-3">Huidig seizoen</h2>
                         <div class="p-3 border border-gray-200 rounded-lg hover:border-blue-300 hover:shadow-sm transition">
                             <div class="flex items-center justify-between mb-2">
-                                <h3 class="font-semibold text-gray-900">{{ $activeSeason->year }}-{{ $activeSeason->year + 1 }}</h3>
+                                <h3 class="font-semibold text-gray-900">{{ $activeSeason->year }}/{{ $activeSeason->year + 1 }}</h3>
                                 <span class="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded">Fase {{ $activeSeason->part }}</span>
                             </div>
                             @if($activeSeason->stats)

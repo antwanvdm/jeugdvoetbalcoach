@@ -14,7 +14,7 @@
             <form method="GET" action="{{ route('players.index') }}">
                 <select name="season_id" onchange="this.form.submit()" class="border py-2 pl-2 pr-8 rounded">
                     @foreach($seasons as $s)
-                        <option value="{{ $s->id }}" {{ (int)($seasonId ?? 0) === $s->id ? 'selected' : '' }}>{{ $s->year }}-{{ $s->year + 1 }}--{{ $s->part }}</option>
+                        <option value="{{ $s->id }}" {{ (int)($seasonId ?? 0) === $s->id ? 'selected' : '' }}>{{ $s->year }}/{{ $s->year + 1 }} - Fase {{ $s->part }}</option>
                     @endforeach
                 </select>
             </form>
