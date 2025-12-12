@@ -43,9 +43,7 @@ class UserSeeder extends Seeder
 
             // Create user's team
             $userTeam = Team::create([
-                'name' => 'Test Team',
-                'logo' => null,
-                'maps_location' => '-',
+                'opponent_id' => 1,
                 'invite_code' => Str::random(64),
             ]);
 
