@@ -13,17 +13,8 @@ class OpponentSeeder extends Seeder
 {
     public function run(): void
     {
-        // Get the test user's default team
-        $user = User::where('email', 'user@team.nl')->first();
-        if (!$user || !$user->defaultTeam()) {
-            return;
-        }
-
-        $userId = $user->id;
-        $teamId = $user->defaultTeam()->id;
-
         $opponents = [
-            ['name' => 'VVOR', "location" => 'Rotterdam', 'logo' => 'https://www.vvor.nl/wp-content/uploads/2015/05/vvor_logo1-188x200.png', 'latitude' => 51.93915934387992, 'longitude' => 4.531862697197812],
+            ['name' => 'VVOR', "location" => 'Rotterdam', 'logo' => 'https://www.vvor.nl/wp-content/uploads/2015/05/vvor_logo1-188x200.png', 'latitude' => 51.93915934387992, 'longitude' => 4.531862697197812, 'kit_reference' => 1, 'real_name' => 'VVOR'],
         ];
 
         foreach ($opponents as $opponent) {
@@ -45,7 +36,7 @@ class OpponentSeeder extends Seeder
                             default => pathinfo(parse_url($logoUrl, PHP_URL_PATH) ?? '', PATHINFO_EXTENSION) ?: 'png',
                         };
 
-                        $filename = $userId . '-' . Str::slug($opponent['name']) . '.' . $ext;
+                        $filename = Str::slug($opponent['name']) . '.' . $ext;
                         $path = 'logos/' . $filename;
                         Storage::disk('public')->put($path, $contents);
                         $opponent['logo'] = $path;
@@ -55,10 +46,7 @@ class OpponentSeeder extends Seeder
                 }
             }
 
-            Opponent::create(array_merge($opponent, [
-                'user_id' => $userId,
-                'team_id' => $teamId,
-            ]));
+            Opponent::create($opponent);
         }
     }
 }
