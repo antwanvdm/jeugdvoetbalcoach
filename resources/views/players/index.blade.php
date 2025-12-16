@@ -84,11 +84,6 @@
                 <td class="p-3 text-right">
                     <a class="text-blue-600 mr-2" href="{{ route('players.show', $player) }}">Bekijk</a>
                     <a class="text-yellow-600 mr-2 hidden md:inline" href="{{ route('players.edit', $player) }}">Bewerk</a>
-                    <form action="{{ route('players.destroy', $player) }}" method="POST" class="hidden md:inline">
-                        @csrf
-                        @method('DELETE')
-                        <button class="text-red-600" onclick="return confirm('Deze speler verwijderen?')">Verwijder</button>
-                    </form>
                 </td>
             </tr>
         @empty

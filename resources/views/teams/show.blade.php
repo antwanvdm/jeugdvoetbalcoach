@@ -1,6 +1,6 @@
 <x-app-layout>
     <div class="max-w-4xl">
-        <div class="flex items-center justify-between mb-6">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6 top-row-actions">
             <div class="flex items-center gap-4">
                 @if($team->opponent?->logo)
                     <img src="{{ asset('storage/' . $team->opponent->logo) }}" alt="{{ $team->opponent->name }}" class="h-16 w-16 object-contain">
@@ -12,7 +12,19 @@
                     @endif
                 </div>
             </div>
-            <a href="{{ route('teams.index') }}" class="px-3 py-2 bg-gray-200 rounded hover:bg-gray-300">Terug</a>
+            <div class="flex gap-2">
+                <a href="{{ route('teams.index') }}" class="px-3 py-2 bg-gray-200 rounded hover:bg-gray-300">Terug</a>
+                @can('update', $team)
+                    <a href="{{ route('teams.edit', $team) }}" class="px-3 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600">Bewerk</a>
+                @endcan
+                @can('delete', $team)
+                    <form action="{{ route('teams.destroy', $team) }}" method="POST" onsubmit="return confirm('Weet je zeker dat je dit team samen met alle gekoppelde seizoenen en wedstrijden wilt verwijderen?')">
+                        @csrf
+                        @method('DELETE')
+                        <button class="px-3 py-2 bg-red-600 text-white rounded hover:bg-red-700">Verwijder</button>
+                    </form>
+                @endcan
+            </div>
         </div>
 
         <!-- Team Members -->
@@ -58,21 +70,29 @@
             <p class="text-sm text-gray-600 mb-4">Deel deze link om nieuwe coaches uit te nodigen voor dit team.</p>
 
             <div class="bg-gray-50 rounded-lg p-4">
-                <div class="flex items-center gap-2">
+                <div class="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
                     <input
                         type="text"
                         readonly
                         value="{{ route('teams.join.show', $team->invite_code) }}"
-                        class="flex-1 border rounded p-2 bg-white text-sm"
-                        id="invite-link-{{ $team->id }}"
+                        class="flex-1 px-3 py-2 border rounded bg-white text-sm font-mono"
+                        id="teamInviteLink"
                     >
                     <button
-                        type="button"
-                        data-copy-to-clipboard="{{ route('teams.join.show', $team->invite_code) }}"
-                        data-copy-message="Uitnodigingslink gekopieerd!"
-                        class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 whitespace-nowrap cursor-pointer"
+                        data-copy-input="teamInviteLink"
+                        data-copy-message="Link gekopieerd naar klembord!"
+                        class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition whitespace-nowrap cursor-pointer"
                     >
-                        📋 Kopieer link
+                        Kopieer
+                    </button>
+                    <button
+                        type="button"
+                        data-share-input="teamInviteLink"
+                        data-share-title="Team uitnodiging delen"
+                        data-share-text="Word coach van {{ $team->opponent?->name ?? 'ons team' }}"
+                        class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition whitespace-nowrap cursor-pointer"
+                    >
+                        Deel
                     </button>
                 </div>
             </div>
@@ -89,15 +109,6 @@
                 </div>
             @endcan
         </div>
-
-        <!-- Actions -->
-        @can('update', $team)
-            <div class="mt-6">
-                <a href="{{ route('teams.edit', $team) }}" class="px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700">
-                    Team Bewerken
-                </a>
-            </div>
-        @endcan
 
         <!-- Update own label -->
         <div class="mt-6 bg-white rounded-lg shadow p-6">

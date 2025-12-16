@@ -89,14 +89,6 @@
                                 <button type="submit" class="text-yellow-600 mr-2">Verlaat</button>
                             </form>
                         @endif
-
-                        @if($team['role'] === 1)
-                            <form method="POST" action="{{ route('teams.destroy', $team['id']) }}" class="hidden sm:inline" onsubmit="return confirm('Weet je zeker dat je dit team wilt verwijderen? Alle data wordt verwijderd!')">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="text-red-600">Verwijder</button>
-                            </form>
-                        @endif
                     </td>
                 </tr>
             @empty
