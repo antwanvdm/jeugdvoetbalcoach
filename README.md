@@ -404,6 +404,7 @@ Bijdragen zijn welkom! Voor grote wijzigingen, open eerst een issue.
 -   [x] Mobile optimized styling met native share optie voor link van ouders
 -   [x] Resultaten security audit Opus 4.5 verwerkt
 -   [x] Tegenstander details uitbreiden (adres, website, officiële clubnaam)
+-   [x] Dark mode support toegevoegd inclusief handmatige toggle optie in het menu
 
 ### 🔜 Toekomstige Features
 
