@@ -195,7 +195,7 @@
                 <a href="{{ route('football-matches.lineup', $footballMatch) }}" class="px-3 py-2 bg-indigo-600 text-white rounded text-sm text-center">Bewerk line-up</a>
             @endauth
         </div>
-        <div class="overflow-x-auto">
+        <div class="overflow-x-auto mt-1">
             <div class="overflow-x-auto">
                 <table class="min-w-full text-sm">
                     <thead>

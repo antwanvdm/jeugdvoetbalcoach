@@ -19,7 +19,6 @@
                     <div class="ml-3">
                         <h3 class="text-sm font-medium text-yellow-800 dark:text-yellow-200">Let op: Impact op je teams</h3>
                         <div class="mt-2 text-sm text-yellow-700 dark:text-yellow-100">
-                            <p class="mb-2">Je bent lid van de volgende teams:</p>
                             <ul class="list-disc list-inside space-y-1">
                                 @foreach($teams as $team)
                                     @php
@@ -29,7 +28,7 @@
                                     <li>
                                         <strong>{{ $teamName }}</strong>
                                         @if($team->users_count === 1)
-                                            <span class="text-red-700 dark:text-red-400 font-semibold">
+                                            <span class="text-red-900 dark:text-red-100 font-semibold">
                                                 — wordt volledig verwijderd inclusief alle spelers, wedstrijden, seizoenen en formaties (je bent het enige lid)
                                             </span>
                                         @else
@@ -66,8 +65,8 @@
 
             @if($teams->isNotEmpty())
                 <div class="mt-4 p-3 bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-700 rounded-md">
-                    <p class="text-sm font-medium text-red-800 dark:text-red-200">Wat wordt er verwijderd:</p>
-                    <ul class="mt-2 text-sm text-red-700 dark:text-red-100 list-disc list-inside space-y-1">
+                    <p class="text-sm font-medium text-red-800 dark:text-red-100">Wat wordt er verwijderd:</p>
+                    <ul class="mt-2 text-sm text-red-700 dark:text-red-50 list-disc list-inside space-y-1">
                         @foreach($teams as $team)
                             @if($team->users_count === 1)
                                 @php
