@@ -22,7 +22,7 @@
             src="{{Vite::asset('resources/images/vvor.jpg')}}"/>
 
         <!-- Gradient overlay (optioneel) -->
-        <div class="absolute inset-0 bg-gradient-to-b from-black/60 to-black/60 -z-10"></div>
+        <div class="absolute inset-0 bg-linear-to-b from-black/60 to-black/60 -z-10"></div>
 
         <div class="mx-auto max-w-5xl px-6 py-20 text-center">
             <div class="mb-4">
@@ -119,7 +119,7 @@
                     </svg>
                 </div>
                 <h3 class="font-semibold text-gray-900 dark:text-gray-100 mb-2">Delen & Printen</h3>
-                <p class="text-sm text-gray-600 dark:text-gray-300">Deel opstellingen met ouders en print voor de wedstrijd</p>
+                <p class="text-sm text-gray-600 dark:text-gray-300">Deel resultaten met ouders en print de wedstrijdopstelling</p>
             </div>
         </div>
     </section>
@@ -356,7 +356,7 @@
                         <span class="flex h-10 w-10 items-center justify-center rounded-full bg-orange-600 text-white font-bold text-lg">4</span>
                         <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100">Deel en print de opstelling</h3>
                     </div>
-                    <p class="text-gray-600 dark:text-gray-300 mb-4">Deel de opstelling met ouders via een link of print het uit voor tijdens de wedstrijd. Alles overzichtelijk op één pagina.</p>
+                    <p class="text-gray-600 dark:text-gray-300 mb-4">Deel de resultaten met ouders via een link en print de opstelling uit voor de wedstrijd. Alles overzichtelijk op één pagina.</p>
                     <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-300">
                         <li class="flex items-start gap-2">
                             <svg class="w-5 h-5 text-orange-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -452,14 +452,14 @@
             <div class="bg-white dark:bg-gray-800 rounded-xl border shadow-sm p-6 hover:shadow-md dark:shadow-gray-700 transition">
                 <div class="flex items-start gap-4">
                     <div class="shrink-0">
-                        <svg class="w-12 h-12 text-pink-600" fill="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-12 h-12 text-pink-600 dark:text-pink-400" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
                         </svg>
                     </div>
                     <div class="flex-1">
                         <h3 class="font-semibold text-gray-900 dark:text-gray-100 mb-2">Steun via GitHub Sponsors</h3>
                         <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">Help mee om de servers draaiende te houden en nieuwe features te ontwikkelen. Elke bijdrage wordt enorm gewaardeerd!</p>
-                        <a href="https://ko-fi.com/antwanvdm" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 text-sm font-medium text-pink-600 hover:text-pink-700">
+                        <a href="https://ko-fi.com/antwanvdm" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 text-sm font-medium text-pink-600 dark:text-pink-400 hover:text-pink-700 dark:hover:text-pink-300">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                 <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
                                 <polyline points="15 3 21 3 21 9"/>

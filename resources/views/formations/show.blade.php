@@ -47,24 +47,24 @@
                 {{-- Aanvallers --}}
                 <div class="flex flex-wrap justify-center gap-2 sm:gap-16 min-h-6">
                     @for($i = 0; $i < $attackers; $i++)
-                        <span class="inline-block px-2 py-1 rounded text-white bg-green-600 text-sm">Aanvaller</span>
+                        <span class="inline-block px-2 py-1 rounded text-white bg-green-600 dark:bg-green-600 text-sm">Aanvaller</span>
                     @endfor
                 </div>
                 {{-- Middenvelders --}}
                 <div class="flex flex-wrap justify-center gap-2 sm:gap-16 min-h-6">
                     @for($i = 0; $i < $midfielders; $i++)
-                        <span class="inline-block px-2 py-1 rounded text-white bg-green-600 text-sm">Middenvelder</span>
+                        <span class="inline-block px-2 py-1 rounded text-white bg-green-600 dark:bg-green-600 text-sm">Middenvelder</span>
                     @endfor
                 </div>
                 {{-- Verdedigers --}}
                 <div class="flex flex-wrap justify-center gap-2 sm:gap-16 min-h-6">
                     @for($i = 0; $i < $defenders; $i++)
-                        <span class="inline-block px-2 py-1 rounded text-white bg-green-600 text-sm">Verdediger</span>
+                        <span class="inline-block px-2 py-1 rounded text-white bg-green-600 dark:bg-green-600 text-sm">Verdediger</span>
                     @endfor
                 </div>
                 {{-- Keeper(s) --}}
                 <div class="flex flex-wrap justify-center gap-2 sm:gap-16 min-h-6">
-                    <span class="inline-block px-2 py-1 rounded text-white bg-green-800 text-sm">Keeper</span>
+                    <span class="inline-block px-2 py-1 rounded text-white bg-blue-600 dark:bg-blue-500 text-sm">Keeper</span>
                 </div>
             </div>
         </div>

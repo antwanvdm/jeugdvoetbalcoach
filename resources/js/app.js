@@ -1,5 +1,78 @@
 import.meta.glob(['../images/**']);
 
+// Theme toggle (light/dark) with system default on first load
+const THEME_KEY = 'theme'; // 'light' | 'dark'
+
+function systemPrefersDark() {
+    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+}
+
+function getStoredTheme() {
+    return localStorage.getItem(THEME_KEY);
+}
+
+function resolveTheme(theme) {
+    if (theme === 'light' || theme === 'dark') return theme;
+    return systemPrefersDark() ? 'dark' : 'light';
+}
+
+function updateThemeToggleVisual(theme) {
+    const isDark = theme === 'dark';
+    document.querySelectorAll('[data-theme-icon]').forEach((icon) => {
+        const target = icon.getAttribute('data-theme-icon');
+        if (target === 'dark') {
+            icon.classList.toggle('hidden', !isDark);
+        } else if (target === 'light') {
+            icon.classList.toggle('hidden', isDark);
+        }
+    });
+    document.querySelectorAll('[data-theme-toggle]').forEach((btn) => {
+        btn.setAttribute('aria-pressed', isDark ? 'true' : 'false');
+        btn.setAttribute('data-theme-state', theme);
+    });
+}
+
+function applyTheme(theme) {
+    const effective = resolveTheme(theme);
+    const isDark = effective === 'dark';
+    document.documentElement.classList.toggle('dark', isDark);
+    document.cookie = `theme=${effective}; path=/; max-age=31536000; SameSite=Lax`;
+    updateThemeToggleVisual(effective);
+}
+
+function setTheme(theme) {
+    localStorage.setItem(THEME_KEY, theme);
+    applyTheme(theme);
+}
+
+function cycleTheme() {
+    const current = resolveTheme(getStoredTheme());
+    const next = current === 'dark' ? 'light' : 'dark';
+    setTheme(next);
+}
+
+function initTheme() {
+    const initial = resolveTheme(getStoredTheme());
+    applyTheme(initial);
+
+    const media = window.matchMedia('(prefers-color-scheme: dark)');
+    const handler = () => {
+        // Only adjust if user hasn't explicitly chosen
+        if (!getStoredTheme()) {
+            applyTheme(resolveTheme(null));
+        }
+    };
+    if (media.addEventListener) media.addEventListener('change', handler);
+    else if (media.addListener) media.addListener(handler);
+
+    document.querySelectorAll('[data-theme-toggle]').forEach((btn) => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            cycleTheme();
+        });
+    });
+}
+
 /**
  * Generic share button handler for season/match share
  */
@@ -16,6 +89,8 @@ function handleNativeShareButtonClick(e) {
 }
 
 document.addEventListener('DOMContentLoaded', function () {
+    initTheme();
+
     document.querySelectorAll('[data-share-input]').forEach((btn) => {
         if (!navigator.share) {
             btn.remove();

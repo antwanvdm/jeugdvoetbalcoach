@@ -46,7 +46,7 @@
                             Deel
                         </button>
                     </div>
-                    <p class="text-xs text-blue-700 dark:text-blue-400 mt-2">💡 Deze link is uniek en privé - deel alleen met betrokken ouders.</p>
+                    <p class="text-xs text-blue-700 dark:text-blue-300 mt-2">💡 Deze link is uniek en privé - deel alleen met betrokken ouders.</p>
                 </div>
             @else
                 <div class="bg-yellow-50 dark:bg-yellow-900 border border-yellow-200 dark:border-yellow-700 rounded-lg p-4 mb-6">

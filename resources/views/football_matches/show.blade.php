@@ -127,7 +127,7 @@
                         Deel
                     </button>
                 </div>
-                <p class="text-xs text-blue-700 dark:text-blue-400 mt-2">💡 Deze link is uniek en privé - deel alleen met betrokken ouders.</p>
+                <p class="text-xs text-blue-700 dark:text-blue-300 mt-2">💡 Deze link is uniek en privé - deel alleen met betrokken ouders.</p>
             </div>
         @endif
     @endauth
@@ -223,14 +223,14 @@
                             <td class="py-2 pr-4 font-medium">Q{{ $q }}</td>
                             <td class="py-2 pr-4">
                                 @if($keeper)
-                                    <span class="inline-block px-2 py-1 rounded text-white bg-green-800 dark:bg-green-700">{{ $keeper->name }}</span>
+                                    <span class="inline-block px-2 py-1 rounded text-white bg-blue-600 dark:bg-blue-500">{{ $keeper->name }}</span>
                                 @else
                                     <span class="text-gray-400 dark:text-gray-500">-</span>
                                 @endif
                             </td>
                             <td class="py-2 pr-4">
                                 @forelse($field as $p)
-                                    <span class="inline-block px-2 py-1 mb-1 sm:mb-0 rounded text-white bg-green-600 dark:bg-green-700">{{ $p->name }}</span>
+                                    <span class="inline-block px-2 py-1 mb-1 sm:mb-0 rounded text-white bg-green-600 dark:bg-green-600">{{ $p->name }}</span>
                                 @empty
                                     <span class="text-gray-400 dark:text-gray-500">-</span>
                                 @endforelse
@@ -289,25 +289,25 @@
                         {{-- Aanvallers --}}
                         <div class="flex flex-wrap justify-center gap-2 sm:gap-16 min-h-6">
                             @foreach($attackers as $p)
-                                <span class="inline-block px-2 py-1 rounded text-white bg-green-600 text-sm">{{ $p->name }}</span>
+                                <span class="inline-block px-2 py-1 rounded text-white bg-green-600 dark:bg-green-600 text-sm">{{ $p->name }}</span>
                             @endforeach
                         </div>
                         {{-- Middenvelders --}}
                         <div class="flex flex-wrap justify-center gap-2 sm:gap-16 min-h-6">
                             @foreach($midfielders as $p)
-                                <span class="inline-block px-2 py-1 rounded text-white bg-green-600 text-sm">{{ $p->name }}</span>
+                                <span class="inline-block px-2 py-1 rounded text-white bg-green-600 dark:bg-green-600 text-sm">{{ $p->name }}</span>
                             @endforeach
                         </div>
                         {{-- Verdedigers --}}
                         <div class="flex flex-wrap justify-center gap-2 sm:gap-16 min-h-6">
                             @foreach($defenders as $p)
-                                <span class="inline-block px-2 py-1 rounded text-white bg-green-600 text-sm">{{ $p->name }}</span>
+                                <span class="inline-block px-2 py-1 rounded text-white bg-green-600 dark:bg-green-600 text-sm">{{ $p->name }}</span>
                             @endforeach
                         </div>
                         {{-- Keeper(s) --}}
                         <div class="flex flex-wrap justify-center gap-2 sm:gap-16 min-h-6">
                             @foreach($keepers as $p)
-                                <span class="inline-block px-2 py-1 rounded text-white bg-green-800 text-sm">{{ $p->name }}</span>
+                                <span class="inline-block px-2 py-1 rounded text-white bg-blue-600 dark:bg-blue-500 text-sm">{{ $p->name }}</span>
                             @endforeach
                         </div>
                     </div>

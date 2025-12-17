@@ -1,9 +1,14 @@
 @props(['title'])
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="{{ request()->cookie('theme') === 'dark' ? 'dark' : '' }}">
 <head>
+    <script>
+        const theme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        if (theme === 'dark') document.documentElement.classList.add('dark');
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light dark">
     <title>{{ $title ?? config('app.name') }}</title>
     <link rel="icon" type="image/png" href="{{asset('favicons/favicon-96x96.png')}}" sizes="96x96"/>
     <link rel="icon" type="image/svg+xml" href="{{asset('favicons/favicon.svg')}}"/>
@@ -17,7 +22,7 @@
 <body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 flex flex-col min-h-screen">
 <x-nav></x-nav>
 
-<div class="flex-grow">
+<div class="grow">
     <main class="@if(request()->route()?->getName() !== 'home') max-w-5xl px-4 mb-8 mt-6 @else w-full @endif mx-auto {{str_replace('.', '-', request()->route()?->getName())}}">
         @if(session('success'))
             <div class="mb-4 p-3 rounded bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100">
