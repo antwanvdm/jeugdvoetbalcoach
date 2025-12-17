@@ -91,12 +91,12 @@
                         </div>
                     @endforeach
                 </div>
-                <button type="button" id="add-goal-btn" class="mt-2 px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700">+ Doelpunt toevoegen</button>
+                <button type="button" id="add-goal-btn" class="mt-2 px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700 cursor-pointer">+ Doelpunt toevoegen</button>
             </div>
         @endif
 
         <div class="flex gap-2">
-            <button class="px-3 py-2 bg-blue-600 text-white rounded">Opslaan</button>
+            <button class="px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 cursor-pointer">Opslaan</button>
             <a href="{{ route('football-matches.show', $footballMatch) }}" class="px-3 py-2 bg-gray-200 dark:bg-gray-700 rounded">Annuleren</a>
         </div>
     </form>
@@ -107,7 +107,7 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-3">
                     <div>
                         <label class="block text-xs text-gray-600 dark:text-gray-300 mb-1">Speler</label>
-                        <select name="goals[__INDEX__][player_id]" class="w-full border rounded p-1 text-sm">
+                        <select name="goals[__INDEX__][player_id]" class="w-full border rounded p-1 text-sm bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
                             <option value="">Eigen goal</option>
                             @foreach($players as $player)
                                 <option value="{{ $player->id }}">{{ $player->name }}</option>
@@ -116,15 +116,15 @@
                     </div>
                     <div>
                         <label class="block text-xs text-gray-600 dark:text-gray-300 mb-1">Minuut</label>
-                        <input type="number" name="goals[__INDEX__][minute]" class="w-full border rounded p-1 text-sm" min="0" max="120" placeholder="—">
+                        <input type="number" name="goals[__INDEX__][minute]" class="w-full border rounded p-1 text-sm bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" min="0" max="120" placeholder="—">
                     </div>
                     <div>
                         <label class="block text-xs text-gray-600 dark:text-gray-300 mb-1">Type</label>
-                        <input type="text" name="goals[__INDEX__][subtype]" class="w-full border rounded p-1 text-sm" placeholder="Bijv. penalty">
+                        <input type="text" name="goals[__INDEX__][subtype]" class="w-full border rounded p-1 text-sm bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" placeholder="Bijv. penalty">
                     </div>
                     <div>
                         <label class="block text-xs text-gray-600 dark:text-gray-300 mb-1">Assist</label>
-                        <select name="goals[__INDEX__][assist_player_id]" class="w-full border rounded p-1 text-sm">
+                        <select name="goals[__INDEX__][assist_player_id]" class="w-full border rounded p-1 text-sm bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
                             <option value="">Onbekend</option>
                             @foreach($players as $player)
                                 <option value="{{ $player->id }}">{{ $player->name }}</option>
@@ -135,11 +135,11 @@
                 <div class="grid grid-cols-1 gap-3">
                     <div>
                         <label class="block text-xs text-gray-600 dark:text-gray-300 mb-1">Notities</label>
-                        <textarea name="goals[__INDEX__][notes]" rows="2" class="w-full border rounded p-2 text-sm" placeholder="—"></textarea>
+                        <textarea name="goals[__INDEX__][notes]" rows="2" class="w-full border rounded p-2 text-sm bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" placeholder="—"></textarea>
                     </div>
                 </div>
                 <div class="mt-3">
-                    <button type="button" class="remove-goal-btn px-2 py-1 bg-red-500 text-white text-xs rounded hover:bg-red-600">Verwijder</button>
+                    <button type="button" class="remove-goal-btn px-2 py-1 bg-red-500 text-white text-xs rounded hover:bg-red-600 cursor-pointer">Verwijder</button>
                     <input type="hidden" name="goals[__INDEX__][_delete]" value="0" class="delete-flag">
                 </div>
             </div>

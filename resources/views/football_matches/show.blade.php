@@ -90,7 +90,7 @@
     @auth
         @if($footballMatch->notes)
             <div class="mt-6 bg-yellow-50 dark:bg-yellow-900 border border-yellow-200 dark:border-yellow-700 p-4 shadow dark:shadow-gray-700 rounded coach-notes">
-                <h2 class="text-lg font-semibold mb-2 text-yellow-900">📝 Coach notities</h2>
+                <h2 class="text-lg font-semibold mb-2 text-yellow-900 dark:text-yellow-100">📝 Coach notities</h2>
                 <p class="text-sm text-gray-700 dark:text-gray-200 whitespace-pre-wrap">{{ $footballMatch->notes }}</p>
             </div>
         @endif
@@ -336,7 +336,7 @@
                                 @if($item['quarters_played'] > 0)
                                     <span class="inline-block px-2 py-1 rounded text-white bg-green-600">{{ $item['quarters_played'] }}</span>
                                 @else
-                                    <span class="inline-block px-2 py-1 rounded bg-red-200 text-red-800 dark:text-red-200">Afwezig</span>
+                                    <span class="inline-block px-2 py-1 rounded bg-red-200 dark:bg-red-800 text-red-800 dark:text-red-100">Afwezig</span>
                                 @endif
                             </td>
                         </tr>
