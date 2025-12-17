@@ -1,26 +1,26 @@
 <x-app-layout>
     <div class="flex items-center justify-between mb-4">
         <h1 class="text-2xl font-semibold">Line-up voor wedstrijd tegen {{ $footballMatch->opponent->name ?? 'Onbekend' }}</h1>
-        <a href="{{ route('football-matches.show', $footballMatch) }}" class="px-3 py-2 bg-gray-200 rounded">Terug</a>
+        <a href="{{ route('football-matches.show', $footballMatch) }}" class="px-3 py-2 bg-gray-200 dark:bg-gray-700 rounded">Terug</a>
     </div>
 
-    <form action="{{ route('football-matches.lineup.update', $footballMatch) }}" method="POST" class="bg-white p-4 shadow rounded">
+    <form action="{{ route('football-matches.lineup.update', $footballMatch) }}" method="POST" class="bg-white dark:bg-gray-800 p-4 shadow dark:shadow-gray-700 rounded">
         @csrf
 
-        <p class="text-sm text-gray-600 mb-4">
+        <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">
             Per kwart kun je spelers markeren als Aanwezig en vervolgens een positie geven. Laat de positie leeg (— Bank —) om de speler op de bank te zetten.
             Als je de speler niet als Aanwezig aanvinkt in een kwart, wordt hij als Afwezig beschouwd voor dat kwart.
         </p>
 
         <!-- Master Attendance Section -->
-        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-            <h3 class="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+        <div class="bg-blue-50 dark:bg-blue-900 border border-blue-200 dark:border-blue-700 rounded-lg p-4 mb-6">
+            <h3 class="font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 Aanwezigheid deze wedstrijd
             </h3>
-            <p class="text-xs text-gray-600 mb-3">Vink spelers aan die de hele wedstrijd aanwezig zijn (alle 4 kwarten). Je kunt per kwart nog wijzigingen maken.</p>
+            <p class="text-xs text-gray-600 dark:text-gray-300 mb-3">Vink spelers aan die de hele wedstrijd aanwezig zijn (alle 4 kwarten). Je kunt per kwart nog wijzigingen maken.</p>
             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
                 @foreach($players as $player)
                     @php
@@ -33,7 +33,7 @@
                             }
                         }
                     @endphp
-                    <label class="flex items-center gap-2 text-sm bg-white rounded px-3 py-2 hover:bg-blue-100 cursor-pointer border border-gray-200">
+                    <label class="flex items-center gap-2 text-sm bg-white dark:bg-gray-800 rounded px-3 py-2 hover:bg-blue-100 dark:bg-blue-900 cursor-pointer border border-gray-200 dark:border-gray-700">
                         <input type="checkbox" class="master-attendance-toggle" data-player-id="{{ $player->id }}" {{ $presentInAll ? 'checked' : '' }}>
                         <span class="truncate">{{ $player->name }}</span>
                     </label>
@@ -48,12 +48,12 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
         @foreach(range(1,4) as $q)
             <div class="border rounded">
-                <div class="px-4 py-2 bg-gray-50 font-medium">Kwart {{ $q }}</div>
+                <div class="px-4 py-2 bg-gray-50 dark:bg-gray-900 font-medium">Kwart {{ $q }}</div>
                 <div class="p-4 overflow-x-auto">
                     <div class="overflow-x-auto">
                     <table class="min-w-full text-sm">
                         <thead>
-                        <tr class="text-left text-gray-600">
+                        <tr class="text-left text-gray-600 dark:text-gray-300">
                             <th class="py-2 pr-4">Speler</th>
                             <th class="py-2 pr-4">Aanwezig</th>
                             <th class="py-2 pr-4">Positie</th>
@@ -71,7 +71,7 @@
                                     <input type="checkbox" class="present-toggle" data-target="sel-q{{ $q }}-p{{ $player->id }}" {{ $present ? 'checked' : '' }}>
                                 </td>
                                 <td class="py-2 pr-4">
-                                    <select id="sel-q{{ $q }}-p{{ $player->id }}" class="border rounded px-2 py-1"
+                                    <select id="sel-q{{ $q }}-p{{ $player->id }}" class="border rounded px-2 py-1 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
                                             name="assignments[{{ $q }}][{{ $player->id }}]"
                                         {{ $present ? '' : 'disabled' }}>
                                         <option value="">— Bank —</option>
@@ -92,7 +92,7 @@
 
         <div class="flex gap-2 mt-6">
             <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">Sla line-up op</button>
-            <a href="{{ route('football-matches.show', $footballMatch) }}" class="px-4 py-2 bg-gray-200 rounded">Annuleer</a>
+            <a href="{{ route('football-matches.show', $footballMatch) }}" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded">Annuleer</a>
         </div>
     </form>
 

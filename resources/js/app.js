@@ -262,7 +262,7 @@ function initOpponentAutocomplete() {
 
         const list = document.createElement('div');
         list.className =
-            'absolute left-0 right-0 top-full z-30 bg-white border border-gray-200 rounded-md shadow mt-1 hidden';
+            'absolute left-0 right-0 top-full z-30 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow dark:shadow-gray-900 mt-1 hidden';
         wrapper.appendChild(list);
 
         let abortController = null;
@@ -297,7 +297,7 @@ function initOpponentAutocomplete() {
             if (abortController) abortController.abort();
             abortController = new AbortController();
             list.innerHTML =
-                '<div class="p-2 text-sm text-gray-500">Zoeken...</div>';
+                '<div class="p-2 text-sm text-gray-500 dark:text-gray-400">Zoeken...</div>';
             list.classList.remove('hidden');
             fetch(`/api/opponents?q=${encodeURIComponent(q)}`, {
                 signal: abortController.signal,
@@ -307,7 +307,7 @@ function initOpponentAutocomplete() {
                 .then((items) => {
                     if (!Array.isArray(items) || !items.length) {
                         list.innerHTML =
-                            '<div class="p-2 text-sm text-gray-500">Geen resultaten</div>';
+                            '<div class="p-2 text-sm text-gray-500 dark:text-gray-400">Geen resultaten</div>';
                         return;
                     }
                     list.innerHTML = '';
@@ -315,7 +315,7 @@ function initOpponentAutocomplete() {
                         const el = document.createElement('button');
                         el.type = 'button';
                         el.className =
-                            'w-full flex items-center gap-3 p-2 text-left hover:bg-blue-50 focus:bg-blue-100 text-sm';
+                            'w-full flex items-center gap-3 p-2 text-left hover:bg-blue-50 dark:hover:bg-blue-900 focus:bg-blue-100 dark:focus:bg-blue-800 text-sm text-gray-900 dark:text-gray-100';
                         el.innerHTML = `
                             ${
                             item.logo_url
@@ -326,7 +326,7 @@ function initOpponentAutocomplete() {
                                 <span class="font-medium">${escapeHtml(
                             item.name
                         )}</span>
-                                <span class="block text-xs text-gray-600">${escapeHtml(
+                                <span class="block text-xs text-gray-600 dark:text-gray-400">${escapeHtml(
                             item.location || ''
                         )}</span>
                             </span>
@@ -344,7 +344,7 @@ function initOpponentAutocomplete() {
                 .catch((e) => {
                     if (e.name === 'AbortError') return;
                     list.innerHTML =
-                        '<div class="p-2 text-sm text-red-600">Fout bij zoeken</div>';
+                        '<div class="p-2 text-sm text-red-600 dark:text-red-400">Fout bij zoeken</div>';
                 });
         }
     });
@@ -387,7 +387,8 @@ document.addEventListener('DOMContentLoaded', function () {
     // Function to create a new player row
     function createPlayerRow(index) {
         const row = document.createElement('div');
-        row.className = 'player-row mb-3 p-3 border rounded bg-gray-50';
+        row.className =
+            'player-row mb-3 p-3 border rounded bg-gray-50 dark:bg-gray-900 dark:border-gray-700';
         row.setAttribute('data-row-index', index);
 
         // Get positions from the first select element
@@ -399,25 +400,25 @@ document.addEventListener('DOMContentLoaded', function () {
         row.innerHTML = `
             <div class="grid grid-cols-1 sm:grid-cols-[2fr_1.5fr_1fr_auto] gap-3 items-start">
                 <div>
-                    <label class="block text-sm font-medium mb-1 sm:hidden">Naam</label>
+                    <label class="block text-sm font-medium mb-1 sm:hidden dark:text-gray-200">Naam</label>
                     <input type="text" name="players[${index}][name]"
-                           class="w-full border rounded p-2"
+                           class="w-full border rounded p-2 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
                            placeholder="Naam van de speler" required>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium mb-1 sm:hidden">Positie</label>
+                    <label class="block text-sm font-medium mb-1 sm:hidden dark:text-gray-200">Positie</label>
                     <select name="players[${index}][position_id]"
-                            class="w-full border rounded p-2" required>
+                            class="w-full border rounded p-2 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" required>
                         ${positionsHTML}
                     </select>
                 </div>
                 <div class="flex flex-col sm:flex-row items-start sm:items-center justify-start h-full">
-                    <label class="block text-sm font-medium mb-1 sm:hidden">Sterkere speler</label>
+                    <label class="block text-sm font-medium mb-1 sm:hidden dark:text-gray-200">Sterkere speler</label>
                     <input type="hidden" name="players[${index}][weight]" value="1">
                     <input type="checkbox" name="players[${index}][weight]" value="2" class="h-5 w-5">
                 </div>
                 <div class="flex items-start sm:items-center sm:justify-center">
-                    <button type="button" class="remove-player-btn w-10 h-10 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition" title="Verwijder speler">
+                    <button type="button" class="remove-player-btn w-10 h-10 text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900 rounded transition cursor-pointer" title="Verwijder speler">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                         </svg>

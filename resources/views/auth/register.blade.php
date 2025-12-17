@@ -1,20 +1,23 @@
 <x-app-layout>
     <h1 class="text-2xl font-semibold mb-2">Registreren</h1>
-    
-    @if(session('team_invite'))
-        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+
+    @if($teamInvite ?? session('team_invite'))
+        @php
+            $invite = $teamInvite ?? session('team_invite');
+        @endphp
+        <div class="bg-blue-50 dark:bg-blue-900 border border-blue-200 dark:border-blue-700 rounded-lg p-4 mb-6">
             <div class="flex items-center gap-3">
-                @if(session('team_invite')['team_logo'])
-                    <img src="{{ asset('storage/' . session('team_invite')['team_logo']) }}" alt="Team" class="h-12 w-12 object-contain">
+                @if($invite['team_logo'])
+                    <img src="{{ asset('storage/' . $invite['team_logo']) }}" alt="{{ $invite['team_name'] }} logo" class="h-12 w-12 object-contain">
                 @endif
                 <div>
-                    <p class="font-semibold text-blue-900">Je bent uitgenodigd voor {{ session('team_invite')['team_name'] }}</p>
-                    <p class="text-sm text-blue-700">Maak een account aan om lid te worden van dit team.</p>
+                    <p class="font-semibold text-blue-900 dark:text-blue-100">Je bent uitgenodigd voor {{ $invite['team_name'] }}</p>
+                    <p class="text-sm text-blue-700 dark:text-blue-400">Maak een account aan om lid te worden van dit team.</p>
                 </div>
             </div>
         </div>
     @else
-        <p class="text-sm text-gray-600 mb-6">Maak een account aan voor je team. Teamnaam en logo zijn verplicht.</p>
+        <p class="text-sm text-gray-600 dark:text-gray-300 mb-6">Maak een account aan voor je team. Teamnaam en logo zijn verplicht.</p>
     @endif
 
     <form method="POST" action="{{ route('register') }}" enctype="multipart/form-data" class="space-y-4">
@@ -34,11 +37,11 @@
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
         </div>
 
-        @unless(session('team_invite'))
+        @unless($teamInvite ?? session('team_invite'))
             <!-- Club zoeken (opponent autocomplete) -->
             <div>
                 <x-input-label for="club_search" value="Zoek club (autocomplete)" />
-                <input id="club_search" data-opponent-autocomplete data-target-hidden="opponent_id" type="text" class="block mt-1 w-full border-gray-300 rounded-md shadow-sm" placeholder="Begin te typen..." autocomplete="off">
+                <input id="club_search" data-opponent-autocomplete data-target-hidden="opponent_id" type="text" class="block mt-1 w-full border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-gray-100 rounded-md shadow-sm" placeholder="Begin te typen..." autocomplete="off">
                 <input type="hidden" name="opponent_id" id="opponent_id" value="{{ old('opponent_id') }}">
                 <x-input-error :messages="$errors->get('opponent_id')" class="mt-2" />
             </div>
@@ -48,7 +51,7 @@
         <div>
             <x-input-label for="password" value="Wachtwoord" />
 
-            <x-text-input id="password" class="block mt-1 w-full"
+            <x-text-input id="password" class="block mt-1 w-full dark:scheme-dark"
                             type="password"
                             name="password"
                             required autocomplete="new-password" />
@@ -60,7 +63,7 @@
         <div>
             <x-input-label for="password_confirmation" value="Bevestig wachtwoord" />
 
-            <x-text-input id="password_confirmation" class="block mt-1 w-full"
+            <x-text-input id="password_confirmation" class="block mt-1 w-full dark:scheme-dark"
                             type="password"
                             name="password_confirmation" required autocomplete="new-password" />
 
@@ -68,7 +71,7 @@
         </div>
 
         <div class="flex items-center justify-between pt-2">
-            <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('login') }}">
+            <a class="underline text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('login') }}">
                 Al geregistreerd?
             </a>
 

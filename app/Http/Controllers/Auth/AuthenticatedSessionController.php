@@ -28,6 +28,12 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
+        // Check if user has a pending team invite
+        if (session()->has('pending_team_invite')) {
+            $inviteCode = session('pending_team_invite');
+            return redirect()->route('teams.join.show', ['inviteCode' => $inviteCode]);
+        }
+
         return redirect()->intended(route('dashboard', absolute: false));
     }
 

@@ -1,5 +1,5 @@
 <x-app-layout>
-    <div class="mb-4 text-sm text-gray-600">
+    <div class="mb-4 text-sm text-gray-600 dark:text-gray-300">
         Dit is een beveiligd gedeelte van de applicatie. Bevestig je wachtwoord voordat je doorgaat.
     </div>
 
@@ -10,7 +10,7 @@
         <div>
             <x-input-label for="password" value="Wachtwoord" />
 
-            <x-text-input id="password" class="block mt-1 w-full"
+            <x-text-input id="password" class="block mt-1 w-full dark:scheme-dark"
                             type="password"
                             name="password"
                             required autocomplete="current-password" />

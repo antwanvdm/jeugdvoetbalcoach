@@ -7,7 +7,7 @@
     </div>
 
     <div class="overflow-x-auto">
-        <table class="min-w-full bg-white shadow rounded">
+        <table class="min-w-full bg-white dark:bg-gray-800 shadow dark:shadow-gray-700 rounded">
             <thead>
             <tr class="border-b">
                 <th class="text-left p-3"></th>
@@ -25,22 +25,22 @@
                         @if($opponent->logo)
                             <img src="{{ asset('storage/' . $opponent->logo) }}" alt="{{ $opponent->name }} logo" class="h-8 min-w-8">
                         @else
-                            <div class="h-8 w-8 flex items-center justify-center bg-gray-100 rounded text-gray-400">?</div>
+                            <div class="h-8 w-8 flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded text-gray-400">?</div>
                         @endif
                     </td>
                     <td class="p-3">{{ $opponent->name }}</td>
                     <td class="p-3 hidden sm:table-cell">
-                        <a href="{{ $opponent->location_maps_link }}" target="_blank" rel="noopener" class="text-blue-600 hover:underline">{{ $opponent->location }}</a>
+                        <a href="{{ $opponent->location_maps_link }}" target="_blank" rel="noopener" class="text-blue-600 dark:text-blue-400 hover:underline">{{ $opponent->location }}</a>
                     </td>
                     @if(auth()->user()->isAdmin())
                         <td class="p-3 text-right">
-                            <a class="text-blue-600 mr-2" href="{{ route('admin.opponents.show', $opponent) }}">Bekijk</a>
+                            <a class="text-blue-600 dark:text-blue-400 mr-2" href="{{ route('admin.opponents.show', $opponent) }}">Bekijk</a>
                         </td>
                     @endif
                 </tr>
             @empty
                 <tr>
-                    <td colspan="3" class="p-3 text-center text-gray-500">Nog geen tegenstanders.</td>
+                    <td colspan="3" class="p-3 text-center text-gray-500 dark:text-gray-400">Nog geen tegenstanders.</td>
                 </tr>
             @endforelse
             </tbody>

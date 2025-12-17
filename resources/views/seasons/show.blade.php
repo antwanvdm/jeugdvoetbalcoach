@@ -10,7 +10,7 @@
                 @endif
                 <div>
                     <h1 class="text-3xl font-bold">Seizoen {{ $season->year }}/{{ $season->year + 1 }} - Fase {{ $season->part }}</h1>
-                    <p class="text-gray-600">{{ $season->start->format('d-m-Y') }} - {{ $season->end->format('d-m-Y') }}</p>
+                    <p class="text-gray-600 dark:text-gray-300">{{ $season->start->format('d-m-Y') }} - {{ $season->end->format('d-m-Y') }}</p>
                 </div>
             </div>
         </div>
@@ -18,21 +18,21 @@
         <!-- Share Section (uniform with match share) -->
         @auth
             @if($season->share_token)
-                <div class="mt-6 bg-blue-50 border border-blue-200 p-4 shadow rounded parents-invite mb-6">
-                    <h2 class="text-lg font-semibold mb-2 text-blue-900">📱 Deel met ouders</h2>
-                    <p class="text-sm text-blue-800 mb-3">Ouders kunnen dit seizoen bekijken zonder in te loggen via onderstaande link:</p>
+                <div class="mt-6 bg-blue-50 dark:bg-blue-900 border border-blue-200 dark:border-blue-700 p-4 shadow dark:shadow-gray-700 rounded parents-invite mb-6">
+                    <h2 class="text-lg font-semibold mb-2 text-blue-900 dark:text-blue-100">📱 Deel met ouders</h2>
+                    <p class="text-sm text-blue-800 dark:text-blue-200 mb-3">Ouders kunnen dit seizoen bekijken zonder in te loggen via onderstaande link:</p>
                     <div class="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
                         <input
                             type="text"
                             readonly
                             value="{{ route('seasons.share', ['season' => $season, 'shareToken' => $season->share_token]) }}"
                             id="seasonShareLink"
-                            class="flex-1 px-3 py-2 border border-blue-300 rounded bg-white text-sm font-mono"
+                            class="flex-1 px-3 py-2 border border-blue-300 rounded bg-white dark:bg-gray-800 text-sm font-mono"
                         >
                         <button
                             data-copy-input="seasonShareLink"
                             data-copy-message="Link gekopieerd naar klembord!"
-                            class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition whitespace-nowrap cursor-pointer"
+                            class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 dark:hover:bg-blue-600 transition whitespace-nowrap cursor-pointer"
                         >
                             Kopieer
                         </button>
@@ -46,11 +46,11 @@
                             Deel
                         </button>
                     </div>
-                    <p class="text-xs text-blue-700 mt-2">💡 Deze link is uniek en privé - deel alleen met betrokken ouders.</p>
+                    <p class="text-xs text-blue-700 dark:text-blue-400 mt-2">💡 Deze link is uniek en privé - deel alleen met betrokken ouders.</p>
                 </div>
             @else
-                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
-                    <p class="text-sm text-yellow-800">Nog geen deellink voor dit seizoen. <a href="{{ route('seasons.edit', $season) }}" class="underline font-medium">Genereer een deellink</a> om met ouders te delen.</p>
+                <div class="bg-yellow-50 dark:bg-yellow-900 border border-yellow-200 dark:border-yellow-700 rounded-lg p-4 mb-6">
+                    <p class="text-sm text-yellow-800 dark:text-yellow-200">Nog geen deellink voor dit seizoen. <a href="{{ route('seasons.edit', $season) }}" class="underline font-medium">Genereer een deellink</a> om met ouders te delen.</p>
                 </div>
             @endif
         @endauth
@@ -58,100 +58,90 @@
         <!-- Statistics & Coaches -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-6">
             <!-- Season Statistics (2/3) -->
-            <div class="sm:col-span-2 bg-white rounded-lg shadow p-4">
+            <div class="sm:col-span-2 bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-700 p-4">
                 <h2 class="text-lg font-semibold mb-4">Seizoensstatistieken</h2>
                 @if($season->stats && $season->stats['total'] > 0)
                     <div class="space-y-3 text-sm">
                         <div class="flex justify-between">
-                            <span class="text-gray-600">Wedstrijden:</span>
+                            <span class="text-gray-600 dark:text-gray-300">Wedstrijden:</span>
                             <span class="font-semibold">{{ $season->stats['total'] }}</span>
                         </div>
                         <div class="flex justify-between">
-                            <span class="text-gray-600">Prestatie:</span>
+                            <span class="text-gray-600 dark:text-gray-300">Prestatie:</span>
                             <span class="font-semibold">
-                                <span class="text-green-600">{{ $season->stats['wins'] }}W</span>
+                                <span class="text-green-600 dark:text-green-400">{{ $season->stats['wins'] }}W</span>
                                 <span class="text-gray-400 mx-1">•</span>
-                                <span class="text-gray-600">{{ $season->stats['draws'] }}G</span>
+                                <span class="text-gray-600 dark:text-gray-300">{{ $season->stats['draws'] }}G</span>
                                 <span class="text-gray-400 mx-1">•</span>
-                                <span class="text-red-600">{{ $season->stats['losses'] }}V</span>
+                                <span class="text-red-600 dark:text-red-400">{{ $season->stats['losses'] }}V</span>
                             </span>
                         </div>
                         <div class="flex justify-between">
-                            <span class="text-gray-600">Doelsaldo:</span>
-                            <span class="font-semibold {{ $season->stats['goal_diff'] >= 0 ? 'text-green-600' : 'text-red-600' }}">{{ $season->stats['goal_diff'] > 0 ? '+' : '' }}{{ $season->stats['goal_diff'] }}</span>
+                            <span class="text-gray-600 dark:text-gray-300">Doelsaldo:</span>
+                            <span class="font-semibold {{ $season->stats['goal_diff'] >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }}">{{ $season->stats['goal_diff'] > 0 ? '+' : '' }}{{ $season->stats['goal_diff'] }}</span>
                         </div>
                     </div>
                 @else
-                    <p class="text-sm text-gray-500">Nog geen wedstrijden met resultaat.</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Nog geen wedstrijden met resultaat.</p>
                 @endif
             </div>
 
             <!-- Coaches (1/3) -->
-            <div class="bg-white rounded-lg shadow p-4">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-700 p-4">
                 <h2 class="text-lg font-semibold mb-4">Coaches</h2>
                 @if($coaches->count() > 0)
                     <div class="space-y-2">
                         @foreach($coaches as $coach)
                             <div class="flex items-center gap-2 text-sm">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-indigo-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-indigo-600 dark:text-indigo-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                                 </svg>
-                                <span class="text-gray-900">{{ $coach->name }}</span>
+                                <span class="text-gray-900 dark:text-gray-100">{{ $coach->name }}</span>
                             </div>
                         @endforeach
                     </div>
                 @else
-                    <p class="text-sm text-gray-500">Geen coaches gekoppeld aan dit team.</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Geen coaches gekoppeld aan dit team.</p>
                 @endif
             </div>
         </div>
 
         <!-- Matches -->
-        <div class="bg-white rounded-lg shadow mb-6">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-700 mb-6">
             <div class="p-4 border-b">
                 <h2 class="text-xl font-semibold">Wedstrijden ({{ $matches->count() }})</h2>
             </div>
             <div class="divide-y">
                 @forelse($matches as $match)
-                    <div class="p-4 hover:bg-gray-50 flex sm:items-center justify-between flex-col sm:flex-row gap-4 sm:gap-0">
+                    <div class="p-4 hover:bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-900 flex sm:items-center justify-between flex-col sm:flex-row gap-4 sm:gap-0">
                         <div class="flex items-center gap-4">
                             @if($match->opponent?->logo)
                                 <img src="{{ asset('storage/' . $match->opponent->logo) }}" alt="{{ $match->opponent->name }}" class="h-10 w-10 object-contain">
                             @endif
                             <div>
                                 <div class="font-semibold">{{ $match->opponent?->name ?? 'Onbekend' }}</div>
-                                <div class="text-sm text-gray-600">{{ $match->date->format('d-m-Y H:i') }} - {{ $match->home ? 'Thuis' : 'Uit' }}</div>
+                                <div class="text-sm text-gray-600 dark:text-gray-300">{{ $match->date->format('d-m-Y H:i') }} - {{ $match->home ? 'Thuis' : 'Uit' }}</div>
                             </div>
                         </div>
                         <div class="flex items-center gap-3">
                             @if(!is_null($match->goals_scored) && !is_null($match->goals_conceded))
-                                <span class="font-bold text-lg result-{{$match->result}}">
-                                    @if($match->result !== 'O')
-                                        @if($match->home)
-                                            {{ $match->goals_scored }} - {{ $match->goals_conceded }}
-                                        @else
-                                            {{ $match->goals_conceded }} - {{ $match->goals_scored }}
-                                        @endif
-                                    @else
-                                        <span class="text-gray-500">-</span>
-                                    @endif
-                                </span>
+                                <x-match-score :match="$match" class="text-lg" />
                             @else
-                                <span class="text-gray-500">—</span>
+                                <span class="text-gray-500 dark:text-gray-400">—</span>
                             @endif
                             @auth
-                                <a href="{{ route('football-matches.show', $match) }}" class="px-3 py-1 text-sm bg-blue-100 text-blue-800 rounded hover:bg-blue-200">
+                                <a href="{{ route('football-matches.show', $match) }}" class="px-3 py-1 text-sm bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-300 rounded hover:bg-blue-200">
                                     Details
                                 </a>
                             @else
-                                <a href="{{ route('football-matches.share', ['footballMatch' => $match, 'shareToken' => $match->share_token]) }}" target="_blank" class="px-3 py-1 text-sm bg-green-100 text-green-800 rounded hover:bg-green-200">
+                                <a href="{{ route('football-matches.share', ['footballMatch' => $match, 'shareToken' => $match->share_token]) }}" target="_blank" class="px-3 py-1 text-sm bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded hover:bg-green-200">
                                     Bekijk wedstrijd
                                 </a>
                             @endauth
                         </div>
                     </div>
                 @empty
-                    <div class="p-4 text-center text-gray-500">Geen wedstrijden in dit seizoen.</div>
+                    <div class="p-4 text-center text-gray-500 dark:text-gray-400">Geen wedstrijden in dit seizoen.</div>
                 @endforelse
             </div>
         </div>
@@ -160,14 +150,14 @@
         @if($season->track_goals && ($topScorers->isNotEmpty() || $topAssisters->isNotEmpty()))
             <div class="grid grid-cols-2 gap-6 mb-6">
                 @if($topScorers->isNotEmpty())
-                    <div class="bg-white rounded-lg shadow">
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-700">
                         <div class="p-4 border-b">
                             <h2 class="text-xl font-semibold">Topscorers</h2>
                         </div>
                         <div class="p-4">
                             <table class="min-w-full">
                                 <thead>
-                                <tr class="text-sm text-gray-600">
+                                <tr class="text-sm text-gray-600 dark:text-gray-300">
                                     <th class="text-left pb-2">Speler</th>
                                     <th class="text-right pb-2">Doelpunten</th>
                                 </tr>
@@ -186,14 +176,14 @@
                 @endif
 
                 @if($topAssisters->isNotEmpty())
-                    <div class="bg-white rounded-lg shadow">
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-700">
                         <div class="p-4 border-b">
                             <h2 class="text-xl font-semibold">Top assists</h2>
                         </div>
                         <div class="p-4">
                             <table class="min-w-full">
                                 <thead>
-                                <tr class="text-sm text-gray-600">
+                                <tr class="text-sm text-gray-600 dark:text-gray-300">
                                     <th class="text-left pb-2">Speler</th>
                                     <th class="text-right pb-2">Assists</th>
                                 </tr>
@@ -216,8 +206,8 @@
         @auth
             <!-- Actions -->
             <div class="flex flex-col sm:flex-row gap-2">
-                <a href="{{ route('seasons.index') }}" class="flex-1 px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 text-center">Alle seizoenen bekijken</a>
-                <a href="{{ route('seasons.edit', $season) }}" class="flex-1 px-4 py-2 bg-yellow-600 text-white text-center rounded hover:bg-yellow-700">
+                <a href="{{ route('seasons.index') }}" class="flex-1 px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:bg-gray-600 text-center">Alle seizoenen bekijken</a>
+                <a href="{{ route('seasons.edit', $season) }}" class="flex-1 px-4 py-2 bg-yellow-600 text-white text-center rounded hover:bg-yellow-700 dark:hover:bg-yellow-600">
                     Seizoen bewerken
                 </a>
                 <form action="{{ route('seasons.destroy', $season) }}" method="POST" class="flex-1" onsubmit="return confirm('Verwijder seizoen inclusief alle wedstrijden?')">

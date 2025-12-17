@@ -23,34 +23,26 @@
         </div>
     </div>
 
-    <div class="bg-white p-4 shadow rounded flex flex-col-reverse sm:flex-row gap-4 opponent-info">
+    <div class="bg-white dark:bg-gray-800 p-4 shadow dark:shadow-gray-700 rounded flex flex-col-reverse sm:flex-row gap-4 opponent-info">
         <dl class="grid grid-cols-2 sm:grid-cols-3 gap-2 flex-1">
-            <dt class="text-gray-600 font-bold">Tegenstander</dt>
+            <dt class="text-gray-600 dark:text-gray-300 font-bold">Tegenstander</dt>
             <dd class="sm:col-span-2">{{ $footballMatch->opponent->name ?? '-' }}</dd>
 
-            <dt class="text-gray-600 font-bold">Seizoen</dt>
+            <dt class="text-gray-600 dark:text-gray-300 font-bold">Seizoen</dt>
             <dd class="sm:col-span-2">{{ $footballMatch->season->year }}/{{ $footballMatch->season->year + 1 }} - Fase {{ $footballMatch->season->part }}</dd>
 
-            <dt class="text-gray-600 font-bold">Locatie</dt>
+            <dt class="text-gray-600 dark:text-gray-300 font-bold">Locatie</dt>
             <dd class="sm:col-span-2">
                 {{ $footballMatch->home ? 'Thuis' : 'Uit' }} (<a href="{{ $footballMatch->home ? $footballMatch->team->opponent->location_maps_link : $footballMatch->opponent->location_maps_link }}" target="_blank" rel="noopener"
-                                                                 class="text-blue-600 hover:underline">{{ $locLabel ?? '📍 Kaart' }}</a>)
+                                                                 class="text-blue-600 dark:text-blue-400 hover:underline">{{ $locLabel ?? '📍 Kaart' }}</a>)
             </dd>
 
-            <dt class="text-gray-600 font-bold">Datum</dt>
+            <dt class="text-gray-600 dark:text-gray-300 font-bold">Datum</dt>
             <dd class="sm:col-span-2">{{ $footballMatch->date?->translatedFormat('j F Y H:i') }}</dd>
 
-            <dt class="text-gray-600 font-bold">Uitslag</dt>
-            <dd class="sm:col-span-2 font-bold result-{{$footballMatch->result}}">
-                @if($footballMatch->result !== 'O')
-                    @if($footballMatch->home)
-                        {{ $footballMatch->goals_scored }} - {{ $footballMatch->goals_conceded }}
-                    @else
-                        {{ $footballMatch->goals_conceded }} - {{ $footballMatch->goals_scored }}
-                    @endif
-                @else
-                    <span class="text-gray-500">-</span>
-                @endif
+            <dt class="text-gray-600 dark:text-gray-300 font-bold">Uitslag</dt>
+            <dd class="sm:col-span-2">
+                <x-match-score :match="$footballMatch" />
             </dd>
         </dl>
         <div class="flex-1 flex justify-center items-center gap-4 @if(!$footballMatch->home) flex-row-reverse @endif">
@@ -68,24 +60,24 @@
 
     {{-- Goals --}}
     @if($footballMatch->season && $footballMatch->season->track_goals && $footballMatch->goals->isNotEmpty())
-        <div class="mt-6 bg-white p-4 shadow rounded player-goals">
+        <div class="mt-6 bg-white dark:bg-gray-800 p-4 shadow dark:shadow-gray-700 rounded player-goals">
             <h2 class="text-xl font-semibold mb-3">⚽ Doelpunten</h2>
             <div class="space-y-2">
                 @foreach($footballMatch->goals->sortBy('minute') as $goal)
-                    <div class="flex items-center gap-3 p-2 bg-gray-50 rounded">
+                    <div class="flex items-center gap-3 p-2 bg-gray-50 dark:bg-gray-900 rounded">
                         @if($goal->minute)
-                            <span class="font-bold text-green-700">{{ $goal->minute }}'</span>
+                            <span class="font-bold text-green-700 dark:text-green-400">{{ $goal->minute }}'</span>
                         @endif
                         <div class="flex-1">
                             <span class="font-semibold">{{ $goal->player?->name ?? 'Eigen goal' }}</span>
                             @if($goal->assistPlayer)
-                                <span class="text-gray-600 text-sm">(assist: {{ $goal->assistPlayer->name }})</span>
+                                <span class="text-gray-600 dark:text-gray-300 text-sm">(assist: {{ $goal->assistPlayer->name }})</span>
                             @endif
                             @if($goal->subtype)
-                                <span class="ml-2 px-2 py-0.5 bg-blue-100 text-blue-800 text-xs rounded">{{ $goal->subtype }}</span>
+                                <span class="ml-2 px-2 py-0.5 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-300 text-xs rounded">{{ $goal->subtype }}</span>
                             @endif
                             @if($goal->notes)
-                                <p class="text-xs text-gray-600 mt-1">{{ $goal->notes }}</p>
+                                <p class="text-xs text-gray-600 dark:text-gray-300 mt-1">{{ $goal->notes }}</p>
                             @endif
                         </div>
                     </div>
@@ -97,9 +89,9 @@
     {{-- Coach Notes --}}
     @auth
         @if($footballMatch->notes)
-            <div class="mt-6 bg-yellow-50 border border-yellow-200 p-4 shadow rounded coach-notes">
+            <div class="mt-6 bg-yellow-50 dark:bg-yellow-900 border border-yellow-200 dark:border-yellow-700 p-4 shadow dark:shadow-gray-700 rounded coach-notes">
                 <h2 class="text-lg font-semibold mb-2 text-yellow-900">📝 Coach notities</h2>
-                <p class="text-sm text-gray-700 whitespace-pre-wrap">{{ $footballMatch->notes }}</p>
+                <p class="text-sm text-gray-700 dark:text-gray-200 whitespace-pre-wrap">{{ $footballMatch->notes }}</p>
             </div>
         @endif
     @endauth
@@ -107,21 +99,21 @@
     @auth
         @if($footballMatch->share_token)
             {{-- Share link for parents --}}
-            <div class="mt-6 bg-blue-50 border border-blue-200 p-4 shadow rounded parents-invite">
-                <h2 class="text-lg font-semibold mb-2 text-blue-900">📱 Deel met ouders</h2>
-                <p class="text-sm text-blue-800 mb-3">Ouders kunnen deze wedstrijd bekijken zonder in te loggen via onderstaande link:</p>
+            <div class="mt-6 bg-blue-50 dark:bg-blue-900 border border-blue-200 dark:border-blue-700 p-4 shadow dark:shadow-gray-700 rounded parents-invite">
+                <h2 class="text-lg font-semibold mb-2 text-blue-900 dark:text-blue-100">📱 Deel met ouders</h2>
+                <p class="text-sm text-blue-800 dark:text-blue-200 mb-3">Ouders kunnen deze wedstrijd bekijken zonder in te loggen via onderstaande link:</p>
                 <div class="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
                     <input
                         type="text"
                         readonly
                         value="{{ route('football-matches.share', ['footballMatch' => $footballMatch, 'shareToken' => $footballMatch->share_token]) }}"
                         id="shareLink"
-                        class="flex-1 px-3 py-2 border border-blue-300 rounded bg-white text-sm font-mono"
+                        class="flex-1 px-3 py-2 border border-blue-300 rounded bg-white dark:bg-gray-800 text-sm font-mono"
                     >
                     <button
                         data-copy-input="shareLink"
                         data-copy-message="Link gekopieerd naar klembord!"
-                        class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition whitespace-nowrap cursor-pointer"
+                        class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 dark:hover:bg-blue-600 transition whitespace-nowrap cursor-pointer"
                     >
                         Kopieer
                     </button>
@@ -135,7 +127,7 @@
                         Deel
                     </button>
                 </div>
-                <p class="text-xs text-blue-700 mt-2">💡 Deze link is uniek en privé - deel alleen met betrokken ouders.</p>
+                <p class="text-xs text-blue-700 dark:text-blue-400 mt-2">💡 Deze link is uniek en privé - deel alleen met betrokken ouders.</p>
             </div>
         @endif
     @endauth
@@ -143,13 +135,13 @@
     {{-- Regenerate lineup section --}}
     @auth
         @if($footballMatch->result === 'O')
-            <div class="mt-6 bg-white p-4 shadow rounded regenerate-section">
+            <div class="mt-6 bg-white dark:bg-gray-800 p-4 shadow dark:shadow-gray-700 rounded regenerate-section">
                 <button class="w-full text-left font-semibold text-lg flex items-center gap-2 hover:text-blue-600 transition cursor-pointer">
                     <span class="inline-block transition-transform duration-200">▶</span>
                     🔄 Opstelling opnieuw maken
                 </button>
                 <div class="hidden border-t pt-4 mt-4 regenerate-form-content">
-                    <p class="text-sm text-gray-600 mb-4">
+                    <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">
                         Wijzigingen in aanwezigheid, teveel werk in handmatige aanpassingen of even een frisse blik nodig?
                         Vink de spelers uit die afwezig zijn. Er wordt automatisch een nieuwe, gebalanceerde opstelling gegenereerd.
                     </p>
@@ -159,15 +151,15 @@
                         <div class="mb-4">
                             <div class="flex justify-between items-center mb-2">
                                 <label class="block text-sm font-medium">Aanwezige spelers</label>
-                                <span class="text-xs text-gray-600">(Minimaal {{ $footballMatch->season->formation->total_players }} spelers)</span>
+                                <span class="text-xs text-gray-600 dark:text-gray-300">(Minimaal {{ $footballMatch->season->formation->total_players }} spelers)</span>
                             </div>
-                            <div class="border rounded p-3 bg-gray-50 overflow-y-auto">
+                            <div class="border dark:border-gray-600 rounded p-3 bg-gray-50 dark:bg-gray-900 overflow-y-auto">
                                 @if($footballMatch->season->players->isEmpty())
-                                    <p class="text-sm text-gray-500">Geen spelers beschikbaar voor dit seizoen</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Geen spelers beschikbaar voor dit seizoen</p>
                                 @else
                                     <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
                                         @foreach($footballMatch->season->players as $player)
-                                            <label class="inline-flex items-center gap-2 hover:bg-gray-100 p-1 rounded cursor-pointer">
+                                            <label class="inline-flex items-center gap-2 hover:bg-gray-100 dark:hover:bg-gray-700 dark:bg-gray-800 p-1 rounded cursor-pointer">
                                                 <input
                                                     type="checkbox"
                                                     name="available_players[]"
@@ -182,12 +174,12 @@
                                 @endif
                             </div>
                             @error('available_players')
-                            <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                            <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
                             @enderror
                         </div>
 
                         <div class="flex gap-2 pt-3 border-t">
-                            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm cursor-pointer">Nieuwe opstelling maken</button>
+                            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 dark:hover:bg-blue-600 text-sm cursor-pointer">Nieuwe opstelling maken</button>
                         </div>
                     </form>
                 </div>
@@ -196,7 +188,7 @@
     @endauth
 
     {{-- Lineup overview table --}}
-    <div class="mt-6 bg-white p-4 shadow rounded">
+    <div class="mt-6 bg-white dark:bg-gray-800 p-4 shadow dark:shadow-gray-700 rounded">
         <div class="flex flex-col sm:flex-row sm:justify-between gap-2 sm:items-center line-up-header">
             <h2 class="text-xl font-semibold mb-3">Line-up per kwart</h2>
             @auth
@@ -207,7 +199,7 @@
             <div class="overflow-x-auto">
                 <table class="min-w-full text-sm">
                     <thead>
-                    <tr class="text-left text-gray-600">
+                    <tr class="text-left text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-900">
                         <th class="py-2 pr-4 w-20"></th>
                         <th class="py-2 pr-4">Keeper</th>
                         <th class="py-2 pr-4">Spelers</th>
@@ -231,21 +223,21 @@
                             <td class="py-2 pr-4 font-medium">Q{{ $q }}</td>
                             <td class="py-2 pr-4">
                                 @if($keeper)
-                                    <span class="inline-block px-2 py-1 rounded text-white bg-green-800">{{ $keeper->name }}</span>
+                                    <span class="inline-block px-2 py-1 rounded text-white bg-green-800 dark:bg-green-700">{{ $keeper->name }}</span>
                                 @else
-                                    <span class="text-gray-400">-</span>
+                                    <span class="text-gray-400 dark:text-gray-500">-</span>
                                 @endif
                             </td>
                             <td class="py-2 pr-4">
                                 @forelse($field as $p)
-                                    <span class="inline-block px-2 py-1 mb-1 sm:mb-0 rounded text-white bg-green-600">{{ $p->name }}</span>
+                                    <span class="inline-block px-2 py-1 mb-1 sm:mb-0 rounded text-white bg-green-600 dark:bg-green-700">{{ $p->name }}</span>
                                 @empty
-                                    <span class="text-gray-400">-</span>
+                                    <span class="text-gray-400 dark:text-gray-500">-</span>
                                 @endforelse
                             </td>
                             <td class="py-2 pr-4">
                                 @forelse($bench as $p)
-                                    <span class="inline-block px-2 py-1 mb-1 sm:mb-0 rounded bg-yellow-300 text-yellow-900">{{ $p->name }}</span>
+                                    <span class="inline-block px-2 py-1 mb-1 sm:mb-0 rounded bg-yellow-300 dark:bg-yellow-700 text-yellow-900 dark:text-yellow-100">{{ $p->name }}</span>
                                 @empty
                                     <span class="text-gray-400">-</span>
                                 @endforelse
@@ -258,8 +250,8 @@
         </div>
     </div>
 
-    {{-- Dobbelsteen-opstelling (schematic) per quarter --}}
-    <div class="mt-6 bg-white p-4 shadow rounded">
+    {{-- Line-up (schematic) per quarter --}}
+    <div class="mt-6 bg-white dark:bg-gray-800 p-4 shadow dark:shadow-gray-700 rounded">
         <div class="flex flex-col sm:flex-row sm:justify-between gap-2 sm:items-center line-up-header mb-3">
             <h2 class="text-xl font-semibold">Opstelling per kwart</h2>
             <button onclick="window.print();" class="px-3 py-2 bg-indigo-600 text-white rounded cursor-pointer text-sm">🖨️ Print</button>
@@ -293,7 +285,7 @@
                 <div class="border rounded p-3 line-up-block">
                     <div class="text-sm font-medium mb-2">Q{{ $q }}</div>
                     {{-- Simple vertical lines: Aanvaller (top), Middenvelder, Verdediger, Keeper (bottom) --}}
-                    <div class="flex flex-col gap-4 sm:gap-6 bg-emerald-50 p-3 rounded line-up-player-rows">
+                    <div class="flex flex-col gap-4 sm:gap-6 bg-emerald-50 dark:bg-emerald-900 p-3 rounded line-up-player-rows">
                         {{-- Aanvallers --}}
                         <div class="flex flex-wrap justify-center gap-2 sm:gap-16 min-h-6">
                             @foreach($attackers as $p)
@@ -325,13 +317,13 @@
     </div>
 
     {{-- Spelers overzicht met kwarten gespeeld --}}
-    <div class="mt-6 bg-white p-4 shadow rounded player-stats">
+    <div class="mt-6 bg-white dark:bg-gray-800 p-4 shadow dark:shadow-gray-700 rounded player-stats">
         <h2 class="text-xl font-semibold mb-3">Statistieken</h2>
         <div class="overflow-x-auto">
             <div class="overflow-x-auto">
                 <table class="min-w-full text-sm">
                     <thead>
-                    <tr class="text-left text-gray-600 border-b">
+                    <tr class="text-left text-gray-600 dark:text-gray-300 border-b">
                         <th class="py-2 pr-4">Speler</th>
                         <th class="py-2 pr-4">Kwarten gespeeld</th>
                     </tr>
@@ -344,7 +336,7 @@
                                 @if($item['quarters_played'] > 0)
                                     <span class="inline-block px-2 py-1 rounded text-white bg-green-600">{{ $item['quarters_played'] }}</span>
                                 @else
-                                    <span class="inline-block px-2 py-1 rounded bg-red-200 text-red-800">Afwezig</span>
+                                    <span class="inline-block px-2 py-1 rounded bg-red-200 text-red-800 dark:text-red-200">Afwezig</span>
                                 @endif
                             </td>
                         </tr>

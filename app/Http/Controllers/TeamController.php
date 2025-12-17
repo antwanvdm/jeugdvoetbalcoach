@@ -245,6 +245,20 @@ class TeamController extends Controller
     }
 
     /**
+     * Decline a team invitation.
+     */
+    public function declineInvite(string $inviteCode)
+    {
+        $team = Team::where('invite_code', $inviteCode)->firstOrFail();
+
+        // Clear the pending invite from session
+        session()->forget('pending_team_invite');
+
+        return redirect()->route('dashboard')
+            ->with('info', "Je hebt de uitnodiging om deel te nemen aan {$team->opponent?->name} geweigerd.");
+    }
+
+    /**
      * Regenerate invite code for a team (hoofdcoach only via 'update' policy).
      */
     public function regenerateInviteCode(Team $team)

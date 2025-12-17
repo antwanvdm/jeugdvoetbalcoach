@@ -8,12 +8,12 @@
                 <div>
                     <h1 class="text-3xl font-bold">{{ $team->opponent?->name }}</h1>
                     @if($team->opponent)
-                        <p class="text-gray-600 mt-1">📍 <a class="text-blue-600 hover:underline" target="_blank" href="{{ $team->opponent->location_maps_link }}">Google Maps</a></p>
+                        <p class="text-gray-600 dark:text-gray-300 mt-1">📍 <a class="text-blue-600 dark:text-blue-400 hover:underline" target="_blank" href="{{ $team->opponent->location_maps_link }}">Kaart</a></p>
                     @endif
                 </div>
             </div>
             <div class="flex gap-2">
-                <a href="{{ route('teams.index') }}" class="px-3 py-2 bg-gray-200 rounded hover:bg-gray-300">Terug</a>
+                <a href="{{ route('teams.index') }}" class="px-3 py-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300">Terug</a>
                 @can('update', $team)
                     <a href="{{ route('teams.edit', $team) }}" class="px-3 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600">Bewerk</a>
                 @endcan
@@ -28,35 +28,35 @@
         </div>
 
         <!-- Team Members -->
-        <div class="bg-white rounded-lg shadow mb-6">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-700 mb-6">
             <div class="p-4 border-b">
                 <h2 class="text-xl font-semibold">Coaches ({{ $members->count() }})</h2>
             </div>
             <div class="overflow-x-auto">
                 <table class="min-w-full">
-                    <thead class="bg-gray-50">
+                    <thead class="bg-gray-50 dark:bg-gray-900">
                         <tr>
-                            <th class="text-left p-3 text-sm font-medium text-gray-700">Naam</th>
-                            <th class="text-left p-3 text-sm font-medium text-gray-700">E-mail</th>
-                            <th class="text-left p-3 text-sm font-medium text-gray-700 hidden sm:table-cell">Rol</th>
-                            <th class="text-left p-3 text-sm font-medium text-gray-700 hidden sm:table-cell">Label</th>
-                            <th class="text-left p-3 text-sm font-medium text-gray-700">Lid sinds</th>
+                            <th class="text-left p-3 text-sm font-medium text-gray-700 dark:text-gray-200">Naam</th>
+                            <th class="text-left p-3 text-sm font-medium text-gray-700 dark:text-gray-200">E-mail</th>
+                            <th class="text-left p-3 text-sm font-medium text-gray-700 dark:text-gray-200 hidden sm:table-cell">Rol</th>
+                            <th class="text-left p-3 text-sm font-medium text-gray-700 dark:text-gray-200 hidden sm:table-cell">Label</th>
+                            <th class="text-left p-3 text-sm font-medium text-gray-700 dark:text-gray-200">Lid sinds</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y">
                         @foreach($members as $member)
-                            <tr class="hover:bg-gray-50">
+                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-900">
                                 <td class="p-3">
                                     <div class="font-medium">{{ $member['name'] }}</div>
                                 </td>
-                                <td class="p-3 text-gray-600">{{ $member['email'] }}</td>
+                                <td class="p-3 text-gray-600 dark:text-gray-300">{{ $member['email'] }}</td>
                                 <td class="p-3 hidden sm:table-cell">
-                                    <span class="px-2 py-1 text-xs rounded {{ $member['role'] === 1 ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800' }}">
+                                    <span class="px-2 py-1 text-xs rounded {{ $member['role'] === 1 ? 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-300' : 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-100' }}">
                                         {{ $member['role_label'] }}
                                     </span>
                                 </td>
-                                <td class="p-3 text-gray-700 hidden sm:table-cell">{{ $member['label'] ?? '—' }}</td>
-                                <td class="p-3 text-gray-600">{{ $member['joined_at']->format('d-m-Y') }}</td>
+                                <td class="p-3 text-gray-700 dark:text-gray-200 hidden sm:table-cell">{{ $member['label'] ?? '—' }}</td>
+                                <td class="p-3 text-gray-600 dark:text-gray-300">{{ $member['joined_at']->format('d-m-Y') }}</td>
                             </tr>
                         @endforeach
                     </tbody>
@@ -65,23 +65,23 @@
         </div>
 
         <!-- Invite Section -->
-        <div class="bg-white rounded-lg shadow p-6">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-700 p-6">
             <h2 class="text-xl font-semibold mb-4">Uitnodiging</h2>
-            <p class="text-sm text-gray-600 mb-4">Deel deze link om nieuwe coaches uit te nodigen voor dit team.</p>
+            <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">Deel deze link om nieuwe coaches uit te nodigen voor dit team.</p>
 
-            <div class="bg-gray-50 rounded-lg p-4">
+            <div class="bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
                 <div class="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
                     <input
                         type="text"
                         readonly
                         value="{{ route('teams.join.show', $team->invite_code) }}"
-                        class="flex-1 px-3 py-2 border rounded bg-white text-sm font-mono"
+                        class="flex-1 px-3 py-2 border rounded bg-white dark:bg-gray-800 text-sm font-mono"
                         id="teamInviteLink"
                     >
                     <button
                         data-copy-input="teamInviteLink"
                         data-copy-message="Link gekopieerd naar klembord!"
-                        class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition whitespace-nowrap cursor-pointer"
+                        class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 dark:hover:bg-blue-600 transition whitespace-nowrap cursor-pointer"
                     >
                         Kopieer
                     </button>
@@ -101,23 +101,23 @@
                 <div class="mt-4 pt-4 border-t">
                     <form method="POST" action="{{ route('teams.invite.regenerate', $team) }}" onsubmit="return confirm('Weet je zeker dat je een nieuwe uitnodigingscode wilt genereren? De oude link werkt dan niet meer.');">
                         @csrf
-                        <button type="submit" class="text-sm text-red-600 hover:text-red-800 underline cursor-pointer">
+                        <button type="submit" class="text-sm text-red-600 dark:text-red-400 hover:text-red-800 underline cursor-pointer">
                             🔄 Nieuwe uitnodigingscode genereren
                         </button>
-                        <p class="text-xs text-gray-500 mt-1">Genereer een nieuwe code als de oude link op straat is beland.</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Genereer een nieuwe code als de oude link op straat is beland.</p>
                     </form>
                 </div>
             @endcan
         </div>
 
         <!-- Update own label -->
-        <div class="mt-6 bg-white rounded-lg shadow p-6">
+        <div class="mt-6 bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-700 p-6">
             <h2 class="text-xl font-semibold mb-3">Mijn teamlabel</h2>
             <form method="POST" action="{{ route('teams.label.update', $team) }}" class="max-w-md">
                 @csrf
                 @method('PATCH')
-                <input type="text" name="label" value="{{ old('label', auth()->user()->teams()->where('teams.id', $team->id)->first()?->pivot->label) }}" class="w-full border rounded p-2" placeholder="Bijv. JO8-1">
-                <p class="text-xs text-gray-600 mt-1">Alleen zichtbaar voor jou; helpt bij onderscheid tussen teams.</p>
+                <input type="text" name="label" value="{{ old('label', auth()->user()->teams()->where('teams.id', $team->id)->first()?->pivot->label) }}" class="w-full border rounded p-2 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" placeholder="Bijv. JO8-1">
+                <p class="text-xs text-gray-600 dark:text-gray-300 mt-1">Alleen zichtbaar voor jou; helpt bij onderscheid tussen teams.</p>
                 <div class="mt-3">
                     <button type="submit" class="px-3 py-2 bg-blue-600 text-white rounded">Opslaan</button>
                 </div>

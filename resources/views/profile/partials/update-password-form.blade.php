@@ -1,10 +1,10 @@
 <section>
     <header>
-        <h2 class="text-lg font-medium text-gray-900">
+        <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
             Wachtwoord bijwerken
         </h2>
 
-        <p class="mt-1 text-sm text-gray-600">
+        <p class="mt-1 text-sm text-gray-600 dark:text-gray-300">
             Zorg ervoor dat je account een lang, willekeurig wachtwoord gebruikt om veilig te blijven.
         </p>
     </header>

@@ -24,7 +24,7 @@ $maxWidth = [
         onclick="closeModal('{{ $name }}')"
     ></div>
 
-    <div class="mb-6 bg-white rounded-lg overflow-hidden shadow-xl transform transition-all sm:w-full {{ $maxWidth }} sm:mx-auto relative">
+    <div class="mb-6 bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-xl transform transition-all sm:w-full {{ $maxWidth }} sm:mx-auto relative">
         {{ $slot }}
     </div>
 </div>

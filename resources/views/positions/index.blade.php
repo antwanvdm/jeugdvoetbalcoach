@@ -5,7 +5,7 @@
     </div>
 
     <div class="overflow-x-auto">
-    <table class="min-w-full bg-white shadow rounded">
+    <table class="min-w-full bg-white dark:bg-gray-800 shadow dark:shadow-gray-700 rounded">
         <thead>
         <tr class="border-b">
             <th class="text-left p-3">Naam</th>
@@ -17,12 +17,12 @@
             <tr class="border-b">
                 <td class="p-3">{{ $position->name }}</td>
                 <td class="p-3 text-right">
-                    <a class="text-blue-600 mr-2" href="{{ route('admin.positions.show', $position) }}">Bekijk</a>
+                    <a class="text-blue-600 dark:text-blue-400 mr-2" href="{{ route('admin.positions.show', $position) }}">Bekijk</a>
                 </td>
             </tr>
         @empty
             <tr>
-                <td colspan="2" class="p-3 text-center text-gray-500">Nog geen posities.</td>
+                <td colspan="2" class="p-3 text-center text-gray-500 dark:text-gray-400">Nog geen posities.</td>
             </tr>
         @endforelse
         </tbody>

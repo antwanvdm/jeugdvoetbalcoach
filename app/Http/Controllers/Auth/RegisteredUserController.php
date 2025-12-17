@@ -22,7 +22,22 @@ class RegisteredUserController extends Controller
      */
     public function create(): View
     {
-        return view('auth.register');
+        // Check if user has a pending team invite and pass team info to view
+        $teamInvite = null;
+        if (session()->has('pending_team_invite')) {
+            $inviteCode = session('pending_team_invite');
+            $team = Team::where('invite_code', $inviteCode)->first();
+            
+            if ($team) {
+                $teamInvite = [
+                    'code' => $inviteCode,
+                    'team_name' => $team->opponent?->name,
+                    'team_logo' => $team->opponent?->logo,
+                ];
+            }
+        }
+        
+        return view('auth.register', compact('teamInvite'));
     }
 
     /**

@@ -49,11 +49,6 @@ class FootballMatchController extends Controller
     {
         Gate::authorize('create', FootballMatch::class);
 
-        // Require at least one player in the current team before creating a match
-        if (!Player::exists()) {
-            return view('football_matches.no-players');
-        }
-
         // Get season_id from request (required)
         $seasonId = $request->query('season_id') ?? old('season_id');
 
@@ -70,6 +65,15 @@ class FootballMatchController extends Controller
 
         if (!$season) {
             abort(403, 'Dit seizoen hoort niet tot jouw team.');
+        }
+
+        // Require at least the formation size players in the current team before creating a match
+        $teamHasPlayers = Player::where('team_id', session('current_team_id'))->count();
+        if ($teamHasPlayers < $season->formation->total_players) {
+            return view('football_matches.no-players', [
+                'requiredPlayers' => $season->formation->total_players,
+                'season' => $season,
+            ]);
         }
 
         $opponents = Opponent::orderBy('name')->pluck('name', 'id');

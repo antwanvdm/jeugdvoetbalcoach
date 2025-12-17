@@ -3,7 +3,7 @@
         <h1 class="text-2xl font-semibold">Wedstrijden</h1>
         <div class="flex items-center gap-4">
             <form method="GET" action="{{ route('football-matches.index') }}">
-                <select name="season_id" onchange="this.form.submit()" class="border py-2 pl-2 pr-8 rounded">
+                <select name="season_id" onchange="this.form.submit()" class="border dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 py-2 pl-2 pr-8 rounded">
                     <option value="all">Alle seizoenen</option>
                     @foreach($seasons as $s)
                         <option value="{{ $s->id }}" {{ (int)($seasonId ?? 0) === $s->id ? 'selected' : '' }}>{{ $s->year }}/{{ $s->year + 1 }} - Fase {{ $s->part }}</option>
@@ -15,7 +15,7 @@
     </div>
 
     <div class="overflow-x-auto">
-    <table class="min-w-full bg-white shadow rounded">
+    <table class="min-w-full bg-white dark:bg-gray-800 shadow dark:shadow-gray-700 rounded">
         <thead>
         <tr class="border-b">
             <th class="text-left p-3">Datum</th>
@@ -31,24 +31,16 @@
                 <td class="p-3">{{ $match->date?->translatedFormat('d-m-Y H:i') }}</td>
                 <td class="p-3">{{ $match->opponent->name }}</td>
                 <td class="p-3 hidden sm:table-cell">{{ $match->home ? 'Thuis' : 'Uit' }}</td>
-                <td class="p-3 font-bold result-{{$match->result}}">
-                    @if($match->result !== 'O')
-                        @if($match->home)
-                            {{ $match->goals_scored }} - {{ $match->goals_conceded }}
-                        @else
-                            {{ $match->goals_conceded }} - {{ $match->goals_scored }}
-                        @endif
-                    @else
-                        <span class="text-gray-500">-</span>
-                    @endif
+                <td class="p-3">
+                    <x-match-score :match="$match" />
                 </td>
                 <td class="p-3 text-right">
-                    <a class="text-blue-600 mr-2" href="{{ route('football-matches.show', $match) }}">Bekijk</a>
+                    <a class="text-blue-600 dark:text-blue-400 mr-2" href="{{ route('football-matches.show', $match) }}">Bekijk</a>
                 </td>
             </tr>
         @empty
             <tr>
-                <td colspan="5" class="p-3 text-center text-gray-500">Nog geen wedstrijden.</td>
+                <td colspan="5" class="p-3 text-center text-gray-500 dark:text-gray-400">Nog geen wedstrijden.</td>
             </tr>
         @endforelse
         </tbody>

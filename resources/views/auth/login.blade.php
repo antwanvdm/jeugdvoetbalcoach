@@ -1,6 +1,6 @@
 <x-app-layout>
     <h1 class="text-2xl font-semibold mb-2">Inloggen</h1>
-    <p class="text-sm text-gray-600 mb-6">Log in om je team te beheren.</p>
+    <p class="text-sm text-gray-600 dark:text-gray-300 mb-6">Log in om je team te beheren.</p>
 
     <!-- Session Status -->
     <x-auth-session-status class="mb-4" :status="session('status')" />
@@ -19,7 +19,7 @@
         <div class="mt-4">
             <x-input-label for="password" value="Wachtwoord" />
 
-            <x-text-input id="password" class="block mt-1 w-full"
+            <x-text-input id="password" class="block mt-1 w-full dark:scheme-dark"
                             type="password"
                             name="password"
                             required autocomplete="current-password" />
@@ -30,14 +30,14 @@
         <!-- Remember Me -->
         <div>
             <label for="remember_me" class="inline-flex items-center">
-                <input id="remember_me" type="checkbox" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" name="remember">
-                <span class="ms-2 text-sm text-gray-600">Onthoud mij</span>
+                <input id="remember_me" type="checkbox" class="rounded border-gray-300 dark:border-gray-600 text-indigo-600 dark:text-indigo-400 shadow-sm focus:ring-indigo-500" name="remember">
+                <span class="ms-2 text-sm text-gray-600 dark:text-gray-300">Onthoud mij</span>
             </label>
         </div>
 
         <div class="flex items-center justify-between pt-2">
             @if (Route::has('password.request'))
-                <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('password.request') }}">
+                <a class="underline text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('password.request') }}">
                     Wachtwoord vergeten?
                 </a>
             @endif
@@ -47,9 +47,9 @@
             </x-primary-button>
         </div>
 
-        <div class="text-sm text-gray-600 mt-4">
+        <div class="text-sm text-gray-600 dark:text-gray-300 mt-4">
             Nog geen account?
-            <a href="{{ route('register') }}" class="text-blue-600 hover:text-blue-700 underline">Registreer nu</a>
+            <a href="{{ route('register') }}" class="text-blue-600 hover:text-blue-700 dark:text-blue-400 underline">Registreer nu</a>
         </div>
     </form>
 </x-app-layout>

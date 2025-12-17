@@ -33,6 +33,7 @@ Route::get('/seasons/{season}/share/{shareToken}', [SeasonController::class, 'sh
 //Public team join routes (accessible without authentication)
 Route::get('/teams/join/{inviteCode}', [TeamController::class, 'showJoin'])->middleware('throttle:20,1')->name('teams.join.show');
 Route::post('/teams/join/{inviteCode}', [TeamController::class, 'join'])->middleware(['auth', 'throttle:20,1'])->name('teams.join');
+Route::post('/teams/join/{inviteCode}/decline', [TeamController::class, 'declineInvite'])->middleware(['auth', 'throttle:20,1'])->name('teams.join.decline');
 
 // Dashboard - accessible with auth only (no email verification required)
 Route::middleware(['auth'])->group(function () {

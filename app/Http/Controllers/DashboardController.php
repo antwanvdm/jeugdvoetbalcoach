@@ -41,18 +41,24 @@ class DashboardController extends Controller
             return redirect()->route('onboarding.index');
         }
 
+        $activeSeason = Season::getCurrent();
+        $requiredPlayers = $activeSeason?->formation?->total_players ?? 0;
+        $playerCount = $currentTeam?->players()->count() ?? 0;
+        $hasEnoughPlayers = $requiredPlayers > 0
+            ? $playerCount >= $requiredPlayers
+            : $playerCount > 0;
+
         // Get onboarding progress
         $onboardingSteps = [
             'season' => $hasSeasons,
-            'players' => $currentTeam?->players()->exists() ?? false,
+            'players' => $hasEnoughPlayers,
             'match' => $currentTeam?->footballMatches()->exists() ?? false,
         ];
         $onboardingComplete = $onboardingSteps['season'] && $onboardingSteps['players'] && $onboardingSteps['match'];
 
-        $activeSeason = Season::getCurrent();
         $recentMatches = $currentTeam->footballMatches()->whereNotNull('goals_scored')->orderByDesc('date')->take(3)->get();
         $nextMatch = $currentTeam->footballMatches()->where('date', '>', now())->get()->first();
         
-        return view('dashboard', compact('recentMatches', 'nextMatch', 'currentTeam', 'onboardingSteps', 'onboardingComplete', 'activeSeason'));
+        return view('dashboard', compact('recentMatches', 'nextMatch', 'currentTeam', 'onboardingSteps', 'onboardingComplete', 'activeSeason', 'requiredPlayers', 'playerCount'));
     }
 }

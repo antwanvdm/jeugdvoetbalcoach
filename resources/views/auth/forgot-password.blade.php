@@ -1,5 +1,5 @@
 <x-app-layout>
-    <div class="mb-4 text-sm text-gray-600">
+    <div class="mb-4 text-sm text-gray-600 dark:text-gray-300">
         Wachtwoord vergeten? Geen probleem. Laat ons je e-mailadres weten en we sturen je een link om je wachtwoord te resetten.
     </div>
 
