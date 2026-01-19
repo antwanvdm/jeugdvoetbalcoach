@@ -16,7 +16,7 @@ class CrawlOpponentEmails extends Command
      *
      * @var string
      */
-    protected $signature = 'app:crawl-opponent-emails {--dry-run : Only show what would be sent} {--limit= : Limit the number of opponents to process} {--delay=0 : Delay in seconds between dispatching jobs}';
+    protected $signature = 'app:crawl-opponent-emails {--dry-run : Only show what would be sent} {--limit= : Limit the number of opponents to process} {--delay=0 : Delay in seconds between dispatching jobs} {--with-fallback : Also use info@ fallback if no email is found}';
 
     /**
      * The console command description.
@@ -44,6 +44,7 @@ class CrawlOpponentEmails extends Command
 
         $sentEmails = $this->getSentEmails();
         $foundCount = 0;
+        $fallbackCount = 0;
         $dispatchedCount = 0;
         $skippedCount = 0;
         $errorCount = 0;
@@ -52,6 +53,15 @@ class CrawlOpponentEmails extends Command
             $this->line("Processing: {$opponent->name} ({$opponent->website})");
 
             $email = $this->getEmailFromWebsite($opponent->website);
+            $isFallback = false;
+
+            if (!$email && $this->option('with-fallback')) {
+                $email = $this->getFallbackEmail($opponent->website);
+                if ($email) {
+                    $isFallback = true;
+                    $this->comment("    Using fallback email: {$email}");
+                }
+            }
 
             if ($email) {
                 if (in_array($email, $sentEmails)) {
@@ -60,8 +70,11 @@ class CrawlOpponentEmails extends Command
                     continue;
                 }
 
-                $this->info("  Found email: {$email}");
+                $this->info("  Found email: {$email}" . ($isFallback ? ' (fallback)' : ''));
                 $foundCount++;
+                if ($isFallback) {
+                    $fallbackCount++;
+                }
 
                 if ($this->option('dry-run')) {
                     $this->comment("  [Dry-run] Would dispatch email to {$email} for {$opponent->name}");
@@ -94,7 +107,9 @@ class CrawlOpponentEmails extends Command
             ['Metric', 'Count'],
             [
                 ['Opponents processed', $opponents->count()],
-                ['Emails found', $foundCount],
+                ['Emails found (total)', $foundCount],
+                [' - Via crawler', $foundCount - $fallbackCount],
+                [' - Via fallback (info@)', $fallbackCount],
                 ['Emails dispatched', $dispatchedCount],
                 ['Emails skipped (already sent)', $skippedCount],
                 ['Errors', $errorCount],
@@ -175,6 +190,23 @@ class CrawlOpponentEmails extends Command
 
         } catch (\Exception $e) {
             $this->error("  Error crawling {$url}: " . $e->getMessage());
+        }
+
+        return null;
+    }
+
+    private function getFallbackEmail(string $url): ?string
+    {
+        $host = parse_url($url, PHP_URL_HOST) ?: $url;
+        $host = preg_replace('/^www\./', '', $host);
+
+        $email = "info@{$host}";
+
+        if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            // Check if domain has MX records to prevent obvious bounces
+            if (checkdnsrr($host, "MX")) {
+                return $email;
+            }
         }
 
         return null;
