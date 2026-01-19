@@ -15,7 +15,7 @@ class SendPromotionEmail implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct(public string $email)
+    public function __construct(public string $email, public ?string $opponentName = null)
     {
         //
     }
@@ -35,6 +35,6 @@ class SendPromotionEmail implements ShouldQueue
      */
     public function handle(): void
     {
-        Mail::to($this->email)->send(new PromotionEmail());
+        Mail::to($this->email)->send(new PromotionEmail($this->opponentName));
     }
 }

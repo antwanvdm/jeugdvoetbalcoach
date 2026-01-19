@@ -6,6 +6,7 @@ use App\Jobs\SendPromotionEmail;
 use App\Models\Opponent;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
 use Symfony\Component\DomCrawler\Crawler;
 
 class CrawlOpponentEmails extends Command
@@ -24,6 +25,8 @@ class CrawlOpponentEmails extends Command
      */
     protected $description = 'Crawl opponent websites for email addresses and send promotion emails';
 
+    private string $logPath = 'sent_emails.json';
+
     /**
      * Execute the console command.
      */
@@ -39,8 +42,10 @@ class CrawlOpponentEmails extends Command
 
         $this->info("Found {$opponents->count()} opponents with websites.");
 
+        $sentEmails = $this->getSentEmails();
         $foundCount = 0;
         $dispatchedCount = 0;
+        $skippedCount = 0;
         $errorCount = 0;
 
         foreach ($opponents as $opponent) {
@@ -49,15 +54,25 @@ class CrawlOpponentEmails extends Command
             $email = $this->getEmailFromWebsite($opponent->website);
 
             if ($email) {
+                if (in_array($email, $sentEmails)) {
+                    $this->comment("  Skipping: Email {$email} already sent previously.");
+                    $skippedCount++;
+                    continue;
+                }
+
                 $this->info("  Found email: {$email}");
                 $foundCount++;
 
                 if ($this->option('dry-run')) {
-                    $this->comment("  [Dry-run] Would dispatch email to {$email}");
+                    $this->comment("  [Dry-run] Would dispatch email to {$email} for {$opponent->name}");
                 } else {
                     try {
-                        SendPromotionEmail::dispatch($email);
+                        SendPromotionEmail::dispatch($email, $opponent->name);
                         $this->info("  Dispatched email to {$email}");
+
+                        $sentEmails[] = $email;
+                        $this->saveSentEmails($sentEmails);
+
                         $dispatchedCount++;
 
                         if ($this->option('delay') > 0) {
@@ -81,9 +96,24 @@ class CrawlOpponentEmails extends Command
                 ['Opponents processed', $opponents->count()],
                 ['Emails found', $foundCount],
                 ['Emails dispatched', $dispatchedCount],
+                ['Emails skipped (already sent)', $skippedCount],
                 ['Errors', $errorCount],
             ]
         );
+    }
+
+    private function getSentEmails(): array
+    {
+        if (!Storage::exists($this->logPath)) {
+            return [];
+        }
+
+        return json_decode(Storage::get($this->logPath), true) ?? [];
+    }
+
+    private function saveSentEmails(array $emails): void
+    {
+        Storage::put($this->logPath, json_encode(array_values(array_unique($emails)), JSON_PRETTY_PRINT));
     }
 
     private function getEmailFromWebsite(string $url): ?string

@@ -11,7 +11,7 @@ class TestPromotionEmail extends Command
      *
      * @var string
      */
-    protected $signature = 'app:test-promotion-email {email : The email address to send the test to}';
+    protected $signature = 'app:test-promotion-email {email : The email address to send the test to} {--club= : The club name to use in the email}';
 
     /**
      * The console command description.
@@ -35,7 +35,7 @@ class TestPromotionEmail extends Command
         $this->info("Sending test promotion email to {$email}...");
 
         try {
-            \Illuminate\Support\Facades\Mail::to($email)->send(new \App\Mail\PromotionEmail());
+            \Illuminate\Support\Facades\Mail::to($email)->send(new \App\Mail\PromotionEmail($this->option('club')));
             $this->info('Email sent successfully!');
         } catch (\Exception $e) {
             $this->error('Failed to send email: ' . $e->getMessage());

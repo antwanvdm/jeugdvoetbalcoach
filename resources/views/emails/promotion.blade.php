@@ -1,33 +1,37 @@
 <x-mail::message>
-# Hi coach! ⚽
+# Beste leden van {{ $opponentName ?? 'de club' }},
 
-Seizoensfase 3 staat voor de deur en dat betekent vaak weer een hoop gepuzzel. Het is vrijdagavond, je moet de opstelling voor morgen nog maken, maar je wilt eigenlijk gewoon ontspannen. Je wilt dat iedereen eerlijk aan de bak komt, dat de keeperbeurten netjes verdeeld zijn en dat het team in balans is.
+Seizoensfase 3 staat voor de deur en dat betekent voor veel jeugdcoaches weer hetzelfde terugkerende probleem: losse lijstjes, Excel-bestanden en keeperbeurten die scheef lopen. Met als gevolg discussies over wie al te vaak op
+de bank zat. Alles bijhouden kost tijd en één kleine wijziging zorgt snel voor nieuwe fouten.
 
-Dat kan makkelijker! Juist nu we een nieuwe fase ingaan is het een perfect moment om aan te sluiten op **[jeugdvoetbalcoach.nl](https://jeugdvoetbalcoach.nl)**. Hiermee automatiseer je het gepuzzel met lijstjes en Excel-sheets in een handomdraai.
+Dat kan makkelijker! Juist nu we een nieuwe fase ingaan is het een perfect moment om jullie coaches te laten aansluiten op jeugdvoetbalcoach.nl. Hiermee automatiseren we het gepuzzel met lijstjes en Excel-sheets in een handomdraai. En dat allemaal
+**privacyvriendelijk**, **100% gratis**, **zonder advertenties**, en **open source**.
 
-### Waarom jeugdvoetbalcoach.nl?
+### Wat biedt jeugdvoetbalcoach.nl?
 
-*   **Teammanagement:** Beheer spelers, posities en houd (optioneel) statistieken bij zoals goals en assists.
-*   **Slimme Opstellingen:** Genereer automatisch een line-up in 4 kwarten voor de volgende wedstrijd.
-*   **Eerlijke Speeltijd:** Onze algoritmes zorgen voor een perfecte rotatie, zodat elke speler (en ouder!) tevreden is.
-*   **Keeper-roulatie:** Nooit meer discussie over wie er aan de beurt is om te keepen.
-*   **Samenwerken:** Werk samen met je mede-coaches in hetzelfde team.
-*   **100% Gratis & Privacyvriendelijk:** Geen advertenties, geen kosten, en volledig open source.
+* **Teammanagement:** Beheer spelers, posities, formaties en houd (optioneel) statistieken bij zoals goals en assists.
+* **Slimme Opstellingen:** Genereer automatisch een line-up in 4 kwarten voor de volgende wedstrijd. Eerlijke speeltijd met ingebouwde keeper-roulatie, zodat elke speler (en ouder) weet waar hij aan toe is.
+* **Delen & Printen:** Deel resultaten met ouders via een unieke link en print als coach de opstelling uit voor de wedstrijd.
+* **Samenwerken:** Werk samen met mede-coaches om samen je team te beheren.
 
-Het platform is speciaal ontworpen voor teams (JO8 t/m JO12) waar plezier en eerlijke speeltijd voorop staan. We willen de administratieve last bij de vrijwillige coaches weghalen, zodat de focus weer op het veld kan liggen.
+Het platform is speciaal ontworpen voor teams (**JO8 t/m JO12**) waar plezier en eerlijke speeltijd voorop staan. We willen de administratieve last bij de vrijwillige coaches weghalen, zodat de focus weer op het veld kan liggen.
 
-Benieuwd hoe het jouw coaches kan helpen? Neem gerust een kijkje op de website!
+<x-mail::panel>
+Trainers van VVOR, SV Marum, Blauw Wit '81, GJS, BVCB, VV Alexandria '66, Herkingen '55 en SV Den Hoorn gingen je al voor.
+</x-mail::panel>
+
+Benieuwd hoe het jullie coaches kan helpen? Neem gerust een kijkje op de website of stuur deze mail door naar de betreffende leeftijdscoördinatoren!
 
 <x-mail::button :url="'https://jeugdvoetbalcoach.nl'">
 Ontdek jeugdvoetbalcoach.nl
 </x-mail::button>
 
-Veel succes op de velden!
+Veel succes op de velden in fase 3!
 
 Met sportieve groet,<br>
 Antwan van [jeugdvoetbalcoach.nl](https://jeugdvoetbalcoach.nl)
 
 <x-mail::subcopy>
-Deze email is eenmalig verzonden en uw e-mailadres wordt niet bij ons opgeslagen. Heb je vragen? Neem dan contact met ons op via het [contactformulier](https://jeugdvoetbalcoach.nl#feedback) op onze website.
+Deze email is eenmalig verzonden en je e-mailadres wordt niet bij ons opgeslagen. Heb je vragen? Neem dan contact met ons op via het [contactformulier](https://jeugdvoetbalcoach.nl#feedback) op onze website.
 </x-mail::subcopy>
 </x-mail::message>
