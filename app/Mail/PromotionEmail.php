@@ -27,7 +27,7 @@ class PromotionEmail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Eerlijke speeltijd en minder gepuzzel voor jouw jeugdcoaches? ⚽',
+            subject: 'Eerlijke speeltijd en minder gepuzzel voor jullie jeugdcoaches? ⚽',
         );
     }
 
