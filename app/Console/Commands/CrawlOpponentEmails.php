@@ -83,9 +83,6 @@ class CrawlOpponentEmails extends Command
                         SendPromotionEmail::dispatch($email, $opponent->name);
                         $this->info("  Dispatched email to {$email}");
 
-                        $sentEmails[] = $email;
-                        $this->saveSentEmails($sentEmails);
-
                         $dispatchedCount++;
 
                         if ($this->option('delay') > 0) {
@@ -124,11 +121,6 @@ class CrawlOpponentEmails extends Command
         }
 
         return json_decode(Storage::get($this->logPath), true) ?? [];
-    }
-
-    private function saveSentEmails(array $emails): void
-    {
-        Storage::put($this->logPath, json_encode(array_values(array_unique($emails)), JSON_PRETTY_PRINT));
     }
 
     private function getEmailFromWebsite(string $url): ?string
