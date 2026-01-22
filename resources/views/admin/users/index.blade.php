@@ -36,7 +36,7 @@
                             @csrf
                             @method('PATCH')
 
-                            <select name="is_active" class="border dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 py-1 pl-2 pr-6 rounded text-sm">
+                            <select name="is_active" class="border dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-gray-100 py-1 pl-2 pr-6 rounded text-sm">
                                 <option value="1" {{ $user->is_active ? 'selected' : '' }}>Actief</option>
                                 <option value="0" {{ ! $user->is_active ? 'selected' : '' }}>Inactief</option>
                             </select>

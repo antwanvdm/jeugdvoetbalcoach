@@ -11,7 +11,7 @@
         <!-- E-mailadres -->
         <div>
             <x-input-label for="email" value="E-mailadres" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" />
+            <x-text-input id="email" class="block mt-1 w-full scheme-light dark:scheme-dark" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" />
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
         </div>
 
@@ -19,7 +19,7 @@
         <div class="mt-4">
             <x-input-label for="password" value="Wachtwoord" />
 
-            <x-text-input id="password" class="block mt-1 w-full dark:scheme-dark"
+            <x-text-input id="password" class="block mt-1 w-full scheme-light dark:scheme-dark"
                             type="password"
                             name="password"
                             required autocomplete="current-password" />

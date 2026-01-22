@@ -51,7 +51,7 @@
         <div>
             <x-input-label for="password" value="Wachtwoord" />
 
-            <x-text-input id="password" class="block mt-1 w-full dark:scheme-dark"
+            <x-text-input id="password" class="block mt-1 w-full scheme-light dark:scheme-dark"
                             type="password"
                             name="password"
                             required autocomplete="new-password" />
@@ -63,7 +63,7 @@
         <div>
             <x-input-label for="password_confirmation" value="Bevestig wachtwoord" />
 
-            <x-text-input id="password_confirmation" class="block mt-1 w-full dark:scheme-dark"
+            <x-text-input id="password_confirmation" class="block mt-1 w-full scheme-light dark:scheme-dark"
                             type="password"
                             name="password_confirmation" required autocomplete="new-password" />
 

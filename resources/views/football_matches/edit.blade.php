@@ -34,7 +34,7 @@
 
         <div class="mb-3">
             <label class="block text-sm font-medium mb-1">Datum en tijd</label>
-            <input type="datetime-local" name="date" value="{{ old('date', optional($footballMatch->date)->format('Y-m-d\TH:i')) }}" class="w-full border rounded p-2 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:scheme-dark" required>
+            <input type="datetime-local" name="date" value="{{ old('date', optional($footballMatch->date)->format('Y-m-d\TH:i')) }}" class="w-full border rounded p-2 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 scheme-light dark:scheme-dark" required>
         </div>
 
         <div class="mb-3">

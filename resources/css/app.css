@@ -25,6 +25,19 @@
     .border-y {
         @apply border-gray-200;
     }
+
+    /* Ensure form controls respect light/dark mode for native browser UI */
+    input,
+    select,
+    textarea {
+        color-scheme: light;
+    }
+
+    .dark input,
+    .dark select,
+    .dark textarea {
+        color-scheme: dark;
+    }
 }
 
 .result-W {

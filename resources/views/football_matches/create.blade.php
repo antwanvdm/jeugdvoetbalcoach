@@ -15,7 +15,7 @@
             <div>
                 <div class="mb-3">
                     <label class="block text-sm font-medium mb-1">Tegenstander (autocomplete)</label>
-                    <input type="text" id="opponent_search" data-opponent-autocomplete data-target-hidden="opponent_id" class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded p-2" placeholder="Typ clubnaam..." autocomplete="off">
+                    <input type="text" id="opponent_search" data-opponent-autocomplete data-target-hidden="opponent_id" class="w-full border dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-gray-100 rounded p-2" placeholder="Typ clubnaam..." autocomplete="off">
                     <input type="hidden" name="opponent_id" id="opponent_id" value="{{ old('opponent_id') }}">
                     <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Begin te typen om een club uit de landelijke database te selecteren.</p>
                 </div>
@@ -34,7 +34,7 @@
 
                 <div class="mb-3">
                     <label class="block text-sm font-medium mb-1">Datum en tijd</label>
-                    <input type="datetime-local" name="date" value="{{ old('date') }}" class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded p-2 dark:scheme-dark" required>
+                    <input type="datetime-local" name="date" value="{{ old('date') }}" class="w-full border dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-gray-100 rounded p-2 scheme-light dark:scheme-dark" required>
                 </div>
             </div>
 
