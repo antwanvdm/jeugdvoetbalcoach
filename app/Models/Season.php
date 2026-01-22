@@ -82,14 +82,27 @@ class Season extends Model
         }
 
         $today = Carbon::today();
+
+        // 1. Active season (today is between start and end)
         $activeSeason = $seasons->first(fn(Season $s) => $s->start->lte($today) && $s->end->gte($today));
-        if (!$activeSeason) {
-            $activeSeason = $seasons
-                ->filter(fn(Season $s) => $s->end->lt($today))
-                ->sortByDesc(fn(Season $s) => $s->end)
-                ->first();
+        if ($activeSeason) {
+            return $activeSeason;
         }
-        return $activeSeason;
+
+        // 2. Most recently ended season
+        $pastSeason = $seasons
+            ->filter(fn(Season $s) => $s->end->lt($today))
+            ->sortByDesc(fn(Season $s) => $s->end)
+            ->first();
+        if ($pastSeason) {
+            return $pastSeason;
+        }
+
+        // 3. Upcoming season (nearest future season)
+        return $seasons
+            ->filter(fn(Season $s) => $s->start->gt($today))
+            ->sortBy(fn(Season $s) => $s->start)
+            ->first();
     }
 
     /**
