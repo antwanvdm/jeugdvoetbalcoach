@@ -1,7 +1,7 @@
 <x-mail::message>
 # Beste {{ $userName }},
 
-Welkom bij jeugdvoetbalcoach.nl! Tof dat je gebruik maakt van ons platform om het coachen van je team makkelijker te maken.
+Welkom bij jeugdvoetbalcoach.nl! Tof dat je gebruik maakt van dit platform om het coachen van je team makkelijker te maken.
 
 ### Belangrijke update: Probleem met spelers opgelost
 Er zat een kleine fout in het systeem (dank voor het melden!) waardoor je bij het aanmaken van een seizoen met een startdatum in de toekomst de spelers niet meer kon zien en geen wedstrijden kon aanmaken.
@@ -19,13 +19,13 @@ Hoewel het systeem flink is doorgetest, kunnen er altijd kleine dingetjes boven 
 Ga naar jeugdvoetbalcoach.nl
 </x-mail::button>
 
-Veel succes met je team!
+Veel plezier morgen bij de eerste wedstrijd!
 
 Met sportieve groet,<br>
 Antwan van [jeugdvoetbalcoach.nl](https://jeugdvoetbalcoach.nl)
 
 <x-mail::subcopy>
-Vragen of ideeën? Laat het weten via het [contactformulier](https://jeugdvoetbalcoach.nl#feedback).
+Vragen of ideeën? Laat het weten via het [feedbackformulier](https://jeugdvoetbalcoach.nl#feedback).
 Wil je geen updates meer ontvangen? Pas dit dan aan in je [profiel]({{ route('profile.edit') }}).
 </x-mail::subcopy>
 </x-mail::message>
