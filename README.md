@@ -70,6 +70,14 @@ De applicatie ondersteunt meerdere teams en gebruikers met een robuust autorisat
 - Data isolatie per gebruiker
 - Actieve/inactieve gebruikers beheer
 
+**📧 Email & Communicatie**
+
+- Bulk emails versturen naar geregistreerde gebruikers
+- Opt-out mogelijkheid voor gebruikers die geen emails willen ontvangen
+- Test emails versturen naar specifieke adressen voor validatie
+- Rate limiting op email verzending via Laravel queue
+- Promotie emails naar voetbalclubs via website crawling
+
 ## 🚀 Aan de slag
 
 ### Vereisten
@@ -159,6 +167,20 @@ php artisan migrate:fresh --seed
 
 # Importeer tegenstanders van Hollandse Velden (met logo's)
 php artisan clubs:fetch
+
+# Test een specifieke mailable naar een emailadres (verstuurt direct, geen queue)
+php artisan mail:test-email WelcomeMemberEmail test@example.com --name="Jan Jansen"
+
+# Verstuur bulk email naar alle leden (excl. admins en opt-out)
+php artisan mail:send-member-emails WelcomeMemberEmail --dry-run
+php artisan mail:send-member-emails WelcomeMemberEmail
+
+# Crawl tegenstander websites voor emails en verstuur promotie
+php artisan app:crawl-opponent-emails --dry-run --limit=10
+php artisan app:crawl-opponent-emails --with-fallback
+
+# Start de queue worker om email jobs te verwerken (vereist voor bulk emails)
+php artisan queue:work --backoff=60 --tries=3
 ```
 
 ## 🏗️ Architectuur
@@ -405,6 +427,8 @@ Bijdragen zijn welkom! Voor grote wijzigingen, open eerst een issue.
 -   [x] Resultaten security audit Opus 4.5 verwerkt
 -   [x] Tegenstander details uitbreiden (adres, website, officiële clubnaam)
 -   [x] Dark mode support toegevoegd inclusief handmatige toggle optie in het menu
+-   [x] Crawlsysteem om voetbalclubs eenmalig te informeren over dit platform via een mailing
+-   [x] Mailsysteem om geregistreerde gebruikers te informeren over updates (inclusief opt-out op profiel)
 
 ### 🔜 Toekomstige Features
 

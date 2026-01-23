@@ -152,21 +152,26 @@ Gebruikers van het systeem met rollen.
 
 | Kolom               | Type            | Nullable | Default        | Beschrijving          |
 |---------------------|-----------------|----------|----------------|-----------------------|
-| `id`                | bigint unsigned | NO       | AUTO_INCREMENT | Primary key           |
-| `name`              | varchar(255)    | NO       |                | Gebruikersnaam        |
-| `email`             | varchar(255)    | NO       |                | E-mailadres (uniek)   |
-| `email_verified_at` | timestamp       | YES      | NULL           | Verificatie timestamp |
-| `password`          | varchar(255)    | NO       |                | Gehashed wachtwoord   |
-| `role`              | tinyint         | NO       | 2              | Rol (1=admin, 2=user) |
-| `is_active`         | boolean         | NO       | true           | Actieve status        |
-| `remember_token`    | varchar(100)    | YES      | NULL           | Remember me token     |
-| `created_at`        | timestamp       | YES      | NULL           | Aanmaakdatum          |
-| `updated_at`        | timestamp       | YES      | NULL           | Laatste wijziging     |
+| `id`                | bigint unsigned | NO       | AUTO_INCREMENT | Primary key                          |
+| `name`              | varchar(255)    | NO       |                | Gebruikersnaam                       |
+| `email`             | varchar(255)    | NO       |                | E-mailadres (uniek)                  |
+| `updates_opt_out`   | boolean         | NO       | false          | Opt-out voor bulk emails             |
+| `email_verified_at` | timestamp       | YES      | NULL           | Verificatie timestamp                |
+| `password`          | varchar(255)    | NO       |                | Gehashed wachtwoord                  |
+| `role`              | tinyint         | NO       | 2              | Rol (1=admin, 2=user)                |
+| `is_active`         | boolean         | NO       | true           | Actieve status                       |
+| `remember_token`    | varchar(100)    | YES      | NULL           | Remember me token                    |
+| `created_at`        | timestamp       | YES      | NULL           | Aanmaakdatum                         |
+| `updated_at`        | timestamp       | YES      | NULL           | Laatste wijziging                    |
 
 **Role systeem:**
 
 - `1` = Admin - Volledige toegang, kan gebruikers beheren
 - `2` = User - Standaard gebruiker, lid van een of meerdere teams
+
+**Email Opt-out:**
+
+De `updates_opt_out` kolom bepaalt of een gebruiker bulk emails ontvangt via het `mail:send-member-emails` commando. Wanneer `true`, wordt de gebruiker uitgesloten van deze mailings. Admins worden altijd uitgesloten.
 
 **Relaties:**
 
