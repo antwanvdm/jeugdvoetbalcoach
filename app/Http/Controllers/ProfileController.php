@@ -18,7 +18,7 @@ class ProfileController extends Controller
     public function edit(Request $request): View
     {
         $teams = $request->user()->teams()->with('opponent')->withCount('users')->get();
-        
+
         return view('profile.edit', [
             'user' => $request->user(),
             'teams' => $teams,
@@ -32,6 +32,7 @@ class ProfileController extends Controller
     {
         $user = $request->user();
         $user->fill($request->validated());
+        $user->updates_opt_out = $request->has('updates_opt_out');
 
         if ($user->isDirty('email')) {
             $user->email_verified_at = null;

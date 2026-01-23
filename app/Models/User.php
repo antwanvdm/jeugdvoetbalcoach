@@ -43,6 +43,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'password',
         'role',
         'is_active',
+        'updates_opt_out',
     ];
 
     /**
@@ -67,6 +68,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'password' => 'hashed',
             'role' => 'integer',
             'is_active' => 'boolean',
+            'updates_opt_out' => 'boolean',
         ];
     }
 

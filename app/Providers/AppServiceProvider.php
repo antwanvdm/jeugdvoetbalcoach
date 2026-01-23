@@ -25,5 +25,9 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('promotion-emails', function (object $job) {
             return Limit::perMinute(5)->by('promotion-emails');
         });
+
+        RateLimiter::for('emails', function (object $job) {
+            return Limit::perMinute(10)->by('emails');
+        });
     }
 }

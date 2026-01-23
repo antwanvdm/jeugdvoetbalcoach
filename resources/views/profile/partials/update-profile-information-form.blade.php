@@ -17,6 +17,16 @@
         @csrf
         @method('patch')
 
+        <div class="flex items-start">
+            <div class="flex items-center h-5">
+                <input id="updates_opt_out" name="updates_opt_out" type="checkbox" value="1" {{ old('updates_opt_out', $user->updates_opt_out) ? 'checked' : '' }} class="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600">
+            </div>
+            <div class="ml-3 text-sm">
+                <label for="updates_opt_out" class="font-medium text-gray-700 dark:text-gray-300">Ik wil geen updates meer ontvangen over het platform</label>
+                <p class="text-gray-500 dark:text-gray-400">Vink dit aan als je geen algemene e-mails over nieuwe functies of bugfixes wilt ontvangen.</p>
+            </div>
+        </div>
+
         <div>
             <x-input-label for="name" value="Naam" />
             <x-text-input id="name" name="name" type="text" class="mt-1 block w-full" :value="old('name', $user->name)" required autofocus autocomplete="name" />
