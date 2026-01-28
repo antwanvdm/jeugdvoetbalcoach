@@ -74,6 +74,7 @@ class PlayerController extends Controller
             'players.*.name' => ['required', 'string', 'max:255'],
             'players.*.position_id' => ['required', 'exists:positions,id'],
             'players.*.weight' => ['required', 'numeric', 'min:1', 'max:2'],
+            'players.*.wants_to_keep' => ['nullable'],
             'seasons' => ['required', 'array', 'min:1'],
             'seasons.*' => ['integer', 'exists:seasons,id'],
         ]);
@@ -90,6 +91,9 @@ class PlayerController extends Controller
             } else {
                 $playerData['weight'] = 1;
             }
+            // Wants to keep: only relevant if not a dedicated keeper (position_id != 1)
+            // If position_id is 1 (Keeper), they always keep, so wants_to_keep is implicitly true
+            $playerData['wants_to_keep'] = $playerData['position_id'] == 1 || isset($request->players[$i]['wants_to_keep']) && $request->players[$i]['wants_to_keep'] == '1';
             $playerData['user_id'] = $userId;
             $playerData['team_id'] = $teamId;
             $player = Player::create($playerData);
@@ -134,15 +138,19 @@ class PlayerController extends Controller
     {
         Gate::authorize('update', $player);
 
-
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'position_id' => ['required', 'exists:positions,id'],
             'weight' => ['nullable'],
+            'wants_to_keep' => ['nullable'],
         ]);
 
         // Checkbox: if not set, fallback to 1 (hidden input), if checked, value is 2
         $validated['weight'] = $request->input('weight', 1) == '2' ? 2 : 1;
+
+        // Wants to keep: if position_id is 1 (Keeper), they always keep
+        // Otherwise, check the checkbox value
+        $validated['wants_to_keep'] = $validated['position_id'] == 1 || $request->input('wants_to_keep') == '1';
 
         $player->update($validated);
 

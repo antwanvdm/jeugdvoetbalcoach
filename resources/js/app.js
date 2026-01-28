@@ -442,6 +442,25 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!playersContainer || !addPlayerBtn) return;
 
     let rowIndex = 1; // Start from 1 since we have row 0 already
+    const KEEPER_POSITION_ID = '1'; // Position ID for Keeper
+
+    // Function to toggle wants_to_keep checkbox disabled state based on position
+    function toggleWantsToKeepDisabled(positionSelect) {
+        const row = positionSelect.closest('.player-row');
+        if (!row) return;
+        
+        const checkbox = row.querySelector('.wants-to-keep-checkbox');
+        if (!checkbox) return;
+        
+        const selectedValue = positionSelect.value;
+        
+        if (selectedValue === KEEPER_POSITION_ID) {
+            checkbox.disabled = true;
+            checkbox.checked = false; // Uncheck when disabled
+        } else {
+            checkbox.disabled = false;
+        }
+    }
 
     // Function to update remove button visibility
     function updateRemoveButtons() {
@@ -473,7 +492,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const positionsHTML = firstSelect ? firstSelect.innerHTML : '';
 
         row.innerHTML = `
-            <div class="grid grid-cols-1 sm:grid-cols-[2fr_1.5fr_1fr_auto] gap-3 items-start">
+            <div class="grid grid-cols-1 sm:grid-cols-[2fr_1.5fr_1fr_1fr_auto] gap-3 items-start">
                 <div>
                     <label class="block text-sm font-medium mb-1 sm:hidden dark:text-gray-200">Naam</label>
                     <input type="text" name="players[${index}][name]"
@@ -483,7 +502,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 <div>
                     <label class="block text-sm font-medium mb-1 sm:hidden dark:text-gray-200">Positie</label>
                     <select name="players[${index}][position_id]"
-                            class="w-full border rounded p-2 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" required>
+                            class="position-select w-full border rounded p-2 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" required>
                         ${positionsHTML}
                     </select>
                 </div>
@@ -491,6 +510,11 @@ document.addEventListener('DOMContentLoaded', function () {
                     <label class="block text-sm font-medium mb-1 sm:hidden dark:text-gray-200">Sterkere speler</label>
                     <input type="hidden" name="players[${index}][weight]" value="1">
                     <input type="checkbox" name="players[${index}][weight]" value="2" class="h-5 w-5">
+                </div>
+                <div class="wants-to-keep-container flex flex-col sm:flex-row items-start sm:items-center justify-start h-full">
+                    <label class="block text-sm font-medium mb-1 sm:hidden dark:text-gray-200">Wil keepen</label>
+                    <input type="hidden" name="players[${index}][wants_to_keep]" value="0">
+                    <input type="checkbox" name="players[${index}][wants_to_keep]" value="1" class="wants-to-keep-checkbox h-5 w-5 disabled:opacity-50 disabled:cursor-not-allowed">
                 </div>
                 <div class="flex items-start sm:items-center sm:justify-center">
                     <button type="button" class="remove-player-btn w-10 h-10 text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900 rounded transition cursor-pointer" title="Verwijder speler">
@@ -511,6 +535,16 @@ document.addEventListener('DOMContentLoaded', function () {
         playersContainer.appendChild(newRow);
         rowIndex++;
         updateRemoveButtons();
+        
+        // Add event listener for the new position select
+        const newPositionSelect = newRow.querySelector('.position-select');
+        if (newPositionSelect) {
+            newPositionSelect.addEventListener('change', function() {
+                toggleWantsToKeepDisabled(this);
+            });
+            // Initial check for the new row
+            toggleWantsToKeepDisabled(newPositionSelect);
+        }
 
         // Focus on the name input of the new row
         const nameInput = newRow.querySelector('input[name$="[name]"]');
@@ -532,6 +566,15 @@ document.addEventListener('DOMContentLoaded', function () {
                 updateRemoveButtons();
             }
         }
+    });
+
+    // Add event listeners for existing position selects (initial rows)
+    playersContainer.querySelectorAll('.position-select').forEach(function(select) {
+        select.addEventListener('change', function() {
+            toggleWantsToKeepDisabled(this);
+        });
+        // Initial check
+        toggleWantsToKeepDisabled(select);
     });
 
     // Initial state
@@ -644,4 +687,26 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }
     }
+});
+
+// Player Edit Page - Toggle wants_to_keep checkbox disabled state based on position
+document.addEventListener('DOMContentLoaded', function () {
+    const positionSelect = document.getElementById('position_id');
+    const wantsToKeepCheckbox = document.querySelector('#wants-to-keep-container .wants-to-keep-checkbox');
+    
+    if (!positionSelect || !wantsToKeepCheckbox) return;
+    
+    const KEEPER_POSITION_ID = '1';
+    
+    function toggleWantsToKeepDisabled() {
+        if (positionSelect.value === KEEPER_POSITION_ID) {
+            wantsToKeepCheckbox.disabled = true;
+            wantsToKeepCheckbox.checked = false; // Uncheck when disabled
+        } else {
+            wantsToKeepCheckbox.disabled = false;
+        }
+    }
+    
+    positionSelect.addEventListener('change', toggleWantsToKeepDisabled);
+    // Initial state is handled by Blade template with disabled attribute
 });

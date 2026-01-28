@@ -20,6 +20,18 @@
                             <strong>Sterkere speler?</strong> Geef aan of een speler fysiek sterker is dan gemiddeld. Dit helpt om de teams per kwart zo eerlijk mogelijk te verdelen. Het algoritme houdt hier rekening mee bij het maken van de opstelling, zodat sterke en minder sterke spelers zo goed mogelijk worden gebalanceerd.
                         </div>
                     </div>
+                    <div class="bg-yellow-50 dark:bg-yellow-900 border border-yellow-200 dark:border-yellow-700 text-yellow-900 dark:text-yellow-100 text-sm rounded p-3 flex items-start gap-2 mt-2">
+                        <svg class="w-5 h-5 mt-0.5 shrink-0 text-yellow-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg>
+                        <div>
+                            <strong>Keeperlogica:</strong>
+                            <ul class="list-disc list-inside mt-1 space-y-0.5">
+                                <li><strong>1 vaste keeper</strong> (positie "Keeper") → keept alle 4 kwarten</li>
+                                <li><strong>2+ vaste keepers</strong> → rouleren onderling, spelen nooit als veldspeler</li>
+                                <li><strong>Geen vaste keeper(s)?</strong> → vink "Wil keepen" aan bij spelers die willen keepen</li>
+                                <li><strong>Niemand aangevinkt?</strong> → iedereen rouleert automatisch als keeper</li>
+                            </ul>
+                        </div>
+                    </div>
                     <div class="text-sm text-gray-600 dark:text-gray-300 mt-2">
                         Voeg één of meerdere spelers toe. Alle spelers worden aan de geselecteerde seizoenen gekoppeld.
                     </div>
@@ -27,17 +39,18 @@
             </div>
 
             <!-- Table Header (hidden on mobile) -->
-            <div class="hidden sm:grid sm:grid-cols-[2fr_1.5fr_1fr_auto] gap-3 mb-2 text-sm font-medium text-gray-700 dark:text-gray-200 px-3">
+            <div class="hidden sm:grid sm:grid-cols-[2fr_1.5fr_1fr_1fr_auto] gap-3 mb-2 text-sm font-medium text-gray-700 dark:text-gray-200 px-3">
                 <div>Naam</div>
                 <div>Positie</div>
                 <div>Sterkere speler</div>
+                <div>Wil keepen</div>
             </div>
 
             <!-- Players rows will be inserted here -->
             <div id="players-rows">
                 <!-- Initial row -->
                 <div class="player-row mb-3 p-3 border rounded bg-gray-50 dark:bg-gray-900 dark:border-gray-700" data-row-index="0">
-                    <div class="grid grid-cols-1 sm:grid-cols-[2fr_1.5fr_1fr_auto] gap-3 items-start">
+                    <div class="grid grid-cols-1 sm:grid-cols-[2fr_1.5fr_1fr_1fr_auto] gap-3 items-start">
                         <div>
                             <label class="block text-sm font-medium mb-1 sm:hidden">Naam</label>
                             <input type="text" name="players[0][name]" value="{{ old('players.0.name') }}"
@@ -49,7 +62,7 @@
                         </div>
                         <div>
                             <label class="block text-sm font-medium mb-1 sm:hidden">Positie</label>
-                            <select name="players[0][position_id]" class="w-full border rounded p-2 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 @error('players.0.position_id') border-red-500 @enderror" required>
+                            <select name="players[0][position_id]" class="position-select w-full border rounded p-2 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 @error('players.0.position_id') border-red-500 @enderror" required>
                                 <option value="">Kies een positie</option>
                                 @foreach($positions as $id => $name)
                                     <option value="{{ $id }}" @selected(old('players.0.position_id')==$id)>{{ $name }}</option>
@@ -64,6 +77,14 @@
                             <input type="hidden" name="players[0][weight]" value="1">
                             <input type="checkbox" name="players[0][weight]" value="2" {{ old('players.0.weight') == '2' ? 'checked' : '' }} class="h-5 w-5">
                             @error('players.0.weight')
+                            <div class="text-red-500 text-sm mt-1">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <div class="wants-to-keep-container flex flex-col sm:flex-row items-start sm:items-center justify-start h-full" data-hidden-if-keeper="true">
+                            <label class="block text-sm font-medium mb-1 sm:hidden">Wil keepen</label>
+                            <input type="hidden" name="players[0][wants_to_keep]" value="0">
+                            <input type="checkbox" name="players[0][wants_to_keep]" value="1" {{ old('players.0.wants_to_keep') == '1' ? 'checked' : '' }} class="wants-to-keep-checkbox h-5 w-5 disabled:opacity-50 disabled:cursor-not-allowed">
+                            @error('players.0.wants_to_keep')
                             <div class="text-red-500 text-sm mt-1">{{ $message }}</div>
                             @enderror
                         </div>

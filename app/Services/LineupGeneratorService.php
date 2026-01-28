@@ -9,12 +9,12 @@ use Illuminate\Support\Collection;
 
 class LineupGeneratorService
 {
-    private const KEEPER_POSITION_ID = 1;
-    private const DEFENDER_POSITION_ID = 2;
-    private const MIDFIELDER_POSITION_ID = 3;
-    private const ATTACKER_POSITION_ID = 4;
+    private const int KEEPER_POSITION_ID = 1;
+    private const int DEFENDER_POSITION_ID = 2;
+    private const int MIDFIELDER_POSITION_ID = 3;
+    private const int ATTACKER_POSITION_ID = 4;
 
-    private const ROLE_POSITION_MAP = [
+    private const array ROLE_POSITION_MAP = [
         'keeper' => self::KEEPER_POSITION_ID,
         'defender' => self::DEFENDER_POSITION_ID,
         'midfielder' => self::MIDFIELDER_POSITION_ID,
@@ -82,7 +82,7 @@ class LineupGeneratorService
 
         // Get keepers from the last match (most recent 4 quarters, excluding current match)
         $this->lastMatchKeepers = $this->getLastMatchKeepers($currentMatch);
-        
+
         // Get bench counts from last 3 matches for fair rotation
         $this->benchCounts = $this->getRecentBenchCounts($currentMatch);
     }
@@ -148,37 +148,54 @@ class LineupGeneratorService
 
     /**
      * Select 4 keepers based on historical appearances and last match rotation
+     *
+     * Priority order:
+     * 1. Dedicated keepers (position_id = 1) - these are always used if available
+     * 2. Players who want to keep (wants_to_keep = true) - used if no dedicated keepers
+     * 3. All players - fallback if nobody is a keeper or wants to keep
      */
     private function selectKeepers(): Collection
     {
         // Debug: Log last match keepers
         $this->debugLog('Last match keepers:', $this->lastMatchKeepers->toArray());
 
-        // Filter players whose favorite position is keeper
-        $keeperPlayers = $this->players->filter(function ($player) {
+        // Filter players whose favorite position is keeper (position_id = 1)
+        $dedicatedKeepers = $this->players->filter(function ($player) {
             return $this->getPlayerFavoriteRole($player->position_id) === 'keeper';
         });
 
-        // If there are favorite keepers, use only those
-        if ($keeperPlayers->isNotEmpty()) {
-            // Sort by who was least recently keeper and least often
-            $sortedKeepers = $keeperPlayers->sortBy(function ($player) {
-                $wasLastMatchKeeper = $this->lastMatchKeepers->contains($player->id) ? 1 : 0;
-                $historicalCount = (int)$this->keeperCounts->get($player->id, 0);
-                $this->debugLog("Player {$player->name}: wasLastMatchKeeper={$wasLastMatchKeeper}, historicalCount={$historicalCount}");
-                return [$wasLastMatchKeeper, $historicalCount, $player->name];
-            });
-            // Take all favorite keepers
-            return $sortedKeepers->values();
+        // If there are dedicated keepers, use only those (existing behavior)
+        if ($dedicatedKeepers->isNotEmpty()) {
+            $this->debugLog('Using dedicated keepers', $dedicatedKeepers->pluck('name')->toArray());
+            return $this->sortKeepersByPriority($dedicatedKeepers);
         }
-        // No favorite keepers: fallback to old logic
-        $sortedKeepers = $this->players->sortBy(function ($player) {
+
+        // No dedicated keepers: check for players who want to keep
+        $wantsToKeepPlayers = $this->players->filter(function ($player) {
+            return (bool) $player->wants_to_keep;
+        });
+
+        if ($wantsToKeepPlayers->isNotEmpty()) {
+            $this->debugLog('Using wants_to_keep players as keepers', $wantsToKeepPlayers->pluck('name')->toArray());
+            return $this->sortKeepersByPriority($wantsToKeepPlayers);
+        }
+
+        // No dedicated keepers and no one wants to keep: fallback to old logic (everyone can keep)
+        $this->debugLog('Fallback: All players can keep');
+        return $this->sortKeepersByPriority($this->players)->take(4)->values();
+    }
+
+    /**
+     * Sort keepers by priority: least recently keeper, least historical keeper count
+     */
+    private function sortKeepersByPriority(Collection $players): Collection
+    {
+        return $players->sortBy(function ($player) {
             $wasLastMatchKeeper = $this->lastMatchKeepers->contains($player->id) ? 1 : 0;
             $historicalCount = (int)$this->keeperCounts->get($player->id, 0);
             $this->debugLog("Player {$player->name}: wasLastMatchKeeper={$wasLastMatchKeeper}, historicalCount={$historicalCount}");
             return [$wasLastMatchKeeper, $historicalCount, $player->name];
-        });
-        return $sortedKeepers->take(4)->values();
+        })->values();
     }
 
     /**
@@ -209,33 +226,36 @@ class LineupGeneratorService
         // Total benches needed across all quarters
         $totalBenchesNeeded = array_sum($targetsPerQuarter);
 
-        // Count favorite keepers (position_id = 1)
-        $favoriteKeepersCount = $keepers->filter(fn($k) => $this->getPlayerFavoriteRole($k->position_id) === 'keeper')->count();
+        // Determine keeper type: dedicated (position_id=1), wants_to_keep, or fallback (everyone)
+        $keeperType = $this->determineKeeperType($keepers);
+        $designatedKeepersCount = $keepers->count();
 
         $keeperBenchPlan = [];
 
-        // Logic based on number of favorite keepers:
-        // - 0 keepers: old logic, everyone can be keeper, keepers get 1 bench quarter
-        // - 1 keeper: keeper always plays, never benched
-        // - 2+ keepers: keepers only play keeper, but get normal bench rotation
-        if ($favoriteKeepersCount === 0 && $keepers->isNotEmpty() && $totalBenchesNeeded > 0) {
-            // No favorite keepers: old logic where keepers get 1 bench quarter
+        // Logic based on keeper type and count:
+        // - 'fallback': old logic, everyone can be keeper, keepers get 1 bench quarter each
+        // - 'dedicated' with 1 keeper: keeper always plays, never benched
+        // - 'dedicated' with 2+ keepers: keepers only play keeper, benched when not keeping
+        // - 'wants_to_keep': keepers can also play outfield, so they get normal bench rotation (not forced bench)
+        if ($keeperType === 'fallback' && $keepers->isNotEmpty() && $totalBenchesNeeded > 0) {
+            // No designated keepers: old logic where keepers get 1 bench quarter
             foreach ($keepers as $index => $keeper) {
                 $keeperQuarter = $index + 1;
                 $benchQuarter = $this->calculateKeeperBenchQuarter($index, $keeperQuarter);
                 $keeperBenchPlan[$keeper->id] = [$benchQuarter];
             }
-        } elseif ($favoriteKeepersCount >= 2 && $totalBenchesNeeded > 0) {
-            // 2+ keepers: each keeper is benched in ALL their non-keeping quarters
+        } elseif ($keeperType === 'dedicated' && $designatedKeepersCount >= 2 && $totalBenchesNeeded > 0) {
+            // 2+ dedicated keepers: each keeper is benched in ALL their non-keeping quarters
+            // (they can ONLY play as keeper, never outfield)
             $keepersByQuarter = [];
             foreach ($keepers as $index => $keeper) {
                 for ($q = 1; $q <= 4; $q++) {
-                    if (($q - 1) % $favoriteKeepersCount === $index) {
+                    if (($q - 1) % $designatedKeepersCount === $index) {
                         $keepersByQuarter[$keeper->id][] = $q;
                     }
                 }
             }
-            
+
             foreach ($keepers as $keeper) {
                 $keepingQuarters = $keepersByQuarter[$keeper->id] ?? [];
                 $benchQuarters = [];
@@ -249,7 +269,8 @@ class LineupGeneratorService
                 }
             }
         }
-        // If $favoriteKeepersCount === 1: keeper gets NO bench quarter (stays empty in keeperBenchPlan)
+        // If 1 dedicated keeper: keeper gets NO bench quarter (stays empty in keeperBenchPlan)
+        // If 'wants_to_keep': keepers participate in normal bench rotation below (can play outfield)
 
         // 2) Calculate how many benches remain per quarter after assigning keeper benches
         $keeperBenchCounts = $this->computeKeeperBenchCounts($keeperBenchPlan);
@@ -259,8 +280,18 @@ class LineupGeneratorService
         }
 
         // 3) Distribute remaining benches among non-keepers only
-        // Keepers are already assigned their bench quarter above
-        $playersForBenchRotation = $this->players->reject(fn($p) => in_array($p->id, $keepers->pluck('id')->all(), true));
+        // For dedicated keepers: they are already assigned their bench quarters above
+        // For fallback keepers: they are already assigned their 1 bench quarter above
+        // For wants_to_keep keepers: they participate in normal bench rotation (can play outfield)
+        $keeperType = $this->determineKeeperType($keepers);
+        if ($keeperType === 'dedicated' || $keeperType === 'fallback') {
+            // Dedicated and fallback keepers are excluded from normal bench rotation
+            // (they already have their bench quarters assigned in keeperBenchPlan)
+            $playersForBenchRotation = $this->players->reject(fn($p) => in_array($p->id, $keepers->pluck('id')->all(), true));
+        } else {
+            // wants_to_keep keepers participate in normal bench rotation (can play outfield)
+            $playersForBenchRotation = $this->players;
+        }
 
         $nonKeeperBenchPlan = $this->distributeNonKeeperBenches($playersForBenchRotation, $remainingPerQuarter, $keepers);
 
@@ -336,27 +367,29 @@ class LineupGeneratorService
         // This prevents keepers from being benched during their keeper quarters
         $keeperQuarterMap = [];
         if ($keepers && $keepers->isNotEmpty()) {
-            $favoriteKeepers = $keepers->filter(fn($k) => $this->getPlayerFavoriteRole($k->position_id) === 'keeper');
-            $favoriteKeepersCount = $favoriteKeepers->count();
-            
-            // Map ALL keepers to their quarters (not just 2+ favorites)
-            if ($favoriteKeepersCount === 1) {
+            $designatedKeepersCount = $keepers->count();
+
+            // Map keepers to their quarters based on type
+            // All keeper types should NOT be benched during their keeper quarters
+            if ($designatedKeepersCount === 1) {
                 // Single keeper keeps all quarters - exclude from bench entirely
-                $keeperQuarterMap[$favoriteKeepers->first()->id] = 'all'; // Special marker
-            } else if ($favoriteKeepersCount >= 2) {
+                $keeperQuarterMap[$keepers->first()->id] = 'all'; // Special marker
+            } else if ($designatedKeepersCount >= 2) {
                 // Build reverse mapping from mapKeepersToQuarters
                 // keeper_id => [array of quarters they keep]
-                $keeperCount = $favoriteKeepers->count();
-                foreach ($favoriteKeepers->values() as $index => $keeper) {
+                foreach ($keepers->values() as $index => $keeper) {
                     $keeperQuarters = [];
                     for ($q = 1; $q <= 4; $q++) {
-                        if (($q - 1) % $keeperCount === $index) {
+                        if (($q - 1) % $designatedKeepersCount === $index) {
                             $keeperQuarters[] = $q;
                         }
                     }
                     $keeperQuarterMap[$keeper->id] = $keeperQuarters;
                 }
             }
+            // Note: Keepers cannot be benched in their keeper quarters, but:
+            // - dedicated keepers: benched in ALL non-keeper quarters (handled in createBenchPlan)
+            // - wants_to_keep: participate in normal bench rotation for non-keeper quarters
         }
 
         while ($totalRemaining > 0) {
@@ -382,7 +415,7 @@ class LineupGeneratorService
                 $totalRemaining--;
                 $assignmentsThisRound++;
             }
-            
+
             // Safety: if no assignments were made this round, we're stuck - break to avoid infinite loop
             if ($assignmentsThisRound === 0) {
                 $this->debugLog('Warning: No bench assignments made in this round, breaking to avoid infinite loop', [
@@ -409,7 +442,7 @@ class LineupGeneratorService
         if ($excludedQuarter === 'all') {
             return null;
         }
-        
+
         // Normalize excludedQuarter to array for easier checking
         $excludedQuarters = [];
         if (is_int($excludedQuarter)) {
@@ -417,7 +450,7 @@ class LineupGeneratorService
         } elseif (is_array($excludedQuarter)) {
             $excludedQuarters = $excludedQuarter;
         }
-        
+
         // Helper to check adjacency considering wrap-around (1 adjacent to 2 and 4)
         $isAdjacent = function (int $a, int $b): bool {
             return $a === $b - 1 || $a === $b + 1 || ($a === 4 && $b === 1) || ($a === 1 && $b === 4);
@@ -537,13 +570,13 @@ class LineupGeneratorService
             if (in_array($quarter, $benchPlan[$player->id] ?? [], true)) {
                 return true;
             }
-            
-            // Exclude keepers who aren't the designated keeper for this quarter
-            // UNLESS they're already handled in the benchPlan (they'll be benched separately)
+
+            // Exclude dedicated keepers (position_id = 1) who aren't the designated keeper for this quarter
+            // They should only play as keeper, never as outfield
             if ($this->getPlayerFavoriteRole($player->position_id) === 'keeper' && $player->id !== $keeperQuarter) {
                 return true;
             }
-            
+
             return false;
         })->values();
     }
@@ -680,6 +713,32 @@ class LineupGeneratorService
             self::ATTACKER_POSITION_ID => 'attacker',
             default => null
         };
+    }
+
+    /**
+     * Determine the type of keepers in the collection
+     *
+     * @param Collection $keepers The keepers collection
+     * @return string 'dedicated' if any have position_id=1, 'wants_to_keep' if using wants_to_keep players, 'fallback' if random selection
+     */
+    private function determineKeeperType(Collection $keepers): string
+    {
+        // Check if any of the keepers have position_id = 1 (dedicated keeper)
+        $hasDedicatedKeepers = $keepers->contains(fn($k) => $this->getPlayerFavoriteRole($k->position_id) === 'keeper');
+
+        if ($hasDedicatedKeepers) {
+            return 'dedicated';
+        }
+
+        // Check if any of the keepers have wants_to_keep = true
+        $hasWantsToKeepPlayers = $keepers->contains(fn($k) => $k->wants_to_keep === true);
+
+        if ($hasWantsToKeepPlayers) {
+            return 'wants_to_keep';
+        }
+
+        // Fallback: random selection from all players
+        return 'fallback';
     }
 
     /**

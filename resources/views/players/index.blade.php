@@ -37,6 +37,7 @@
 
     @php
         $keeperCount = $players->where('position_id', 1)->count();
+        $wantsToKeepCount = $players->where('wants_to_keep', true)->where('position_id', '!=', 1)->count();
     @endphp
 
     @if($keeperCount > 0)
@@ -48,10 +49,41 @@
                 <div class="text-sm text-blue-800 dark:text-blue-300">
                     @if($keeperCount === 1)
                         <strong class="font-semibold">Let op:</strong> Je hebt 1 speler met favoriete positie "Keeper". Deze speler wordt <strong>alleen</strong> ingezet op de keeperspositie en komt <strong>nooit</strong> op de bank.
+                        @if($wantsToKeepCount > 0)
+                            (bij afwezigheid van vaste keepers worden andere spelers in roulatie gebruikt)
+                        @endif
                     @else
-                        <strong class="font-semibold">Let op:</strong> Je hebt {{ $keeperCount }} spelers met favoriete positie "Keeper". Deze spelers worden <strong>alleen</strong> ingezet op de keeperspositie, maar krijgen wel normale bankbeurten
-                        (net als andere spelers).
+                        <strong class="font-semibold">Let op:</strong> Je hebt {{ $keeperCount }} spelers met favoriete positie "Keeper". Deze spelers worden <strong>alleen</strong> ingezet op de keeperspositie, maar krijgen wel normale bankbeurten (net als andere spelers).
+                        @if($wantsToKeepCount > 0)
+                            (bij afwezigheid van vaste keepers worden andere spelers in roulatie gebruikt)
+                        @endif
                     @endif
+                </div>
+            </div>
+        </div>
+    @elseif($wantsToKeepCount > 0)
+        <div class="mb-4 p-4 bg-yellow-50 dark:bg-yellow-900 border border-yellow-200 dark:border-yellow-700 rounded-lg">
+            <div class="flex items-start">
+                <svg class="w-5 h-5 text-yellow-600 mt-0.5 mr-3 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                </svg>
+                <div class="text-sm text-yellow-800 dark:text-yellow-300">
+                    @if($wantsToKeepCount === 1)
+                        <strong class="font-semibold">Let op:</strong> Je hebt 1 speler die wil keepen (roulatie). Deze speler wordt afgewisseld op de keeperspositie en speelt in de andere kwarten als <strong>veldspeler</strong>.
+                    @else
+                        <strong class="font-semibold">Let op:</strong> Je hebt {{ $wantsToKeepCount }} spelers die willen keepen (roulatie). Deze spelers wisselen elkaar af op de keeperspositie en spelen in de andere kwarten als <strong>veldspeler</strong>.
+                    @endif
+                </div>
+            </div>
+        </div>
+    @else
+        <div class="mb-4 p-4 bg-yellow-50 dark:bg-yellow-900 border border-yellow-200 dark:border-yellow-700 rounded-lg">
+            <div class="flex items-start">
+                <svg class="w-5 h-5 text-yellow-600 mt-0.5 mr-3 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                </svg>
+                <div class="text-sm text-yellow-800 dark:text-yellow-300">
+                    <strong class="font-semibold">Let op:</strong> Je hebt geen vaste keeper of spelers die willen keepen. Elke wedstrijd worden <strong>4 willekeurige spelers</strong> als keeper ingezet (1 per kwart).
                 </div>
             </div>
         </div>
@@ -64,7 +96,7 @@
                 <th class="text-left p-3">Naam</th>
                 <th class="text-left p-3">Favoriete positie</th>
                 <th class="text-left p-3">Sterkere speler</th>
-                <th class="text-left p-3 hidden sm:table-cell">Keer gekeept</th>
+                <th class="text-left p-3 hidden sm:table-cell">Keeper status</th>
                 <th class="text-right p-3"></th>
             </tr>
             </thead>
@@ -80,7 +112,15 @@
                             <span class="inline-block px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded text-xs">Nee</span>
                         @endif
                     </td>
-                    <td class="p-3 hidden sm:table-cell">{{ $player->keeper_count ?? 0 }}</td>
+                    <td class="p-3 hidden sm:table-cell">
+                        @if($player->position_id == 1)
+                            <span class="inline-block px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded text-xs font-medium">Vast</span>
+                        @elseif($player->wants_to_keep || ($keeperCount === 0 && $wantsToKeepCount === 0))
+                            <span class="inline-block px-2 py-1 bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 rounded text-xs font-medium">Roulatie</span>
+                        @else
+                            <span class="text-gray-400">Nooit</span>
+                        @endif
+                    </td>
                     <td class="p-3 text-right">
                         <a class="text-blue-600 dark:text-blue-400 mr-2" href="{{ route('players.show', $player) }}">Bekijk</a>
                         <a class="text-yellow-600 mr-2 hidden md:inline" href="{{ route('players.edit', $player) }}">Bewerk</a>

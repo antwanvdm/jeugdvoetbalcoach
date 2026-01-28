@@ -14,15 +14,19 @@ A Laravel 12 SaaS application for youth football coaches (JO8-JO12) to manage te
 
 ### LineupGeneratorService - Critical Business Rules
 
-Located at `app/Services/LineupGeneratorService.php` with support classes in `app/Services/LineupGenerator/` (`QuarterAssignmentData`, `AssignmentResult`). See `docs/LineupGeneratorService.md` for full documentation. 22 unit tests in `tests/Unit/LineupGeneratorServiceTest.php`.
+Located at `app/Services/LineupGeneratorService.php` with support classes in `app/Services/LineupGenerator/` (`QuarterAssignmentData`, `AssignmentResult`). See `docs/LineupGeneratorService.md` for full documentation. 45 unit tests in `tests/Unit/LineupGeneratorServiceTest.php`.
 
 **Formation System**: Dynamically loaded from `Season->formation` relationship (globally shared or team-specific). Parse `lineup_formation` string (e.g., "2-1-2") via `parseFormationNeeds()` to get outfield role counts `['defender' => 2, 'midfielder' => 1, 'attacker' => 2]`. Desired on-field: `getDesiredOnField()` computes `formation.total_players > 0 ? total_players : 1 + sum(parsed_lineup)` (1 keeper + outfield). NEVER hardcode on-field counts. Formation validated via `ValidFormation` rule - `lineup_formation` sum must equal `total_players - 1`.
 
 **Keeper Logic** (context-sensitive, see `selectKeepers()` and related methods):
-- **0 keepers**: All players eligible for keeper position, 4 selected randomly with weight balance, each gets 1 bench quarter (not in keeper quarter)
+- **Three keeper types** via `determineKeeperType()`:
+  - `dedicated`: `position_id = 1` → only plays keeper, NEVER outfield
+  - `wants_to_keep`: `wants_to_keep = true` → keeps when scheduled, plays outfield otherwise
+  - `fallback`: no dedicated AND no wants_to_keep → 4 random players selected
+- **0 keepers (fallback)**: 4 players selected randomly with weight balance, each gets 1 bench quarter
 - **1 keeper**: Plays all 4 quarters, NEVER benched (critical constraint, tested)
-- **2 keepers**: Each keeps 2 quarters, benches 2 quarters (non-keeper quarters only), NEVER plays outfield
-- **3-4 keepers**: Each keeps 1-2 quarters evenly distributed, benched when not keeping (tested for fairness)
+- **2 keepers**: Each keeps 2 quarters; dedicated keepers bench when not keeping, wants_to_keep plays outfield
+- **3-4 keepers**: Each keeps 1-2 quarters evenly distributed
 - **Historical priority**: Avoids keepers from last match (`getLastMatchKeepers()`), prioritizes players with lowest `keeper_count`
 
 **Bench Distribution Algorithm** (see `createBenchPlan()` and `distributeNonKeeperBenches()`):

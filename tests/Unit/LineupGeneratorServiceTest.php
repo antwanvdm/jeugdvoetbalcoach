@@ -55,7 +55,7 @@ class LineupGeneratorServiceTest extends TestCase
         return $season;
     }
 
-    private function createPlayers(Team $team, int $count, array $keeperIndices = [], array $weights = []): Collection
+    private function createPlayers(Team $team, int $count, array $keeperIndices = [], array $weights = [], array $wantsToKeepIndices = []): Collection
     {
         foreach ([1 => 'Keeper', 2 => 'Defender', 3 => 'Midfielder', 4 => 'Attacker'] as $id => $name) {
             Position::query()->firstOrCreate(['id' => $id], ['name' => $name]);
@@ -66,11 +66,13 @@ class LineupGeneratorServiceTest extends TestCase
             $isKeeper = in_array($i, $keeperIndices, true);
             $positionId = $isKeeper ? 1 : [2,3,4][($i % 3)];
             $weight = $weights[$i] ?? ($i % 3) + 1;
+            $wantsToKeep = in_array($i, $wantsToKeepIndices, true);
             $players->push(Player::create([
                 'team_id' => $team->id,
                 'name' => 'Player '.($i+1),
                 'position_id' => $positionId,
                 'weight' => $weight,
+                'wants_to_keep' => $wantsToKeep,
             ]));
         }
         return $players;
@@ -1334,6 +1336,652 @@ class LineupGeneratorServiceTest extends TestCase
             $this->assertSame(6, $onField, "Quarter $q moet 6 spelers op het veld hebben");
             $keepers = $assignments->where('pivot.position_id', 1)->count();
             $this->assertSame(1, $keepers, "Quarter $q moet 1 keeper hebben");
+        }
+    }
+
+    // === WANTS_TO_KEEP TESTS ===
+
+    public function test_wants_to_keep_players_are_used_as_keepers_when_no_dedicated_keepers(): void
+    {
+        [$user, $team] = $this->createUserAndTeam();
+        $season = $this->createSeasonWithFormation($team, '2-1-2', 6);
+        
+        // Create 8 players with NO dedicated keepers (position_id != 1)
+        // But 3 players have wants_to_keep = true
+        $players = $this->createPlayers($team, 8, keeperIndices: [], wantsToKeepIndices: [0, 1, 2]);
+        $season->players()->sync($players->pluck('id'));
+
+        $match = $this->createMatch($season);
+        $this->generateLineup($match, $players->pluck('id')->all());
+
+        // Verify that only wants_to_keep players are used as keepers
+        for ($quarter = 1; $quarter <= 4; $quarter++) {
+            $keeperInQuarter = $match->players()
+                ->wherePivot('quarter', $quarter)
+                ->wherePivot('position_id', 1)
+                ->first();
+            
+            $this->assertNotNull($keeperInQuarter, "Quarter $quarter should have a keeper");
+            
+            // The keeper should be one of the wants_to_keep players (index 0, 1, or 2)
+            $keeperPlayerId = $keeperInQuarter->id;
+            $wantsToKeepPlayerIds = [$players[0]->id, $players[1]->id, $players[2]->id];
+            
+            $this->assertTrue(
+                in_array($keeperPlayerId, $wantsToKeepPlayerIds),
+                "Quarter $quarter keeper should be a wants_to_keep player"
+            );
+        }
+
+        // Verify players who don't want to keep (indices 3-7) never play as keeper
+        for ($i = 3; $i < 8; $i++) {
+            $keeperCount = $match->players()
+                ->wherePivot('player_id', $players[$i]->id)
+                ->wherePivot('position_id', 1)
+                ->count();
+            
+            $this->assertSame(0, $keeperCount, "Player {$i} (doesn't want to keep) should never be keeper");
+        }
+    }
+
+    public function test_three_wants_to_keep_players_rotate_fairly(): void
+    {
+        [$user, $team] = $this->createUserAndTeam();
+        $season = $this->createSeasonWithFormation($team, '2-1-2', 6);
+        
+        // Create 9 players with 3 wants_to_keep players (no dedicated keepers)
+        $players = $this->createPlayers($team, 9, keeperIndices: [], wantsToKeepIndices: [0, 1, 2]);
+        $season->players()->sync($players->pluck('id'));
+
+        $match = $this->createMatch($season);
+        $this->generateLineup($match, $players->pluck('id')->all());
+
+        $wantsToKeepPlayers = [$players[0], $players[1], $players[2]];
+        
+        // Count how many quarters each wants_to_keep player keeps
+        $keeperCounts = [];
+        foreach ($wantsToKeepPlayers as $player) {
+            $keeperCounts[$player->id] = $match->players()
+                ->wherePivot('player_id', $player->id)
+                ->wherePivot('position_id', 1)
+                ->count();
+        }
+
+        // Total should be 4 (one keeper per quarter)
+        $totalKeeperQuarters = array_sum($keeperCounts);
+        $this->assertSame(4, $totalKeeperQuarters, 'Total keeper quarters should be 4');
+
+        // Each player should keep at least 1 quarter
+        foreach ($keeperCounts as $playerId => $count) {
+            $this->assertGreaterThanOrEqual(1, $count, "Player $playerId should keep at least 1 quarter");
+        }
+
+        // No player should keep more than 2 quarters
+        foreach ($keeperCounts as $playerId => $count) {
+            $this->assertLessThanOrEqual(2, $count, "Player $playerId should keep at most 2 quarters");
+        }
+    }
+
+    public function test_four_wants_to_keep_players_each_keeps_one_quarter(): void
+    {
+        [$user, $team] = $this->createUserAndTeam();
+        $season = $this->createSeasonWithFormation($team, '2-1-2', 6);
+        
+        // Create 10 players with 4 wants_to_keep players (no dedicated keepers)
+        $players = $this->createPlayers($team, 10, keeperIndices: [], wantsToKeepIndices: [0, 1, 2, 3]);
+        $season->players()->sync($players->pluck('id'));
+
+        $match = $this->createMatch($season);
+        $this->generateLineup($match, $players->pluck('id')->all());
+
+        // Each of the 4 wants_to_keep players should keep exactly 1 quarter
+        for ($i = 0; $i < 4; $i++) {
+            $keeperCount = $match->players()
+                ->wherePivot('player_id', $players[$i]->id)
+                ->wherePivot('position_id', 1)
+                ->count();
+            
+            $this->assertSame(1, $keeperCount, "Player {$i} should keep exactly 1 quarter");
+        }
+    }
+
+    public function test_one_wants_to_keep_player_keeps_all_quarters_and_never_benched(): void
+    {
+        [$user, $team] = $this->createUserAndTeam();
+        $season = $this->createSeasonWithFormation($team, '2-1-2', 6);
+        
+        // Create 8 players with only 1 wants_to_keep player (no dedicated keepers)
+        $players = $this->createPlayers($team, 8, keeperIndices: [], wantsToKeepIndices: [0]);
+        $season->players()->sync($players->pluck('id'));
+
+        $match = $this->createMatch($season);
+        $this->generateLineup($match, $players->pluck('id')->all());
+
+        $wantsToKeepPlayer = $players[0];
+
+        // Should keep all 4 quarters
+        $keeperCount = $match->players()
+            ->wherePivot('player_id', $wantsToKeepPlayer->id)
+            ->wherePivot('position_id', 1)
+            ->count();
+        
+        $this->assertSame(4, $keeperCount, "Single wants_to_keep player should keep all 4 quarters");
+
+        // Should never be benched
+        $benchCount = $match->players()
+            ->wherePivot('player_id', $wantsToKeepPlayer->id)
+            ->whereNull('football_match_player.position_id')
+            ->count();
+        
+        $this->assertSame(0, $benchCount, "Single wants_to_keep player should never be benched");
+    }
+
+    public function test_dedicated_keepers_take_priority_over_wants_to_keep(): void
+    {
+        [$user, $team] = $this->createUserAndTeam();
+        $season = $this->createSeasonWithFormation($team, '2-1-2', 6);
+        
+        // Create 9 players: 1 dedicated keeper + 2 wants_to_keep players
+        // The dedicated keeper should be used, wants_to_keep players should play outfield
+        $players = $this->createPlayers($team, 9, keeperIndices: [0], wantsToKeepIndices: [1, 2]);
+        $season->players()->sync($players->pluck('id'));
+
+        $match = $this->createMatch($season);
+        $this->generateLineup($match, $players->pluck('id')->all());
+
+        $dedicatedKeeper = $players[0];
+
+        // Dedicated keeper should keep all 4 quarters
+        $keeperQuarters = $match->players()
+            ->wherePivot('player_id', $dedicatedKeeper->id)
+            ->wherePivot('position_id', 1)
+            ->count();
+        
+        $this->assertSame(4, $keeperQuarters, "Dedicated keeper should keep all 4 quarters");
+
+        // Wants_to_keep players should NOT keep (they play outfield instead)
+        for ($i = 1; $i <= 2; $i++) {
+            $keeperCount = $match->players()
+                ->wherePivot('player_id', $players[$i]->id)
+                ->wherePivot('position_id', 1)
+                ->count();
+            
+            $this->assertSame(0, $keeperCount, "Wants_to_keep player $i should not keep when dedicated keeper exists");
+        }
+    }
+
+    public function test_wants_to_keep_players_can_play_outfield_when_not_keeping(): void
+    {
+        [$user, $team] = $this->createUserAndTeam();
+        $season = $this->createSeasonWithFormation($team, '2-1-2', 6);
+        
+        // Create 8 players with 2 wants_to_keep players (no dedicated keepers)
+        $players = $this->createPlayers($team, 8, keeperIndices: [], wantsToKeepIndices: [0, 1]);
+        $season->players()->sync($players->pluck('id'));
+
+        $match = $this->createMatch($season);
+        $this->generateLineup($match, $players->pluck('id')->all());
+
+        // Each wants_to_keep player keeps 2 quarters, so they have 2 other quarters
+        // In those quarters they should be either benched OR playing outfield
+        // (Unlike dedicated keepers who are ALWAYS benched when not keeping)
+        
+        foreach ([$players[0], $players[1]] as $player) {
+            $totalAssignments = $match->players()
+                ->wherePivot('player_id', $player->id)
+                ->count();
+            
+            // Should have 4 total assignments (one per quarter)
+            $this->assertSame(4, $totalAssignments, "Wants_to_keep player should have 4 total assignments");
+            
+            // Should have exactly 2 keeper assignments
+            $keeperCount = $match->players()
+                ->wherePivot('player_id', $player->id)
+                ->wherePivot('position_id', 1)
+                ->count();
+            $this->assertSame(2, $keeperCount, "Wants_to_keep player should keep exactly 2 quarters");
+            
+            // KEY FIX TEST: wants_to_keep players MUST play outfield in some quarters
+            // They should NOT be benched in ALL non-keeping quarters (that's only for dedicated keepers)
+            $outfieldCount = $match->players()
+                ->wherePivot('player_id', $player->id)
+                ->where(function ($query) {
+                    $query->whereNotNull('football_match_player.position_id')
+                          ->where('football_match_player.position_id', '!=', 1);
+                })
+                ->count();
+            
+            // With 8 players and 6 on field: 2 bench slots per quarter = 8 total benches
+            // 2 wants_to_keep keepers should each have a mix of: 2 keeper + X outfield + Y bench
+            // They should NOT have 2 bench quarters (that's dedicated keeper behavior)
+            $benchCount = $match->players()
+                ->wherePivot('player_id', $player->id)
+                ->whereNull('football_match_player.position_id')
+                ->count();
+            
+            // Wants_to_keep players should have LESS bench time than if they were dedicated keepers
+            // Dedicated keeper: 2 keeper + 2 bench (never outfield)
+            // Wants_to_keep: 2 keeper + at least some outfield (normal bench rotation applies)
+            $this->assertLessThanOrEqual(2, $benchCount, 
+                "Wants_to_keep player should follow normal bench rotation, not dedicated keeper bench rules");
+            
+            // Should have at least 1 outfield assignment (proof they can play field)
+            $this->assertGreaterThanOrEqual(1, $outfieldCount,
+                "Wants_to_keep player MUST be able to play outfield when not keeping");
+        }
+    }
+
+    public function test_fallback_to_all_players_when_no_keepers_and_no_wants_to_keep(): void
+    {
+        [$user, $team] = $this->createUserAndTeam();
+        $season = $this->createSeasonWithFormation($team, '2-1-2', 6);
+        
+        // Create 8 players with NO dedicated keepers and NO wants_to_keep
+        // This should use the old fallback logic (4 random players keep)
+        $players = $this->createPlayers($team, 8, keeperIndices: [], wantsToKeepIndices: []);
+        $season->players()->sync($players->pluck('id'));
+
+        $match = $this->createMatch($season);
+        $this->generateLineup($match, $players->pluck('id')->all());
+
+        // Each quarter should have exactly 1 keeper
+        for ($quarter = 1; $quarter <= 4; $quarter++) {
+            $keepersInQuarter = $match->players()
+                ->wherePivot('quarter', $quarter)
+                ->wherePivot('position_id', 1)
+                ->count();
+            
+            $this->assertSame(1, $keepersInQuarter, "Quarter $quarter should have exactly 1 keeper");
+            
+            // Count total players on field (not benched) - should be exactly 6
+            $playersOnField = $match->players()
+                ->wherePivot('quarter', $quarter)
+                ->whereNotNull('football_match_player.position_id')
+                ->count();
+            
+            $this->assertSame(6, $playersOnField, "Quarter $quarter should have exactly 6 players on field");
+            
+            // Count outfield players (position_id != 1) - should be exactly 5
+            $outfieldPlayers = $match->players()
+                ->wherePivot('quarter', $quarter)
+                ->whereNotNull('football_match_player.position_id')
+                ->where('football_match_player.position_id', '!=', 1)
+                ->count();
+            
+            $this->assertSame(5, $outfieldPlayers, "Quarter $quarter should have exactly 5 outfield players");
+        }
+
+        // 4 different players should have kept (one per quarter)
+        $playersWhoKept = $match->players()
+            ->wherePivot('position_id', 1)
+            ->get()
+            ->unique('id');
+
+        $this->assertSame(4, $playersWhoKept->count(), "4 different players should have kept");
+    }
+
+    public function test_two_wants_to_keep_players_bench_distribution(): void
+    {
+        [$user, $team] = $this->createUserAndTeam();
+        $season = $this->createSeasonWithFormation($team, '2-1-2', 6);
+        
+        // Create 8 players with 2 wants_to_keep players
+        $players = $this->createPlayers($team, 8, keeperIndices: [], wantsToKeepIndices: [0, 1]);
+        $season->players()->sync($players->pluck('id'));
+
+        $match = $this->createMatch($season);
+        $this->generateLineup($match, $players->pluck('id')->all());
+
+        // Each wants_to_keep player should NOT be benched in their keeper quarters
+        // They participate in normal bench rotation for their non-keeping quarters
+        // With 8 players and 6 on field: 2 benches per quarter = 8 total bench slots
+        // Unlike dedicated keepers, wants_to_keep players can also play outfield
+        foreach ([$players[0], $players[1]] as $player) {
+            $keeperCount = $match->players()
+                ->wherePivot('player_id', $player->id)
+                ->wherePivot('position_id', 1)
+                ->count();
+            
+            $benchCount = $match->players()
+                ->wherePivot('player_id', $player->id)
+                ->whereNull('football_match_player.position_id')
+                ->count();
+            
+            $outfieldCount = $match->players()
+                ->wherePivot('player_id', $player->id)
+                ->whereNotNull('football_match_player.position_id')
+                ->where('football_match_player.position_id', '!=', 1)
+                ->count();
+            
+            // Each player should keep 2 quarters
+            $this->assertSame(2, $keeperCount, "Wants_to_keep player should keep exactly 2 quarters");
+            
+            // Total assignments should be 4 (one per quarter)
+            $total = $keeperCount + $benchCount + $outfieldCount;
+            $this->assertSame(4, $total, "Wants_to_keep player should have 4 total assignments");
+            
+            // Should participate in normal bench rotation (bench count varies based on fairness algorithm)
+            // But they should NOT always be benched when not keeping (that was the bug)
+            // They should have at least some outfield time OR follow normal bench rules
+            $this->assertLessThanOrEqual(2, $benchCount, 
+                "Wants_to_keep player should not be benched more than non-keeping quarters");
+        }
+    }
+
+    // === ADDITIONAL EDGE CASE TESTS ===
+
+    public function test_two_dedicated_keepers_with_two_wants_to_keep_players(): void
+    {
+        [$user, $team] = $this->createUserAndTeam();
+        $season = $this->createSeasonWithFormation($team, '2-1-2', 6);
+        
+        // Create 10 players: 2 dedicated keepers + 2 wants_to_keep players
+        // Dedicated keepers should be used, wants_to_keep should play outfield
+        $players = $this->createPlayers($team, 10, keeperIndices: [0, 1], wantsToKeepIndices: [2, 3]);
+        $season->players()->sync($players->pluck('id'));
+
+        $match = $this->createMatch($season);
+        $this->generateLineup($match, $players->pluck('id')->all());
+
+        // Dedicated keepers should each keep 2 quarters
+        $keeper1Quarters = $match->players()
+            ->wherePivot('player_id', $players[0]->id)
+            ->wherePivot('position_id', 1)
+            ->count();
+        $keeper2Quarters = $match->players()
+            ->wherePivot('player_id', $players[1]->id)
+            ->wherePivot('position_id', 1)
+            ->count();
+        
+        $this->assertSame(2, $keeper1Quarters, "Dedicated keeper 1 should keep 2 quarters");
+        $this->assertSame(2, $keeper2Quarters, "Dedicated keeper 2 should keep 2 quarters");
+
+        // Wants_to_keep players should NOT keep (dedicated keepers take priority)
+        foreach ([$players[2], $players[3]] as $player) {
+            $keeperCount = $match->players()
+                ->wherePivot('player_id', $player->id)
+                ->wherePivot('position_id', 1)
+                ->count();
+            
+            $this->assertSame(0, $keeperCount, 
+                "Wants_to_keep player should not keep when dedicated keepers exist");
+            
+            // Wants_to_keep players should play outfield normally
+            $outfieldCount = $match->players()
+                ->wherePivot('player_id', $player->id)
+                ->whereIn('football_match_player.position_id', [2, 3, 4])
+                ->count();
+            
+            $this->assertGreaterThan(0, $outfieldCount,
+                "Wants_to_keep player should play outfield when dedicated keepers handle keeping");
+        }
+    }
+
+    public function test_two_wants_to_keep_one_absent_other_takes_all_quarters(): void
+    {
+        [$user, $team] = $this->createUserAndTeam();
+        $season = $this->createSeasonWithFormation($team, '2-1-2', 6);
+        
+        // Create 8 players with 2 wants_to_keep players
+        $players = $this->createPlayers($team, 8, keeperIndices: [], wantsToKeepIndices: [0, 1]);
+        $season->players()->sync($players->pluck('id'));
+
+        // One wants_to_keep player is absent
+        $availablePlayers = $players->reject(fn($p) => $p->id === $players[0]->id);
+        
+        $match = $this->createMatch($season);
+        $this->generateLineup($match, $availablePlayers->pluck('id')->all());
+
+        // The available wants_to_keep player should keep all 4 quarters
+        $keeperCount = $match->players()
+            ->wherePivot('player_id', $players[1]->id)
+            ->wherePivot('position_id', 1)
+            ->count();
+        
+        $this->assertSame(4, $keeperCount, 
+            "Single available wants_to_keep player should keep all 4 quarters");
+
+        // Should never be benched (like single dedicated keeper)
+        $benchCount = $match->players()
+            ->wherePivot('player_id', $players[1]->id)
+            ->whereNull('football_match_player.position_id')
+            ->count();
+        
+        $this->assertSame(0, $benchCount,
+            "Single wants_to_keep player should never be benched");
+
+        // Absent player should have no assignments
+        $absentAssignments = $match->players()
+            ->wherePivot('player_id', $players[0]->id)
+            ->count();
+        
+        $this->assertSame(0, $absentAssignments, "Absent player should have no assignments");
+    }
+
+    public function test_wants_to_keep_rotation_fair_across_multiple_matches(): void
+    {
+        [$user, $team] = $this->createUserAndTeam();
+        $season = $this->createSeasonWithFormation($team, '2-1-2', 6);
+        
+        // Create 9 players with 3 wants_to_keep players
+        $players = $this->createPlayers($team, 9, keeperIndices: [], wantsToKeepIndices: [0, 1, 2]);
+        $season->players()->sync($players->pluck('id'));
+
+        // Play 6 matches to see rotation fairness
+        for ($i = 0; $i < 6; $i++) {
+            $match = $this->createMatch($season, ['date' => now()->addDays($i)]);
+            $this->generateLineup($match, $players->pluck('id')->all());
+        }
+
+        // Count total keeper quarters per wants_to_keep player across all matches
+        $keeperCounts = [];
+        foreach ([$players[0], $players[1], $players[2]] as $player) {
+            $keeperCounts[$player->id] = \DB::table('football_match_player')
+                ->join('football_matches', 'football_matches.id', '=', 'football_match_player.football_match_id')
+                ->where('football_matches.season_id', $season->id)
+                ->where('football_match_player.player_id', $player->id)
+                ->where('football_match_player.position_id', 1)
+                ->count();
+        }
+
+        // With 3 keepers and 4 quarters per match over 6 matches = 24 total keeper slots
+        // Expected: 8 each (24/3)
+        $totalKeeperQuarters = array_sum($keeperCounts);
+        $this->assertSame(24, $totalKeeperQuarters, "Total keeper quarters should be 24 (4 per match × 6 matches)");
+
+        $minKeeper = min($keeperCounts);
+        $maxKeeper = max($keeperCounts);
+
+        // Fair distribution should have max difference of 2 (allows for rounding in 4/3 division)
+        $this->assertLessThanOrEqual(2, $maxKeeper - $minKeeper,
+            "Wants_to_keep keeper rotation should be fair across matches (max 2 difference)");
+    }
+
+    public function test_five_dedicated_keepers_rotation(): void
+    {
+        [$user, $team] = $this->createUserAndTeam();
+        $season = $this->createSeasonWithFormation($team, '2-1-2', 6);
+        
+        // Create 11 players with 5 dedicated keepers (more than 4 quarters)
+        $players = $this->createPlayers($team, 11, keeperIndices: [0, 1, 2, 3, 4]);
+        $season->players()->sync($players->pluck('id'));
+
+        $match = $this->createMatch($season);
+        $this->generateLineup($match, $players->pluck('id')->all());
+
+        // Count how many keepers actually kept
+        $keeperCounts = [];
+        for ($i = 0; $i < 5; $i++) {
+            $keeperCounts[$players[$i]->id] = $match->players()
+                ->wherePivot('player_id', $players[$i]->id)
+                ->wherePivot('position_id', 1)
+                ->count();
+        }
+
+        // Total should be exactly 4 (one per quarter)
+        $totalKeeperQuarters = array_sum($keeperCounts);
+        $this->assertSame(4, $totalKeeperQuarters, "Total keeper quarters should be 4");
+
+        // Only 4 keepers should have kept (one keeper didn't play as keeper)
+        $keepersWhoKept = count(array_filter($keeperCounts, fn($c) => $c > 0));
+        $this->assertSame(4, $keepersWhoKept, "With 5 keepers and 4 quarters, only 4 should keep");
+
+        // Each keeper who kept should keep exactly 1 quarter
+        foreach ($keeperCounts as $count) {
+            $this->assertLessThanOrEqual(1, $count, "No keeper should keep more than 1 quarter with 5 keepers");
+        }
+
+        // All keepers should be either keeping or benched (never outfield)
+        for ($i = 0; $i < 5; $i++) {
+            $outfieldCount = $match->players()
+                ->wherePivot('player_id', $players[$i]->id)
+                ->whereIn('football_match_player.position_id', [2, 3, 4])
+                ->count();
+            
+            $this->assertSame(0, $outfieldCount, "Dedicated keeper should never play outfield");
+        }
+    }
+
+    public function test_4_3_3_formation_with_12_players(): void
+    {
+        [$user, $team] = $this->createUserAndTeam();
+        
+        // Create 4-3-3 formation (11 players on field)
+        $formation = Formation::create([
+            'team_id' => null,
+            'lineup_formation' => '4-3-3',
+            'total_players' => 11,
+            'is_global' => true,
+        ]);
+
+        $season = Season::create([
+            'team_id' => $team->id,
+            'formation_id' => $formation->id,
+            'year' => (int) now()->year,
+            'part' => 1,
+            'start' => now()->startOfYear()->toDateString(),
+            'end' => now()->endOfYear()->toDateString(),
+            'track_goals' => false,
+            'share_token' => Str::random(32),
+        ]);
+
+        // Create 12 players (1 dedicated keeper + 11 outfield)
+        $players = $this->createPlayers($team, 12, keeperIndices: [0]);
+        $season->players()->sync($players->pluck('id'));
+
+        $match = $this->createMatch($season);
+        $this->generateLineup($match, $players->pluck('id')->all());
+
+        // Each quarter should have 11 on field, 1 benched
+        for ($q = 1; $q <= 4; $q++) {
+            $onField = $match->players()
+                ->wherePivot('quarter', $q)
+                ->whereNotNull('football_match_player.position_id')
+                ->count();
+            
+            $benched = $match->players()
+                ->wherePivot('quarter', $q)
+                ->whereNull('football_match_player.position_id')
+                ->count();
+            
+            $this->assertSame(11, $onField, "Quarter $q should have 11 players on field");
+            $this->assertSame(1, $benched, "Quarter $q should have 1 player benched");
+        }
+
+        // Verify formation: 1 keeper + 4 defenders + 3 midfielders + 3 attackers
+        for ($q = 1; $q <= 4; $q++) {
+            $keepers = $match->players()->wherePivot('quarter', $q)->wherePivot('position_id', 1)->count();
+            $defenders = $match->players()->wherePivot('quarter', $q)->wherePivot('position_id', 2)->count();
+            $midfielders = $match->players()->wherePivot('quarter', $q)->wherePivot('position_id', 3)->count();
+            $attackers = $match->players()->wherePivot('quarter', $q)->wherePivot('position_id', 4)->count();
+            
+            $this->assertSame(1, $keepers, "Quarter $q should have 1 keeper");
+            $this->assertSame(4, $defenders, "Quarter $q should have 4 defenders");
+            $this->assertSame(3, $midfielders, "Quarter $q should have 3 midfielders");
+            $this->assertSame(3, $attackers, "Quarter $q should have 3 attackers");
+        }
+    }
+
+    public function test_keeper_avoids_adjacent_quarters_when_possible(): void
+    {
+        [$user, $team] = $this->createUserAndTeam();
+        $season = $this->createSeasonWithFormation($team, '2-1-2', 6);
+        
+        // Create 9 players with 2 wants_to_keep players
+        $players = $this->createPlayers($team, 9, keeperIndices: [], wantsToKeepIndices: [0, 1]);
+        $season->players()->sync($players->pluck('id'));
+
+        // Play multiple matches to see adjacent quarter patterns
+        $adjacentQuarterMatches = 0;
+        $totalMatches = 10;
+
+        for ($i = 0; $i < $totalMatches; $i++) {
+            $match = $this->createMatch($season, ['date' => now()->addDays($i)]);
+            $this->generateLineup($match, $players->pluck('id')->all());
+
+            // Check each keeper's quarter pattern
+            foreach ([$players[0], $players[1]] as $player) {
+                $quarters = $match->players()
+                    ->wherePivot('player_id', $player->id)
+                    ->wherePivot('position_id', 1)
+                    ->pluck('football_match_player.quarter')
+                    ->sort()
+                    ->values()
+                    ->toArray();
+
+                // Check for adjacent quarters (1-2, 2-3, 3-4)
+                if (count($quarters) === 2) {
+                    $hasAdjacent = abs($quarters[1] - $quarters[0]) === 1;
+                    if ($hasAdjacent) {
+                        $adjacentQuarterMatches++;
+                    }
+                }
+            }
+        }
+
+        // With 2 keepers, each keeps Q1+Q3 or Q2+Q4 ideally (non-adjacent)
+        // Some adjacent quarters may occur, but majority should be non-adjacent
+        $adjacentPercentage = ($adjacentQuarterMatches / ($totalMatches * 2)) * 100;
+        
+        $this->assertLessThan(40, $adjacentPercentage,
+            "Keepers should avoid adjacent quarters when possible (got {$adjacentPercentage}% adjacent)");
+    }
+
+    public function test_wants_to_keep_with_one_dedicated_keeper_present(): void
+    {
+        [$user, $team] = $this->createUserAndTeam();
+        $season = $this->createSeasonWithFormation($team, '2-1-2', 6);
+        
+        // Create 9 players: 1 dedicated keeper + 2 wants_to_keep
+        $players = $this->createPlayers($team, 9, keeperIndices: [0], wantsToKeepIndices: [1, 2]);
+        $season->players()->sync($players->pluck('id'));
+
+        $match = $this->createMatch($season);
+        $this->generateLineup($match, $players->pluck('id')->all());
+
+        // Dedicated keeper should keep all 4 quarters
+        $dedicatedKeeperQuarters = $match->players()
+            ->wherePivot('player_id', $players[0]->id)
+            ->wherePivot('position_id', 1)
+            ->count();
+        
+        $this->assertSame(4, $dedicatedKeeperQuarters, 
+            "Dedicated keeper should keep all 4 quarters even with wants_to_keep players present");
+
+        // Wants_to_keep players should play outfield (not keep)
+        foreach ([$players[1], $players[2]] as $player) {
+            $keeperCount = $match->players()
+                ->wherePivot('player_id', $player->id)
+                ->wherePivot('position_id', 1)
+                ->count();
+            
+            $outfieldCount = $match->players()
+                ->wherePivot('player_id', $player->id)
+                ->whereIn('football_match_player.position_id', [2, 3, 4])
+                ->count();
+            
+            $this->assertSame(0, $keeperCount, "Wants_to_keep should not keep when dedicated keeper is present");
+            $this->assertGreaterThan(0, $outfieldCount, "Wants_to_keep should play outfield");
         }
     }
 }

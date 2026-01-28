@@ -214,20 +214,27 @@ Voetbalposities die spelers kunnen spelen. **Globale tabel**, niet per gebruiker
 
 Alle spelers per team met hun eigenschappen.
 
-| Kolom         | Type            | Nullable | Default        | Beschrijving               |
-|---------------|-----------------|----------|----------------|----------------------------|
-| `id`          | bigint unsigned | NO       | AUTO_INCREMENT | Primary key                |
-| `team_id`     | bigint unsigned | YES      | NULL           | Team waar speler bij hoort |
-| `name`        | varchar(255)    | NO       |                | Naam van de speler         |
-| `position_id` | bigint unsigned | NO       |                | Favoriete/hoofdpositie     |
-| `weight`      | tinyint         | NO       | 1              | Fysiek niveau (1-2)        |
-| `created_at`  | timestamp       | YES      | NULL           | Aanmaakdatum               |
-| `updated_at`  | timestamp       | YES      | NULL           | Laatste wijziging          |
+| Kolom           | Type            | Nullable | Default        | Beschrijving                      |
+|-----------------|-----------------|----------|----------------|-----------------------------------|
+| `id`            | bigint unsigned | NO       | AUTO_INCREMENT | Primary key                       |
+| `team_id`       | bigint unsigned | YES      | NULL           | Team waar speler bij hoort        |
+| `name`          | varchar(255)    | NO       |                | Naam van de speler                |
+| `position_id`   | bigint unsigned | NO       |                | Favoriete/hoofdpositie            |
+| `weight`        | tinyint         | NO       | 1              | Fysiek niveau (1-2)               |
+| `wants_to_keep` | boolean         | NO       | false          | Wil meedoen aan keeper-roulatie   |
+| `created_at`    | timestamp       | YES      | NULL           | Aanmaakdatum                      |
+| `updated_at`    | timestamp       | YES      | NULL           | Laatste wijziging                 |
 
 **Weight systeem:**
 
 - `1` = Normale speler
 - `2` = Sterkere speler
+
+**Keeper selectie (prioriteit):**
+
+1. `position_id = 1` (Keeper) → Vaste keeper, speelt alleen als keeper
+2. `wants_to_keep = true` → Roulatie-keeper, speelt ook veldspeler wanneer niet keepend
+3. Geen van beide → Fallback: 4 willekeurige spelers worden geselecteerd
 
 **Foreign Keys:**
 

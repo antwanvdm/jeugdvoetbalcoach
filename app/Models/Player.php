@@ -13,9 +13,17 @@ class Player extends Model
         'name',
         'position_id',
         'weight',
+        'wants_to_keep',
         'user_id',
         'team_id',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'wants_to_keep' => 'boolean',
+        ];
+    }
 
     /**
      * Boot the model.

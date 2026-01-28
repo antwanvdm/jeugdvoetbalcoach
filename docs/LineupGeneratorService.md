@@ -4,8 +4,8 @@
 
 The `LineupGeneratorService` is responsible for automatically generating balanced football lineups for 4-quarter matches. It considers multiple factors including player rotation, weight distribution, position preferences, keeper history, and historical bench fairness across the last 3 matches.
 
-**Supported Formations:** 2-1-2 (6 players), 3-2-2 (8 players)  
-**Test Coverage:** 22 comprehensive unit tests covering all scenarios
+**Supported Formations:** 2-1-2 (6 players), 3-2-2 (8 players), 4-3-3 (11 players)  
+**Test Coverage:** 45 comprehensive unit tests covering all scenarios
 
 ## Key Features
 
@@ -14,13 +14,17 @@ The `LineupGeneratorService` is responsible for automatically generating balance
 -   Prioritizes players who **didn't keep goal in the previous match**
 -   Considers **historical keeper appearances** (least experienced first)
 -   Applies **weight balance** to avoid clustering similar physical levels
+-   **Three keeper types** (determined by `determineKeeperType()`):
+    -   **`dedicated`**: Players with `position_id = 1` (vaste keeper) - only play keeper, never outfield
+    -   **`wants_to_keep`**: Players with `wants_to_keep = true` - keep when scheduled, play outfield otherwise
+    -   **`fallback`**: When no dedicated keepers AND no wants_to_keep - 4 random players selected
 -   **Smart keeper logic based on count:**
-    -   **0 keepers**: All players eligible for keeper, selected keepers get 1 bench quarter
+    -   **0 keepers (fallback)**: 4 players selected randomly with weight balance, each keeps 1 quarter, gets 1 bench quarter
     -   **1 keeper**: Plays all 4 quarters, NEVER benched (tested)
-    -   **2 keepers**: Each keeps 2 quarters, benches 2 quarters, NEVER play outfield (tested)
+    -   **2 keepers**: Each keeps 2 quarters, benches/plays outfield based on type (tested)
     -   **3 keepers**: Distribution 2-1-1 or similar across 4 quarters (tested)
-    -   **4 keepers**: Each keeps exactly 1 quarter, benches 3 quarters (tested)
--   **Rotation guarantee:** Each keeper gets complete 4-quarter assignment (keeping + bench)
+    -   **4 keepers**: Each keeps exactly 1 quarter (tested)
+-   **Rotation guarantee:** Each keeper gets complete 4-quarter assignment (keeping + bench/outfield)
 
 ### ⚽ **Smart Player Rotation & Bench Fairness**
 
@@ -28,10 +32,11 @@ The `LineupGeneratorService` is responsible for automatically generating balance
 -   **Priority sorting**: Players with fewer recent benches get benched first in current match
 -   **Fair distribution**: Max bench difference of 1-2 across multiple matches (tested over 3, 5, and 10 match seasons)
 -   **Adjacent quarter avoidance**: Spreads bench assignments to avoid consecutive quarters
--   **Keeper bench logic:**
-    -   **1 keeper**: NEVER benched (tested)
-    -   **2+ keepers**: Benched in non-keeper quarters only (tested)
-    -   **0 keepers**: Selected keepers get 1 bench quarter (not in their keeper quarter)
+-   **Keeper bench logic by type:**
+    -   **1 dedicated keeper**: NEVER benched (tested)
+    -   **2+ dedicated keepers**: Benched in ALL non-keeper quarters, NEVER play outfield (tested)
+    -   **wants_to_keep keepers**: Participate in normal bench rotation, CAN play outfield when not keeping (tested)
+    -   **fallback keepers**: Each gets exactly 1 bench quarter, excluded from additional bench rotation (tested)
 -   **New player fairness**: Players joining mid-season automatically get priority due to 0 bench history (tested)
 
 ### 🏃‍♂️ **Formation & Position Management**
@@ -275,20 +280,31 @@ $lineupGenerator->generateLineup($match, [1, 3, 5, 7, 9]);
 ## Test Coverage
 
 **Location:** `tests/Unit/LineupGeneratorServiceTest.php`  
-**Total Tests:** 22 comprehensive scenarios  
+**Total Tests:** 45 comprehensive scenarios  
 **Framework:** PHPUnit with RefreshDatabase  
 **Database:** SQLite (isolated test environment)
 
 ### Test Categories
 
-#### ✅ Keeper Scenarios (6 tests)
+#### ✅ Dedicated Keeper Scenarios (6 tests)
 
 -   `test_one_keeper_keeps_all_quarters_and_is_never_benched` - Single keeper plays all quarters, 0 benches
 -   `test_two_keepers_only_play_keeper_and_rotate_fairly` - 2 keepers each keep 2 quarters, bench 2 quarters, never outfield
--   `test_no_keepers_allows_all_players_to_rotate_through_keeper_position` - 4 different keepers across quarters, each gets 1 bench
+-   `test_no_keepers_allows_all_players_to_rotate_through_keeper_position` - Fallback: 4 different keepers across quarters
 -   `test_three_keepers_rotate_fairly_each_keeps_one_or_two_quarters` - Distribution 2-1-1 or similar
 -   `test_four_keepers_each_keeps_exactly_one_quarter` - Perfect 1-1-1-1 distribution
 -   `test_keeper_availability_changes_between_matches` - Keeper absent/present across matches
+
+#### ✅ Wants_to_keep Scenarios (8 tests)
+
+-   `test_wants_to_keep_players_are_used_as_keepers_when_no_dedicated_keepers` - Prioritized over fallback
+-   `test_three_wants_to_keep_players_rotate_fairly` - Fair keeper rotation among 3 players
+-   `test_four_wants_to_keep_players_each_keeps_one_quarter` - Perfect 1-1-1-1 distribution
+-   `test_one_wants_to_keep_player_keeps_all_quarters_and_never_benched` - Single wants_to_keep = plays all quarters
+-   `test_dedicated_keepers_take_priority_over_wants_to_keep` - Dedicated keepers selected first
+-   `test_wants_to_keep_players_can_play_outfield_when_not_keeping` - Key difference from dedicated keepers
+-   `test_fallback_to_all_players_when_no_keepers_and_no_wants_to_keep` - Fallback mode with correct bench distribution
+-   `test_two_wants_to_keep_players_bench_distribution` - Bench fairness maintained
 
 #### ✅ Bench Fairness (4 tests)
 
@@ -364,9 +380,9 @@ php artisan test --filter=LineupGeneratorServiceTest --coverage
 
 ### What Makes This Service Robust
 
-1. **Comprehensive Test Suite** - 22 tests covering all scenarios from single matches to 10-match seasons
+1. **Comprehensive Test Suite** - 45 tests covering all scenarios from single matches to 10-match seasons
 2. **Historical Fairness** - Tracks last 3 matches to ensure fair rotation over time
-3. **Flexible Keeper Logic** - Handles 0-4 keepers with appropriate rules for each scenario
+3. **Flexible Keeper Logic** - Handles three keeper types (dedicated, wants_to_keep, fallback) with 0-4 keepers
 4. **Formation Validation** - Prevents impossible match creation at the form level
 5. **Position Respect** - >70% position preference adherence while maintaining fairness
 6. **Weight Awareness** - Avoids extreme clustering while respecting mathematical constraints
@@ -375,7 +391,8 @@ php artisan test --filter=LineupGeneratorServiceTest --coverage
 
 ### Verified Capabilities
 
-✅ All keeper scenarios work correctly (0, 1, 2, 3, 4 keepers)  
+✅ All keeper scenarios work correctly (dedicated, wants_to_keep, fallback with 0-4 keepers)  
+✅ Wants_to_keep players can play outfield when not keeping (unlike dedicated keepers)  
 ✅ Bench fairness maintained across 3-10 match seasons  
 ✅ Both 2-1-2 and 3-2-2 formations supported  
 ✅ New players get fair treatment automatically  
