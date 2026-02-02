@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\FootballMatch;
+use App\Models\MatchGoal;
 use App\Models\Player;
 use App\Models\Position;
 use App\Models\Season;
 use Gate;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -93,7 +96,9 @@ class PlayerController extends Controller
             }
             // Wants to keep: only relevant if not a dedicated keeper (position_id != 1)
             // If position_id is 1 (Keeper), they always keep, so wants_to_keep is implicitly true
-            $playerData['wants_to_keep'] = $playerData['position_id'] == 1 || isset($request->players[$i]['wants_to_keep']) && $request->players[$i]['wants_to_keep'] == '1';
+            $playerData['wants_to_keep'] = $playerData['position_id'] == 1 
+                ? true 
+                : (isset($request->players[$i]['wants_to_keep']) && $request->players[$i]['wants_to_keep'] == '1');
             $playerData['user_id'] = $userId;
             $playerData['team_id'] = $teamId;
             $player = Player::create($playerData);
@@ -115,8 +120,74 @@ class PlayerController extends Controller
     {
         Gate::authorize('view', $player);
 
-        $player->load('position');
-        return view('players.show', compact('player'));
+        $player->load(['position', 'team.players']);
+        
+        // Keeper status logic
+        $teamPlayers = $player->team->players;
+        $keeperCount = $teamPlayers->where('position_id', 1)->count();
+        $wantsToKeepCount = $teamPlayers->where('wants_to_keep', true)->where('position_id', '!=', 1)->count();
+        
+        if ($player->position_id == 1) {
+            $keeperStatus = 'vast';
+        } elseif ($player->wants_to_keep || ($keeperCount === 0 && $wantsToKeepCount === 0)) {
+            $keeperStatus = 'roulatie';
+        } else {
+            $keeperStatus = 'nooit';
+        }
+        
+        // Stats - count unique matches (pivot table has multiple rows per match - one per quarter)
+        $matchesPlayed = DB::table('football_match_player')
+            ->where('player_id', $player->id)
+            ->distinct('football_match_id')
+            ->count('football_match_id');
+        
+        $totalGoals = MatchGoal::where('player_id', $player->id)->count();
+        $totalAssists = MatchGoal::where('assist_player_id', $player->id)->count();
+        
+        // Count unique matches where player was keeper (position_id = 1)
+        $keeperMatches = DB::table('football_match_player')
+            ->where('player_id', $player->id)
+            ->where('position_id', 1)
+            ->distinct('football_match_id')
+            ->count('football_match_id');
+        
+        // Get all unique match IDs for this player
+        $matchIds = DB::table('football_match_player')
+            ->where('player_id', $player->id)
+            ->distinct()
+            ->pluck('football_match_id');
+        
+        $matchesWithResult = FootballMatch::withoutGlobalScopes()
+            ->whereIn('id', $matchIds)
+            ->whereNotNull('goals_scored')
+            ->whereNotNull('goals_conceded')
+            ->get();
+        
+        $wins = 0;
+        $draws = 0;
+        $losses = 0;
+        
+        foreach ($matchesWithResult as $match) {
+            if ($match->goals_scored > $match->goals_conceded) {
+                $wins++;
+            } elseif ($match->goals_scored === $match->goals_conceded) {
+                $draws++;
+            } else {
+                $losses++;
+            }
+        }
+        
+        $stats = [
+            'matchesPlayed' => $matchesPlayed,
+            'totalGoals' => $totalGoals,
+            'totalAssists' => $totalAssists,
+            'keeperMatches' => $keeperMatches,
+            'wins' => $wins,
+            'draws' => $draws,
+            'losses' => $losses,
+        ];
+
+        return view('players.show', compact('player', 'keeperStatus', 'stats'));
     }
 
     /**
@@ -138,6 +209,7 @@ class PlayerController extends Controller
     {
         Gate::authorize('update', $player);
 
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'position_id' => ['required', 'exists:positions,id'],
@@ -147,10 +219,12 @@ class PlayerController extends Controller
 
         // Checkbox: if not set, fallback to 1 (hidden input), if checked, value is 2
         $validated['weight'] = $request->input('weight', 1) == '2' ? 2 : 1;
-
+        
         // Wants to keep: if position_id is 1 (Keeper), they always keep
         // Otherwise, check the checkbox value
-        $validated['wants_to_keep'] = $validated['position_id'] == 1 || $request->input('wants_to_keep') == '1';
+        $validated['wants_to_keep'] = $validated['position_id'] == 1 
+            ? true 
+            : ($request->input('wants_to_keep') == '1');
 
         $player->update($validated);
 

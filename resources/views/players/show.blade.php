@@ -37,14 +37,9 @@
             <div class="mb-2">
                 <div class="text-sm text-gray-600 dark:text-gray-300">Keeper status</div>
                 <div class="font-medium">
-                    @php
-                        $teamPlayers = $player->team->players;
-                        $keeperCount = $teamPlayers->where('position_id', 1)->count();
-                        $wantsToKeepCount = $teamPlayers->where('wants_to_keep', true)->where('position_id', '!=', 1)->count();
-                    @endphp
-                    @if($player->position_id == 1)
+                    @if($keeperStatus === 'vast')
                         <span class="inline-block px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded text-xs font-medium">Vast</span>
-                    @elseif($player->wants_to_keep || ($keeperCount === 0 && $wantsToKeepCount === 0))
+                    @elseif($keeperStatus === 'roulatie')
                         <span class="inline-block px-2 py-1 bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 rounded text-xs font-medium">Roulatie</span>
                     @else
                         <span class="text-gray-400">Nooit</span>
@@ -55,73 +50,37 @@
     </div>
 
     <!-- Statistieken -->
-    @php
-        $matchesPlayed = $player->footballMatches->count();
-        $goalsScored = $player->footballMatches()
-            ->whereHas('goals', function ($query) use ($player) {
-                $query->where('player_id', $player->id);
-            })
-            ->distinct()
-            ->count();
-        
-        $totalGoals = \App\Models\MatchGoal::where('player_id', $player->id)->count();
-        $totalAssists = \App\Models\MatchGoal::where('assist_player_id', $player->id)->count();
-        
-        $keeperMatches = $player->footballMatches()
-            ->whereNotNull('football_match_player.position_id')
-            ->wherePivot('position_id', 1)
-            ->distinct()
-            ->count();
-        
-        $matchesWithResult = $player->footballMatches()
-            ->whereNotNull('goals_scored')
-            ->whereNotNull('goals_conceded')
-            ->distinct()
-            ->get();
-        
-        $wins = 0;
-        $draws = 0;
-        $losses = 0;
-        
-        foreach ($matchesWithResult as $match) {
-            if ($match->goals_scored > $match->goals_conceded) {
-                $wins++;
-            } elseif ($match->goals_scored === $match->goals_conceded) {
-                $draws++;
-            } else {
-                $losses++;
-            }
-        }
-    @endphp
-
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <div class="bg-white dark:bg-gray-800 p-4 shadow dark:shadow-gray-700 rounded">
             <div class="text-sm text-gray-600 dark:text-gray-300">Gespeelde wedstrijden</div>
-            <div class="text-3xl font-bold text-blue-600 dark:text-blue-400">{{ $matchesPlayed }}</div>
+            <div class="text-3xl font-bold text-blue-600 dark:text-blue-400">{{ $stats['matchesPlayed'] }}</div>
         </div>
 
         <div class="bg-white dark:bg-gray-800 p-4 shadow dark:shadow-gray-700 rounded">
             <div class="text-sm text-gray-600 dark:text-gray-300">Doelpunten</div>
-            <div class="text-3xl font-bold text-green-600 dark:text-green-400">{{ $totalGoals }}</div>
+            <div class="text-3xl font-bold text-green-600 dark:text-green-400">{{ $stats['totalGoals'] }}</div>
         </div>
 
         <div class="bg-white dark:bg-gray-800 p-4 shadow dark:shadow-gray-700 rounded">
             <div class="text-sm text-gray-600 dark:text-gray-300">Assists</div>
-            <div class="text-3xl font-bold text-purple-600 dark:text-purple-400">{{ $totalAssists }}</div>
+            <div class="text-3xl font-bold text-purple-600 dark:text-purple-400">{{ $stats['totalAssists'] }}</div>
         </div>
 
         <div class="bg-white dark:bg-gray-800 p-4 shadow dark:shadow-gray-700 rounded">
             <div class="text-sm text-gray-600 dark:text-gray-300">Keer keeper geweest</div>
-            <div class="text-3xl font-bold text-yellow-600 dark:text-yellow-400">{{ $keeperMatches }}</div>
+            <div class="text-3xl font-bold text-yellow-600 dark:text-yellow-400">{{ $stats['keeperMatches'] }}</div>
         </div>
 
         <div class="bg-white dark:bg-gray-800 p-4 shadow dark:shadow-gray-700 rounded">
             <div class="text-sm text-gray-600 dark:text-gray-300">Winst/Gelijk/Verlies</div>
             <div class="text-2xl font-bold">
-                <span class="text-green-600 dark:text-green-400">{{ $wins }}</span> /
-                <span class="text-gray-600 dark:text-gray-400">{{ $draws }}</span> /
-                <span class="text-red-600 dark:text-red-400">{{ $losses }}</span>
+                <span class="text-green-600 dark:text-green-400">{{ $stats['wins'] }}</span> /
+                <span class="text-gray-600 dark:text-gray-400">{{ $stats['draws'] }}</span> /
+                <span class="text-red-600 dark:text-red-400">{{ $stats['losses'] }}</span>
             </div>
+            @if($stats['matchesPlayed'] > ($stats['wins'] + $stats['draws'] + $stats['losses']))
+                <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $stats['matchesPlayed'] - ($stats['wins'] + $stats['draws'] + $stats['losses']) }} wedstrijd(en) zonder resultaat</div>
+            @endif
         </div>
     </div>
 
