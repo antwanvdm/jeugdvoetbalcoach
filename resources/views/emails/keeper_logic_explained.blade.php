@@ -3,7 +3,7 @@
 
 Het verdelen van keeperbeurten is voor veel jeugdcoaches een terugkerend puzzeltje. Wie staat wanneer in doel? En hoe zorg je dat het eerlijk blijft voor iedereen?
 
-Bij jeugdvoetbalcoach.nl wordt dit automatisch geregeld, maar je houdt als coach altijd zelf de controle hoe dit gebeurd.
+Bij jeugdvoetbalcoach.nl wordt dit automatisch geregeld, maar je houdt als coach altijd zelf de controle over hoe je dit instelt.
 
 ### Keeperinstellingen: drie mogelijkheden
 
