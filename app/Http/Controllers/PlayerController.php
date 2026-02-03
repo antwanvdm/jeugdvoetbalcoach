@@ -135,11 +135,18 @@ class PlayerController extends Controller
             $keeperStatus = 'nooit';
         }
         
-        // Stats - count unique matches (pivot table has multiple rows per match - one per quarter)
-        $matchesPlayed = DB::table('football_match_player')
+        // Get all unique match IDs for this player
+        $matchIds = DB::table('football_match_player')
             ->where('player_id', $player->id)
-            ->distinct('football_match_id')
-            ->count('football_match_id');
+            ->distinct()
+            ->pluck('football_match_id');
+        
+        // Only count matches with results
+        $matchesPlayed = FootballMatch::withoutGlobalScopes()
+            ->whereIn('id', $matchIds)
+            ->whereNotNull('goals_scored')
+            ->whereNotNull('goals_conceded')
+            ->count();
         
         $totalGoals = MatchGoal::where('player_id', $player->id)->count();
         $totalAssists = MatchGoal::where('assist_player_id', $player->id)->count();
@@ -150,12 +157,6 @@ class PlayerController extends Controller
             ->where('position_id', 1)
             ->distinct('football_match_id')
             ->count('football_match_id');
-        
-        // Get all unique match IDs for this player
-        $matchIds = DB::table('football_match_player')
-            ->where('player_id', $player->id)
-            ->distinct()
-            ->pluck('football_match_id');
         
         $matchesWithResult = FootballMatch::withoutGlobalScopes()
             ->whereIn('id', $matchIds)

@@ -78,9 +78,6 @@
                 <span class="text-gray-600 dark:text-gray-400">{{ $stats['draws'] }}</span> /
                 <span class="text-red-600 dark:text-red-400">{{ $stats['losses'] }}</span>
             </div>
-            @if($stats['matchesPlayed'] > ($stats['wins'] + $stats['draws'] + $stats['losses']))
-                <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $stats['matchesPlayed'] - ($stats['wins'] + $stats['draws'] + $stats['losses']) }} wedstrijd(en) zonder resultaat</div>
-            @endif
         </div>
     </div>
 
