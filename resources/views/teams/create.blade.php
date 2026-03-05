@@ -4,7 +4,7 @@
         @csrf
         <div class="mb-3">
             <label class="block text-sm font-medium mb-1">Koppel Club (autocomplete)</label>
-            <input type="text" data-opponent-autocomplete data-target-hidden="opponent_id" class="w-full border rounded p-2" placeholder="Zoek clubnaam..." autocomplete="off">
+            <input type="text" data-opponent-autocomplete data-target-hidden="opponent_id" class="w-full border rounded p-2 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" placeholder="Zoek clubnaam..." autocomplete="off">
             <input type="hidden" name="opponent_id" id="opponent_id" value="{{ old('opponent_id') }}">
             <p class="text-xs text-gray-600 dark:text-gray-300 mt-1">Selecteer een club uit de landelijke database. Team-naam/logo/locatie komen voortaan van deze club.</p>
             @error('opponent_id')
@@ -13,7 +13,7 @@
         </div>
         <div class="mb-3">
             <label class="block text-sm font-medium mb-1">Eigen label (optioneel)</label>
-            <input type="text" name="label" value="{{ old('label') }}" class="w-full border rounded p-2" placeholder="Bijv. JO8-1">
+            <input type="text" name="label" value="{{ old('label') }}" class="w-full border rounded p-2 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" placeholder="Bijv. JO8-1">
             <p class="text-xs text-gray-600 dark:text-gray-300 mt-1">Handige eigen naam als je meerdere teams bij dezelfde club hebt.</p>
             @error('label')
                 <p class="text-red-600 dark:text-red-400 text-sm mt-1">{{ $message }}</p>
