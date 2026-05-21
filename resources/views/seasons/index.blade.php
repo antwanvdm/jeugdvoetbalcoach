@@ -26,7 +26,21 @@
             </tr>
             </thead>
             <tbody>
+            @php $shownYears = []; @endphp
             @foreach($seasons as $season)
+                @if($yearsWithMultiple->contains($season->year) && !in_array($season->year, $shownYears))
+                    @php $shownYears[] = $season->year; @endphp
+                    <tr class="bg-indigo-50 dark:bg-indigo-950 border-b border-indigo-200 dark:border-indigo-700">
+                        <td class="p-3 font-semibold text-indigo-800 dark:text-indigo-200" colspan="3">
+                            Jaaroverzicht {{ $season->year }}/{{ $season->year + 1 }}
+                        </td>
+                        <td class="p-3 hidden sm:table-cell"></td>
+                        <td class="p-3"></td>
+                        <td class="p-3 text-right">
+                            <a href="{{ route('seasons.year', $season->year) }}" class="text-indigo-600 dark:text-indigo-400 font-medium">Bekijk jaaroverzicht →</a>
+                        </td>
+                    </tr>
+                @endif
                 <tr class="border-b">
                     <td class="p-3 font-medium">{{ $season->year }}/{{ $season->year + 1 }}</td>
                     <td class="p-3">{{ $season->part }}</td>

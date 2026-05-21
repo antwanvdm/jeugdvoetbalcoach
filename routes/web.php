@@ -29,6 +29,7 @@ Route::get('/api/opponents', OpponentSearchController::class)->middleware('throt
 //Public share pages (for parents)
 Route::get('/football-matches/{footballMatch}/share/{shareToken}', [FootballMatchController::class, 'showPublic'])->middleware('throttle:30,1')->name('football-matches.share');
 Route::get('/seasons/{season}/share/{shareToken}', [SeasonController::class, 'showPublic'])->middleware('throttle:30,1')->name('seasons.share');
+Route::get('/seasons/year/{year}/share/{shareToken}', [SeasonController::class, 'showYearPublic'])->middleware('throttle:30,1')->name('seasons.year.share');
 
 //Public team join routes (accessible without authentication)
 Route::get('/teams/join/{inviteCode}', [TeamController::class, 'showJoin'])->middleware('throttle:20,1')->name('teams.join.show');
@@ -63,6 +64,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('football-matches/{footballMatch}/lineup', [FootballMatchController::class, 'lineup'])->name('football-matches.lineup');
     Route::post('football-matches/{footballMatch}/lineup', [FootballMatchController::class, 'lineupUpdate'])->name('football-matches.lineup.update');
     Route::post('football-matches/{footballMatch}/regenerate-lineup', [FootballMatchController::class, 'regenerateLineup'])->name('football-matches.regenerate-lineup');
+
+    // Season year overview
+    Route::get('/seasons/year/{year}', [SeasonController::class, 'showYear'])->name('seasons.year');
 
     // Resource routes
     Route::resources([

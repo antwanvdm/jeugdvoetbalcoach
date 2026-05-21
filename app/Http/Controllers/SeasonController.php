@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Formation;
+use App\Models\Player;
 use App\Models\Season;
 use Gate;
 use Illuminate\Http\RedirectResponse;
@@ -19,7 +20,12 @@ class SeasonController extends Controller
         $seasons = Season::orderByDesc('year')->orderByDesc('part')->paginate(15);
         $onboardingInProgress = !auth()->user()->hasTeamOnboardingCompleted();
 
-        return view('seasons.index', compact('seasons', 'onboardingInProgress'));
+        $yearsWithMultiple = Season::select('year')
+            ->groupBy('year')
+            ->havingRaw('COUNT(*) >= 2')
+            ->pluck('year');
+
+        return view('seasons.index', compact('seasons', 'onboardingInProgress', 'yearsWithMultiple'));
     }
 
     public function create(): View
@@ -118,6 +124,108 @@ class SeasonController extends Controller
 
         $season->delete();
         return redirect()->route('seasons.index')->with('success', 'Seizoen verwijderd.');
+    }
+
+    public function showYear(int $year): View
+    {
+        Gate::authorize('viewAny', Season::class);
+
+        $seasons = Season::where('year', $year)
+            ->with(['footballMatches.opponent', 'footballMatches.goals', 'footballMatches.season'])
+            ->get();
+
+        abort_if($seasons->count() < 2, 404);
+
+        $yearShareToken = self::computeYearShareToken($seasons);
+        $dateFrom = $seasons->sortBy('start')->first()->start->format('d-m-Y');
+        $dateTo   = $seasons->sortByDesc('end')->first()->end->format('d-m-Y');
+
+        [$stats, $allMatches, $topScorers, $topAssisters, $trackGoals] = $this->aggregateYearData($seasons, session('current_team_id'));
+        $coaches = $seasons->first()->team->users()->get();
+        $isPublic = false;
+
+        return view('seasons.year', compact('year', 'seasons', 'stats', 'allMatches', 'topScorers', 'topAssisters', 'coaches', 'trackGoals', 'yearShareToken', 'dateFrom', 'dateTo', 'isPublic'));
+    }
+
+    public function showYearPublic(int $year, string $shareToken): View
+    {
+        $allYearSeasons = Season::withoutGlobalScope('team')
+            ->where('year', $year)
+            ->with(['footballMatches.opponent', 'footballMatches.goals', 'footballMatches.season'])
+            ->get();
+
+        $seasons = null;
+        foreach ($allYearSeasons->groupBy('team_id') as $teamSeasons) {
+            if ($teamSeasons->count() < 2) continue;
+            if (hash_equals(self::computeYearShareToken($teamSeasons), $shareToken)) {
+                $seasons = $teamSeasons->values();
+                break;
+            }
+        }
+        abort_if($seasons === null, 404);
+
+        $yearShareToken = $shareToken;
+        $dateFrom = $seasons->sortBy('start')->first()->start->format('d-m-Y');
+        $dateTo   = $seasons->sortByDesc('end')->first()->end->format('d-m-Y');
+
+        [$stats, $allMatches, $topScorers, $topAssisters, $trackGoals] = $this->aggregateYearData($seasons, $seasons->first()->team_id);
+        $coaches = $seasons->first()->team->users()->get();
+        $isPublic = true;
+
+        return view('seasons.year', compact('year', 'seasons', 'stats', 'allMatches', 'topScorers', 'topAssisters', 'coaches', 'trackGoals', 'yearShareToken', 'dateFrom', 'dateTo', 'isPublic'));
+    }
+
+    private function aggregateYearData($seasons, int $teamId): array
+    {
+        $allMatches = $seasons->flatMap(fn($s) => $s->footballMatches)->sortBy('date');
+        $matchesWithResult = $allMatches->filter(fn($m) => !is_null($m->goals_scored));
+
+        $stats = [
+            'total'         => $matchesWithResult->count(),
+            'wins'          => $matchesWithResult->filter(fn($m) => $m->result === 'W')->count(),
+            'draws'         => $matchesWithResult->filter(fn($m) => $m->result === 'D')->count(),
+            'losses'        => $matchesWithResult->filter(fn($m) => $m->result === 'L')->count(),
+            'goals_for'     => $matchesWithResult->sum('goals_scored'),
+            'goals_against' => $matchesWithResult->sum('goals_conceded'),
+            'goal_diff'     => $matchesWithResult->sum('goals_scored') - $matchesWithResult->sum('goals_conceded'),
+        ];
+
+        $trackGoals = $seasons->contains(fn($s) => $s->track_goals);
+        $seasonIds  = $seasons->pluck('id');
+
+        $topScorers = $trackGoals ? Player::query()
+            ->select('players.*')
+            ->selectRaw('COUNT(match_goals.id) as goals_count')
+            ->join('match_goals', 'players.id', '=', 'match_goals.player_id')
+            ->join('football_matches', 'match_goals.football_match_id', '=', 'football_matches.id')
+            ->whereIn('football_matches.season_id', $seasonIds)
+            ->where('football_matches.team_id', $teamId)
+            ->groupBy('players.id')
+            ->orderByDesc('goals_count')
+            ->limit(5)
+            ->get() : collect();
+
+        $topAssisters = $trackGoals ? Player::query()
+            ->select('players.*')
+            ->selectRaw('COUNT(match_goals.id) as assists_count')
+            ->join('match_goals', 'players.id', '=', 'match_goals.assist_player_id')
+            ->join('football_matches', 'match_goals.football_match_id', '=', 'football_matches.id')
+            ->whereIn('football_matches.season_id', $seasonIds)
+            ->where('football_matches.team_id', $teamId)
+            ->groupBy('players.id')
+            ->orderByDesc('assists_count')
+            ->limit(5)
+            ->get() : collect();
+
+        return [$stats, $allMatches, $topScorers, $topAssisters, $trackGoals];
+    }
+
+    private static function computeYearShareToken($seasons): string
+    {
+        return substr(
+            hash('sha256', $seasons->sortBy('id')->map(fn($s) => $s->id . ':' . ($s->share_token ?? ''))->join('|')),
+            0, 64
+        );
     }
 
     /**
