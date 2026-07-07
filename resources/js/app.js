@@ -1,4 +1,4 @@
-import.meta.glob(['../images/**']);
+import.meta.glob(['../images/**'], { eager: true });
 
 // Theme toggle (light/dark) with system default on first load
 const THEME_KEY = 'theme'; // 'light' | 'dark'
@@ -448,12 +448,12 @@ document.addEventListener('DOMContentLoaded', function () {
     function toggleWantsToKeepDisabled(positionSelect) {
         const row = positionSelect.closest('.player-row');
         if (!row) return;
-        
+
         const checkbox = row.querySelector('.wants-to-keep-checkbox');
         if (!checkbox) return;
-        
+
         const selectedValue = positionSelect.value;
-        
+
         if (selectedValue === KEEPER_POSITION_ID) {
             checkbox.disabled = true;
             checkbox.checked = false; // Uncheck when disabled
@@ -535,7 +535,7 @@ document.addEventListener('DOMContentLoaded', function () {
         playersContainer.appendChild(newRow);
         rowIndex++;
         updateRemoveButtons();
-        
+
         // Add event listener for the new position select
         const newPositionSelect = newRow.querySelector('.position-select');
         if (newPositionSelect) {
@@ -693,11 +693,11 @@ document.addEventListener('DOMContentLoaded', function () {
 document.addEventListener('DOMContentLoaded', function () {
     const positionSelect = document.getElementById('position_id');
     const wantsToKeepCheckbox = document.querySelector('#wants-to-keep-container .wants-to-keep-checkbox');
-    
+
     if (!positionSelect || !wantsToKeepCheckbox) return;
-    
+
     const KEEPER_POSITION_ID = '1';
-    
+
     function toggleWantsToKeepDisabled() {
         if (positionSelect.value === KEEPER_POSITION_ID) {
             wantsToKeepCheckbox.disabled = true;
@@ -706,7 +706,7 @@ document.addEventListener('DOMContentLoaded', function () {
             wantsToKeepCheckbox.disabled = false;
         }
     }
-    
+
     positionSelect.addEventListener('change', toggleWantsToKeepDisabled);
     // Initial state is handled by Blade template with disabled attribute
 });
