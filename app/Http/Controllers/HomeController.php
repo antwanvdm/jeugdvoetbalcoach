@@ -24,7 +24,7 @@ class HomeController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255',
             'subject' => 'required|string|max:255',
-            'message' => 'required|string|max:2000',
+            'message' => 'required|string|max:2000|regex:/\S+\s+\S+/',
         ]);
 
         // Log feedback without email for GDPR compliance
