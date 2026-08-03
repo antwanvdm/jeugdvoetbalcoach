@@ -38,6 +38,12 @@
         </div>
 
         <div class="mb-3">
+            <label class="block text-sm font-medium mb-1">Wisselmomenten override (optioneel)</label>
+            <input type="number" name="substitution_moments_override" min="2" max="8" value="{{ old('substitution_moments_override', $footballMatch->substitution_moments_override) }}" class="w-full border rounded p-2 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" placeholder="Leeg = seizoen default {{ $footballMatch->season->default_substitution_moments ?? 4 }}">
+            <p class="mt-1 text-xs text-gray-600 dark:text-gray-300">Leeg laten gebruikt seizoen-default. Keepers wisselen maximaal in de eerste 4 momenten.</p>
+        </div>
+
+        <div class="mb-3">
             <label class="block text-sm font-medium mb-1">Notities coach (optioneel)</label>
             <textarea name="notes" rows="3" class="w-full border rounded p-2 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" placeholder="Gedachten over de wedstrijd...">{{ old('notes', $footballMatch->notes) }}</textarea>
             <p class="text-xs text-gray-600 dark:text-gray-300 mt-1">Privé notities; alleen zichtbaar voor coaches.</p>

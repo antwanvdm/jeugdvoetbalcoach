@@ -207,7 +207,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    @foreach(range(1,4) as $q)
+                    @foreach(range(1, $periodCount) as $q)
                         @php
                             $present = $assignmentsByQuarter[$q] ?? collect();
                             $bench = $present->filter(fn($p) => is_null($p->position_id));
@@ -257,7 +257,7 @@
             <button onclick="window.print();" class="px-3 py-2 bg-indigo-600 text-white rounded cursor-pointer text-sm">🖨️ Print</button>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 line-up">
-            @foreach(range(1,4) as $q)
+            @foreach(range(1, $periodCount) as $q)
                 @php
                     $present = $assignmentsByQuarter[$q] ?? collect();
                     $starters = $present->filter(fn($p) => !is_null($p->position_id));

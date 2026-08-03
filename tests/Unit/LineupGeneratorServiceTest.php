@@ -1984,4 +1984,30 @@ class LineupGeneratorServiceTest extends TestCase
             $this->assertGreaterThan(0, $outfieldCount, "Wants_to_keep should play outfield");
         }
     }
+
+    public function test_keeper_rotation_is_capped_when_match_has_more_than_four_moments(): void
+    {
+        [$user, $team] = $this->createUserAndTeam();
+        $season = $this->createSeasonWithFormation($team, '2-1-2', 6);
+
+        $players = $this->createPlayers($team, 10, keeperIndices: [0, 1, 2]);
+        $season->players()->sync($players->pluck('id'));
+
+        $match = $this->createMatch($season, ['substitution_moments_override' => 6]);
+        $this->generateLineup($match, $players->pluck('id')->all());
+
+        $keepersByMoment = [];
+        for ($q = 1; $q <= 6; $q++) {
+            $keeper = $match->players()
+                ->wherePivot('quarter', $q)
+                ->wherePivot('position_id', 1)
+                ->first();
+
+            $this->assertNotNull($keeper, "Moment $q should have a keeper");
+            $keepersByMoment[$q] = $keeper->id;
+        }
+
+        $this->assertSame($keepersByMoment[4], $keepersByMoment[5], 'Keeper should stay the same after moment 4');
+        $this->assertSame($keepersByMoment[5], $keepersByMoment[6], 'Keeper should stay the same after moment 4');
+    }
 }

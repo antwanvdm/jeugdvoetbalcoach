@@ -10,12 +10,16 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class FootballMatch extends Model
 {
+    public const int MIN_SUBSTITUTION_MOMENTS = 2;
+    public const int MAX_SUBSTITUTION_MOMENTS = 8;
+
     protected $fillable = [
         'opponent_id',
         'home',
         'goals_scored',
         'goals_conceded',
         'date',
+        'substitution_moments_override',
         'season_id',
         'user_id',
         'team_id',
@@ -26,7 +30,19 @@ class FootballMatch extends Model
     protected $casts = [
         'home' => 'boolean',
         'date' => 'datetime',
+        'substitution_moments_override' => 'integer',
     ];
+
+    public function effectiveSubstitutionMoments(): int
+    {
+        $rawValue = $this->substitution_moments_override
+            ?? $this->season?->default_substitution_moments
+            ?? 4;
+
+        $value = (int) $rawValue;
+
+        return max(self::MIN_SUBSTITUTION_MOMENTS, min(self::MAX_SUBSTITUTION_MOMENTS, $value));
+    }
 
     /**
      * Boot the model.

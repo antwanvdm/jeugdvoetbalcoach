@@ -51,4 +51,12 @@
         @error('track_goals')
         <div class="text-red-600 dark:text-red-400 text-sm">{{ $message }}</div>@enderror
     </div>
+
+    <div>
+        <label class="block text-sm text-gray-600 dark:text-gray-300">Standaard wisselmomenten per wedstrijd <span class="text-xs text-gray-500 dark:text-gray-400">(2 t/m 8)</span></label>
+        <input type="number" name="default_substitution_moments" min="2" max="8" value="{{ old('default_substitution_moments', $season->default_substitution_moments ?? 4) }}" class="mt-1 block w-full border dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-gray-100 p-2 rounded">
+        <p class="text-xs text-gray-600 dark:text-gray-300 mt-1">Deze waarde geldt als standaard voor alle wedstrijden in dit seizoen.</p>
+        @error('default_substitution_moments')
+        <div class="text-red-600 dark:text-red-400 text-sm">{{ $message }}</div>@enderror
+    </div>
 </div>

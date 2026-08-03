@@ -36,6 +36,12 @@
                     <label class="block text-sm font-medium mb-1">Datum en tijd</label>
                     <input type="datetime-local" name="date" value="{{ old('date') }}" class="w-full border dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-gray-100 rounded p-2 scheme-light dark:scheme-dark" required>
                 </div>
+
+                <div class="mb-3">
+                    <label class="block text-sm font-medium mb-1">Wisselmomenten override (optioneel)</label>
+                    <input type="number" name="substitution_moments_override" min="2" max="8" value="{{ old('substitution_moments_override') }}" class="w-full border dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-gray-100 rounded p-2" placeholder="Leeg = seizoen default {{ $season->default_substitution_moments ?? 4 }}">
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Leeg laten gebruikt seizoen-default. Keepers wisselen maximaal in de eerste 4 momenten.</p>
+                </div>
             </div>
 
             <!-- Right column: Available players -->
