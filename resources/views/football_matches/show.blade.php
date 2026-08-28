@@ -220,7 +220,7 @@
                             $field = $starters->filter(fn($p) => $keeper ? $p->id !== $keeper->id : true);
                         @endphp
                         <tr class="border-t align-middle">
-                            <td class="py-2 pr-4 font-medium">Q{{ $q }}</td>
+                            <td class="py-2 pr-4 font-medium">{{ \App\Models\FootballMatch::periodLabel($q, $substitutionsPerQuarter) }}</td>
                             <td class="py-2 pr-4">
                                 @if($keeper)
                                     <span class="inline-block px-2 py-1 rounded text-white bg-blue-600 dark:bg-blue-500">{{ $keeper->name }}</span>
@@ -283,7 +283,7 @@
                     }
                 @endphp
                 <div class="border rounded p-3 line-up-block">
-                    <div class="text-sm font-medium mb-2">Q{{ $q }}</div>
+                    <div class="text-sm font-medium mb-2">{{ \App\Models\FootballMatch::periodLabel($q, $substitutionsPerQuarter) }}</div>
                     {{-- Simple vertical lines: Aanvaller (top), Middenvelder, Verdediger, Keeper (bottom) --}}
                     <div class="flex flex-col gap-4 sm:gap-6 bg-emerald-50 dark:bg-emerald-900 p-3 rounded line-up-player-rows">
                         {{-- Aanvallers --}}
@@ -325,7 +325,7 @@
                     <thead>
                     <tr class="text-left text-gray-600 dark:text-gray-300 border-b">
                         <th class="py-2 pr-4">Speler</th>
-                        <th class="py-2 pr-4">Kwarten gespeeld</th>
+                        <th class="py-2 pr-4">Keren gespeeld</th>
                     </tr>
                     </thead>
                     <tbody>

@@ -46,7 +46,7 @@ class SeasonController extends Controller
             'start' => ['required', 'date'],
             'end' => ['required', 'date', 'after_or_equal:start'],
             'formation_id' => ['required', 'integer', 'exists:formations,id'],
-            'default_substitution_moments' => ['required', 'integer', 'min:2', 'max:8'],
+            'default_substitutions_per_quarter' => ['required', 'integer', 'min:1', 'max:4'],
         ]);
 
         $data['user_id'] = auth()->id();
@@ -112,7 +112,7 @@ class SeasonController extends Controller
             'end' => ['required', 'date', 'after_or_equal:start'],
             'formation_id' => ['required', 'integer', 'exists:formations,id'],
             'track_goals' => ['boolean'],
-            'default_substitution_moments' => ['required', 'integer', 'min:2', 'max:8'],
+            'default_substitutions_per_quarter' => ['required', 'integer', 'min:1', 'max:4'],
         ]);
 
         $season->update($data);

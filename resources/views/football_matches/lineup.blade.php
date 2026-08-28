@@ -20,7 +20,7 @@
                 </svg>
                 Aanwezigheid deze wedstrijd
             </h3>
-            <p class="text-xs text-gray-600 dark:text-gray-300 mb-3">Vink spelers aan die de hele wedstrijd aanwezig zijn (alle {{ $periodCount }} momenten). Je kunt per kwart nog wijzigingen maken.</p>
+            <p class="text-xs text-gray-600 dark:text-gray-300 mb-3">Vink spelers aan die de hele wedstrijd aanwezig zijn (alle {{ $periodCount }} momenten). Je kunt per wisselmoment nog wijzigingen maken.</p>
             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
                 @foreach($players as $player)
                     @php
@@ -48,7 +48,7 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
         @foreach(range(1, $periodCount) as $q)
             <div class="border rounded">
-                <div class="px-4 py-2 bg-gray-50 dark:bg-gray-900 font-medium">Kwart {{ $q }}</div>
+                <div class="px-4 py-2 bg-gray-50 dark:bg-gray-900 font-medium">{{ \App\Models\FootballMatch::periodLabel($q, $substitutionsPerQuarter) }}</div>
                 <div class="p-4 overflow-x-auto">
                     <div class="overflow-x-auto">
                     <table class="min-w-full text-sm">
@@ -98,6 +98,7 @@
 
     <script>
         const periodCount = {{ (int) $periodCount }};
+        const substitutionsPerQuarter = {{ (int) $substitutionsPerQuarter }};
 
         document.addEventListener('change', function (e) {
             // Handle quarter-specific present toggles

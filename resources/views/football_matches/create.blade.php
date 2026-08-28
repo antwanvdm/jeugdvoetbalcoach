@@ -38,9 +38,9 @@
                 </div>
 
                 <div class="mb-3">
-                    <label class="block text-sm font-medium mb-1">Wisselmomenten override (optioneel)</label>
-                    <input type="number" name="substitution_moments_override" min="2" max="8" value="{{ old('substitution_moments_override') }}" class="w-full border dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-gray-100 rounded p-2" placeholder="Leeg = seizoen default {{ $season->default_substitution_moments ?? 4 }}">
-                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Leeg laten gebruikt seizoen-default. Keepers wisselen maximaal in de eerste 4 momenten.</p>
+                    <label class="block text-sm font-medium mb-1">Wissels per kwart (optioneel override)</label>
+                    <input type="number" name="substitutions_per_quarter_override" min="1" max="4" value="{{ old('substitutions_per_quarter_override') }}" class="w-full border dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-gray-100 rounded p-2" placeholder="Leeg = seizoen default {{ $season->default_substitutions_per_quarter ?? 1 }}">
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Leeg laten gebruikt seizoen-default. Keepers wisselen altijd op kwartsgrens.</p>
                 </div>
             </div>
 

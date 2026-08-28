@@ -111,7 +111,7 @@ class FootballMatchController extends Controller
             'goals_scored' => ['nullable', 'integer', 'min:0'],
             'goals_conceded' => ['nullable', 'integer', 'min:0'],
             'date' => ['required', 'date'],
-            'substitution_moments_override' => ['nullable', 'integer', 'min:2', 'max:8'],
+            'substitutions_per_quarter_override' => ['nullable', 'integer', 'min:1', 'max:4'],
             'available_players' => ['required', 'array', 'min:' . $season->formation->total_players],
             'available_players.*' => ['exists:players,id'],
         ], [
@@ -171,8 +171,9 @@ class FootballMatchController extends Controller
      */
     private function getMatchViewData(FootballMatch $footballMatch): array
     {
-        $footballMatch->load(['opponent', 'goals.player', 'goals.assistPlayer']);
-        $periodCount = $footballMatch->effectiveSubstitutionMoments();
+        $footballMatch->load(['opponent', 'season', 'goals.player', 'goals.assistPlayer']);
+        $substitutionsPerQuarter = $footballMatch->effectiveSubstitutionsPerQuarter();
+        $periodCount = $footballMatch->effectivePeriodCount();
 
         // Fetch all pivot rows for this match and group by quarter to avoid de-duplication by player_id
         $rows = Player::query()
@@ -238,6 +239,7 @@ class FootballMatchController extends Controller
             'positionNames' => $positionNames,
             'assignmentsByQuarter' => $assignmentsByQuarter,
             'periodCount' => $periodCount,
+            'substitutionsPerQuarter' => $substitutionsPerQuarter,
             'playersWithQuarters' => $playersWithQuarters,
             'currentPlayerIds' => $currentPlayerIds,
         ];
@@ -282,7 +284,7 @@ class FootballMatchController extends Controller
             'goals_conceded' => ['nullable', 'integer', 'min:0'],
             'date' => ['required', 'date'],
             'notes' => ['nullable', 'string'],
-            'substitution_moments_override' => ['nullable', 'integer', 'min:2', 'max:8'],
+            'substitutions_per_quarter_override' => ['nullable', 'integer', 'min:1', 'max:4'],
         ]);
         $request->validate(['season_id' => ['nullable', 'exists:seasons,id']]);
         $validated = array_merge($validated, $request->only('season_id'));
@@ -333,7 +335,8 @@ class FootballMatchController extends Controller
             'players' => $players,
             'positions' => $positions,
             'existing' => $existing,
-            'periodCount' => $footballMatch->effectiveSubstitutionMoments(),
+            'periodCount' => $footballMatch->loadMissing('season')->effectivePeriodCount(),
+            'substitutionsPerQuarter' => $footballMatch->effectiveSubstitutionsPerQuarter(),
         ]);
     }
 
@@ -352,7 +355,7 @@ class FootballMatchController extends Controller
         ]);
 
         $assignments = $data['assignments'] ?? [];
-        $periodCount = $footballMatch->effectiveSubstitutionMoments();
+        $periodCount = $footballMatch->loadMissing('season')->effectivePeriodCount();
 
         // We'll rebuild pivot entries for the provided quarters only.
         // Each quarter from 1..4 is valid. Absent players: no pivot row.

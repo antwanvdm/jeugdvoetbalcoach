@@ -8,7 +8,7 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('football_matches', function (Blueprint $table) {
-            $table->unsignedTinyInteger('substitution_moments_override')
+            $table->unsignedTinyInteger('substitutions_per_quarter_override')
                 ->nullable()
                 ->after('date');
         });
@@ -17,7 +17,7 @@ return new class extends Migration {
     public function down(): void
     {
         Schema::table('football_matches', function (Blueprint $table) {
-            $table->dropColumn('substitution_moments_override');
+            $table->dropColumn('substitutions_per_quarter_override');
         });
     }
 };

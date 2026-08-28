@@ -11,12 +11,12 @@ use Illuminate\Support\Carbon;
 
 class Season extends Model
 {
-    protected $fillable = ['year', 'part', 'start', 'end', 'formation_id', 'user_id', 'team_id', 'track_goals', 'default_substitution_moments', 'share_token'];
+    protected $fillable = ['year', 'part', 'start', 'end', 'formation_id', 'user_id', 'team_id', 'track_goals', 'default_substitutions_per_quarter', 'share_token'];
     protected $casts = [
         'start' => 'date',
         'end' => 'date',
         'track_goals' => 'boolean',
-        'default_substitution_moments' => 'integer',
+        'default_substitutions_per_quarter' => 'integer',
     ];
 
     protected $appends = ['stats'];

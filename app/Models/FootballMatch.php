@@ -10,8 +10,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class FootballMatch extends Model
 {
-    public const int MIN_SUBSTITUTION_MOMENTS = 2;
-    public const int MAX_SUBSTITUTION_MOMENTS = 8;
+    public const int MIN_SUBSTITUTIONS_PER_QUARTER = 1;
+    public const int MAX_SUBSTITUTIONS_PER_QUARTER = 4;
 
     protected $fillable = [
         'opponent_id',
@@ -19,7 +19,7 @@ class FootballMatch extends Model
         'goals_scored',
         'goals_conceded',
         'date',
-        'substitution_moments_override',
+        'substitutions_per_quarter_override',
         'season_id',
         'user_id',
         'team_id',
@@ -30,18 +30,32 @@ class FootballMatch extends Model
     protected $casts = [
         'home' => 'boolean',
         'date' => 'datetime',
-        'substitution_moments_override' => 'integer',
+        'substitutions_per_quarter_override' => 'integer',
     ];
 
-    public function effectiveSubstitutionMoments(): int
+    public function effectiveSubstitutionsPerQuarter(): int
     {
-        $rawValue = $this->substitution_moments_override
-            ?? $this->season?->default_substitution_moments
-            ?? 4;
+        $raw = $this->substitutions_per_quarter_override
+            ?? $this->season?->default_substitutions_per_quarter
+            ?? 1;
 
-        $value = (int) $rawValue;
+        return max(self::MIN_SUBSTITUTIONS_PER_QUARTER, min(self::MAX_SUBSTITUTIONS_PER_QUARTER, (int) $raw));
+    }
 
-        return max(self::MIN_SUBSTITUTION_MOMENTS, min(self::MAX_SUBSTITUTION_MOMENTS, $value));
+    public function effectivePeriodCount(): int
+    {
+        return 4 * $this->effectiveSubstitutionsPerQuarter();
+    }
+
+    // Returns "Q2" (n=1) or "Q2-1" (n>1) for a given period number.
+    public static function periodLabel(int $period, int $substitutionsPerQuarter): string
+    {
+        $quarter = (int) ceil($period / $substitutionsPerQuarter);
+        if ($substitutionsPerQuarter === 1) {
+            return "Q{$quarter}";
+        }
+        $sub = $period - ($quarter - 1) * $substitutionsPerQuarter;
+        return "Q{$quarter}-{$sub}";
     }
 
     /**
