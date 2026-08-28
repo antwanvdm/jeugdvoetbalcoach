@@ -149,6 +149,14 @@
                         @csrf
 
                         <div class="mb-4">
+                            <label class="block text-sm font-medium mb-1">Wissels per kwart</label>
+                            <input type="number" name="substitutions_per_quarter_override" min="1" max="4"
+                                value="{{ $footballMatch->substitutions_per_quarter_override ?? $footballMatch->season->default_substitutions_per_quarter ?? 1 }}"
+                                class="w-40 border dark:border-gray-600 rounded p-2 bg-white dark:bg-gray-700 dark:text-gray-100 text-sm">
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Seizoen default: {{ $footballMatch->season->default_substitutions_per_quarter ?? 1 }}</p>
+                        </div>
+
+                        <div class="mb-4">
                             <div class="flex justify-between items-center mb-2">
                                 <label class="block text-sm font-medium">Aanwezige spelers</label>
                                 <span class="text-xs text-gray-600 dark:text-gray-300">(Minimaal {{ $footballMatch->season->formation->total_players }} spelers)</span>

@@ -235,19 +235,16 @@ php artisan queue:work --backoff=60 --tries=3
 ### Line-up Generatie Algoritme
 
 1. **Keeper Selectie**
-
     - Prioriteit voor spelers die vorige wedstrijd NIET hebben gekeept
     - Balanceert historische keeper-ervaring
     - Optimaliseert fysieke diversiteit
 
 2. **Bank Planning**
-
     - Bepaalt per periode de bankbehoefte: `teamSize - desiredOnField`
     - Keepers: roteren op kwartsgrens; bij N wissels/kwart is dezelfde keeper actief voor alle N sub-periodes
     - Niet-keepers: bench plan op sub-periode niveau voor maximale spreiding
 
 3. **Positie Toewijzing**
-
     - Formatiegestuurd: outfield-behoefte komt uit `Season->formation` (`lineup_formation` en/of `total_players`)
     - Eerst spelers op hun voorkeursposities, daarna opvullen met beste kandidaten
     - Weight-balancing om clustering te voorkomen
@@ -367,19 +364,16 @@ php artisan make:migration create_example_table
 ### Line-up Generatie Algoritme
 
 1. **Keeper Selectie**
-
     - Prioriteit voor spelers die vorige wedstrijd NIET hebben gekeept
     - Balanceert historische keeper-ervaring
     - Optimaliseert fysieke diversiteit
 
 2. **Bank Planning**
-
     - Bepaalt per periode de bankbehoefte: `teamSize - desiredOnField`
     - Keepers: roteren op kwartsgrens; bij N wissels/kwart is dezelfde keeper actief voor alle N sub-periodes
     - Niet-keepers: bench plan op sub-periode niveau voor maximale spreiding
 
 3. **Positie Toewijzing**
-
     - Formatiegestuurd: outfield-behoefte komt uit `Season->formation` (`lineup_formation` en/of `total_players`)
     - Eerst spelers op hun voorkeursposities, daarna opvullen met beste kandidaten
     - Weight-balancing om clustering te voorkomen
@@ -408,32 +402,33 @@ Bijdragen zijn welkom! Voor grote wijzigingen, open eerst een issue.
 
 ### ✅ Gerealiseerd
 
--   [x] Multi-team support & koppelen van coaches (pivot + invite codes)
--   [x] Formatie ook per wedstrijd kunnen aanpassen (is nu enkel per seizoensblok)
--   [x] Tegenstanders mass import via admin, koppelen vanuit gebruikers
--   [x] Deelbare view met unieke link voor niet ingelogde gebruikers van losse wedstrijden
--   [x] Aanmaken wedstrijd moet optie geven om afwezige spelers aan te geven (IPV achteraf alles te moeten aanpassen)
--   [x] Spelers aanmaken moet in 1 keer simpel kunnen, ook moeten die gewoon gelijk aan actieve seizoen gekoppeld worden
--   [x] Goals en assists bijhouden van spelers per wedstrijd
--   [x] Seizoenen ook kunnen delen met overzicht van wedstrijden en (optioneel) statistieken
--   [x] Labels aan coaches kunnen geven binnen een team (bijv. "Hoofdtrainer", "Keeperstrainer")
--   [x] Notities toevoegen aan wedstrijden voor extra context
--   [x] Share tokens voor wedstrijden en seizoenen voor publieke toegang
--   [x] Opruimen van data als gebruiker account verwijderd
--   [x] Statistieken voor admin over aantallen aan data in de DB
--   [x] Unit tests voor line-up met meerdere scenario's maken en uitvoeren
--   [x] Notities van trainers tonen onder wedstrijden
--   [x] Mobile optimized styling met native share optie voor link van ouders
--   [x] Resultaten security audit Opus 4.5 verwerkt
--   [x] Tegenstander details uitbreiden (adres, website, officiële clubnaam)
--   [x] Dark mode support toegevoegd inclusief handmatige toggle optie in het menu
--   [x] Crawlsysteem om voetbalclubs eenmalig te informeren over dit platform via een mailing
--   [x] Mailsysteem om geregistreerde gebruikers te informeren over updates (inclusief opt-out op profiel)
+- [x] Multi-team support & koppelen van coaches (pivot + invite codes)
+- [x] Formatie ook per wedstrijd kunnen aanpassen (is nu enkel per seizoensblok)
+- [x] Tegenstanders mass import via admin, koppelen vanuit gebruikers
+- [x] Deelbare view met unieke link voor niet ingelogde gebruikers van losse wedstrijden
+- [x] Aanmaken wedstrijd moet optie geven om afwezige spelers aan te geven (IPV achteraf alles te moeten aanpassen)
+- [x] Spelers aanmaken moet in 1 keer simpel kunnen, ook moeten die gewoon gelijk aan actieve seizoen gekoppeld worden
+- [x] Goals en assists bijhouden van spelers per wedstrijd
+- [x] Seizoenen ook kunnen delen met overzicht van wedstrijden en (optioneel) statistieken
+- [x] Labels aan coaches kunnen geven binnen een team (bijv. "Hoofdtrainer", "Keeperstrainer")
+- [x] Notities toevoegen aan wedstrijden voor extra context
+- [x] Share tokens voor wedstrijden en seizoenen voor publieke toegang
+- [x] Opruimen van data als gebruiker account verwijderd
+- [x] Statistieken voor admin over aantallen aan data in de DB
+- [x] Unit tests voor line-up met meerdere scenario's maken en uitvoeren
+- [x] Notities van trainers tonen onder wedstrijden
+- [x] Mobile optimized styling met native share optie voor link van ouders
+- [x] Resultaten security audit Opus 4.5 verwerkt
+- [x] Tegenstander details uitbreiden (adres, website, officiële clubnaam)
+- [x] Dark mode support toegevoegd inclusief handmatige toggle optie in het menu
+- [x] Crawlsysteem om voetbalclubs eenmalig te informeren over dit platform via een mailing
+- [x] Mailsysteem om geregistreerde gebruikers te informeren over updates (inclusief opt-out op profiel)
+- [x] Meerdere wissels mogelijk per kwart op eigen instelling
 
 ### 🔜 Toekomstige Features
 
--   [ ] Webservice maken zodat andere developers gemakkelijk voetbalclub data kunnen inladen
--   [ ] JO13+ support met helften i.p.v. kwarten (fundament al aanwezig via configureerbaar `number_of_segments`)
+- [ ] Webservice maken zodat andere developers gemakkelijk voetbalclub data kunnen inladen
+- [ ] JO13+ support met helften i.p.v. kwarten (fundament al aanwezig via configureerbaar `number_of_segments`)
 
 ## 📄 Licentie
 

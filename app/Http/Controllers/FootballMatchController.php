@@ -463,9 +463,14 @@ class FootballMatchController extends Controller
         $validated = $request->validate([
             'available_players' => ['required', 'array', 'min:' . $season->formation->total_players],
             'available_players.*' => ['exists:players,id'],
+            'substitutions_per_quarter_override' => ['nullable', 'integer', 'min:1', 'max:4'],
         ], [
             'available_players.min' => "Je hebt minimaal {$season->formation->total_players} spelers nodig voor formatie {$season->formation->lineup_formation}.",
         ]);
+
+        // Update the override if changed before regenerating so the generator reads the new value.
+        $footballMatch->substitutions_per_quarter_override = $request->input('substitutions_per_quarter_override') ?: null;
+        $footballMatch->save();
 
         // Delete all existing player assignments for this match
         $footballMatch->players()->detach();
