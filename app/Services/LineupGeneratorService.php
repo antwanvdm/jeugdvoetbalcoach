@@ -431,14 +431,15 @@ class LineupGeneratorService
             }
         }
 
-        // Mop-up: fill any remaining slots by picking the player whose existing bench is furthest away.
-        // This only runs when strict non-adjacent placement left slots unfilled.
-        if ($totalRemaining > 0) {
+        // Mop-up: fill remaining slots without adjacency restriction.
+        // Scoring: non-consecutive-period players always preferred; within that, prefer same quarter (dist=0).
+        while ($totalRemaining > 0) {
+            $assigned = 0;
             foreach ($remainingPerQuarter as $q => $remaining) {
                 if ($remaining <= 0) continue;
 
                 $bestPlayer = null;
-                $bestDist   = -1;
+                $bestScore  = PHP_INT_MIN;
                 foreach ($ordered as $player) {
                     $already = $benchPlan[$player->id] ?? [];
                     if (in_array($q, $already, true)) continue;
@@ -448,13 +449,26 @@ class LineupGeneratorService
                     $excArr = is_array($exc) ? $exc : ($exc !== null ? [$exc] : []);
                     if (in_array($q, $excArr, true)) continue;
 
-                    // Prefer the player whose existing bench is farthest from $q.
-                    $minDist = empty($already) ? 4 : min(array_map(
+                    $hasConsecutivePeriod = !empty($already) && min(array_map(
+                        fn($bp) => abs((int) $bp - (int) $q),
+                        $already
+                    )) === 1;
+
+                    $minQDist = empty($already) ? 3 : min(array_map(
                         fn($bq) => abs($this->quarterOf($q) - $this->quarterOf($bq)),
                         $already
                     ));
-                    if ($minDist > $bestDist) {
-                        $bestDist   = $minDist;
+
+                    // Priority: non-adjacent (40) > same-quarter (20) > adjacent-no-consec (15) > same-consec (10) > adjacent-consec (5).
+                    // Adjacent quarter without consecutive period (15) must beat same-quarter with consecutive period (10).
+                    if ($minQDist >= 2) $base = 40;
+                    elseif ($minQDist === 0) $base = 20;
+                    else $base = 15;
+
+                    $score = $base - ($hasConsecutivePeriod ? 10 : 0);
+
+                    if ($score > $bestScore) {
+                        $bestScore  = $score;
                         $bestPlayer = $player;
                     }
                 }
@@ -463,8 +477,11 @@ class LineupGeneratorService
                     $already = $benchPlan[$bestPlayer->id] ?? [];
                     $benchPlan[$bestPlayer->id] = array_values(array_unique(array_merge($already, [$q])));
                     $remainingPerQuarter[$q]--;
+                    $totalRemaining--;
+                    $assigned++;
                 }
             }
+            if ($assigned === 0) break;
         }
 
         return $benchPlan;
@@ -492,12 +509,14 @@ class LineupGeneratorService
             $excludedQuarters = $excludedQuarter;
         }
 
-        // Adjacent = in different consecutive quarters (quarter boundary, wraps Q4→Q1).
+        // Same quarter (diff=0): sub-periods must have different bench players → treat as adjacent.
+        // Consecutive quarters (diff=1): standard non-adjacent rule.
+        // Wrap-around (diff=3): Q1 and Q4 treated as adjacent.
         $isAdjacent = function (int $a, int $b): bool {
             $qa = $this->quarterOf($a);
             $qb = $this->quarterOf($b);
             $diff = abs($qa - $qb);
-            return $diff === 1 || $diff === 3;
+            return $diff === 0 || $diff === 1 || $diff === 3;
         };
 
         // Build candidate quarters with remaining slots, excluding ones already assigned and excluded quarters

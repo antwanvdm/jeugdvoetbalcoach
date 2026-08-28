@@ -2024,10 +2024,10 @@ class LineupGeneratorServiceTest extends TestCase
         }
     }
 
-    public function test_no_field_player_is_benched_in_consecutive_quarters_with_two_subs_per_quarter(): void
+    public function test_no_player_is_benched_in_back_to_back_periods_with_two_subs_per_quarter(): void
     {
-        // N=2 → 8 periods. Adjacency must be quarter-level, not period-level.
-        // Periods 1+2 (same Q1) are fine; periods 2+3 (Q1→Q2 boundary) are not.
+        // Regardless of N, a player must never sit in period P and period P+1 back-to-back.
+        // This verifies the mop-up also respects consecutive period avoidance.
         [$user, $team] = $this->createUserAndTeam();
         $season = $this->createSeasonWithFormation($team, '2-1-2', 6);
         $players = $this->createPlayers($team, 8, keeperIndices: [0]);
@@ -2054,20 +2054,43 @@ class LineupGeneratorServiceTest extends TestCase
                     ->pluck('quarter')
                     ->toArray();
 
-                // Convert periods to quarters (N=2: ceil(period/2)) and deduplicate.
-                $benchQuarterNumbers = array_values(array_unique(array_map(
-                    fn($p) => (int) ceil($p / 2),
-                    $benchPeriods
-                )));
-                sort($benchQuarterNumbers);
-
-                for ($j = 0; $j < count($benchQuarterNumbers) - 1; $j++) {
-                    $diff = abs($benchQuarterNumbers[$j] - $benchQuarterNumbers[$j + 1]);
-                    $this->assertNotEquals(1, $diff,
-                        "Player {$player->name} benched in consecutive quarters Q{$benchQuarterNumbers[$j]} and Q{$benchQuarterNumbers[$j+1]} (N=2, match {$match->id})"
+                for ($j = 0; $j < count($benchPeriods) - 1; $j++) {
+                    $this->assertNotEquals(1, abs($benchPeriods[$j] - $benchPeriods[$j + 1]),
+                        "Player {$player->name} benched back-to-back in periods {$benchPeriods[$j]} and {$benchPeriods[$j+1]} (match {$match->id})"
                     );
                 }
             }
+        }
+    }
+
+    // NOTE: A "no consecutive quarters for N=2" test is intentionally omitted.
+    // With 7 non-keepers and 16 bench slots (N=2), 2 mop-up slots always exist for which
+    // BOTH "no consecutive periods" and "no consecutive quarters" cannot simultaneously be
+    // satisfied. The algorithm prioritises "no back-to-back periods" (the harder constraint)
+    // over "no consecutive quarters". See test_no_player_is_benched_in_back_to_back_periods_with_two_subs_per_quarter.
+
+    public function test_lineup_with_two_subs_per_quarter_has_different_bench_per_sub_period(): void
+    {
+        // Each quarter must have different bench compositions in Q_x-1 vs Q_x-2.
+        // Identical lineups within a quarter would defeat the purpose of N=2.
+        [$user, $team] = $this->createUserAndTeam();
+        $season = $this->createSeasonWithFormation($team, '2-1-2', 6);
+        $players = $this->createPlayers($team, 8, keeperIndices: [0]);
+        $season->players()->sync($players->pluck('id'));
+
+        $match = $this->createMatch($season, ['substitutions_per_quarter_override' => 2]);
+        $this->generateLineup($match, $players->pluck('id')->all());
+
+        for ($quarter = 1; $quarter <= 4; $quarter++) {
+            $p1 = ($quarter - 1) * 2 + 1;
+            $p2 = $quarter * 2;
+
+            $bench1 = $match->players()->wherePivot('quarter', $p1)->whereNull('football_match_player.position_id')->pluck('players.id')->sort()->values()->toArray();
+            $bench2 = $match->players()->wherePivot('quarter', $p2)->whereNull('football_match_player.position_id')->pluck('players.id')->sort()->values()->toArray();
+
+            $this->assertNotEquals($bench1, $bench2,
+                "Q{$quarter}-1 and Q{$quarter}-2 have identical bench: both teams benching the same players defeats the purpose of N=2"
+            );
         }
     }
 
