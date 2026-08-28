@@ -149,6 +149,14 @@
                         @csrf
 
                         <div class="mb-4">
+                            <label class="block text-sm font-medium mb-1">Wissels per kwart</label>
+                            <input type="number" name="substitutions_per_quarter_override" min="1" max="4"
+                                value="{{ $footballMatch->substitutions_per_quarter_override ?? $footballMatch->season->default_substitutions_per_quarter ?? 1 }}"
+                                class="w-40 border dark:border-gray-600 rounded p-2 bg-white dark:bg-gray-700 dark:text-gray-100 text-sm">
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Seizoen default: {{ $footballMatch->season->default_substitutions_per_quarter ?? 1 }}</p>
+                        </div>
+
+                        <div class="mb-4">
                             <div class="flex justify-between items-center mb-2">
                                 <label class="block text-sm font-medium">Aanwezige spelers</label>
                                 <span class="text-xs text-gray-600 dark:text-gray-300">(Minimaal {{ $footballMatch->season->formation->total_players }} spelers)</span>
@@ -207,7 +215,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    @foreach(range(1,4) as $q)
+                    @foreach(range(1, $periodCount) as $q)
                         @php
                             $present = $assignmentsByQuarter[$q] ?? collect();
                             $bench = $present->filter(fn($p) => is_null($p->position_id));
@@ -220,7 +228,7 @@
                             $field = $starters->filter(fn($p) => $keeper ? $p->id !== $keeper->id : true);
                         @endphp
                         <tr class="border-t align-middle">
-                            <td class="py-2 pr-4 font-medium">Q{{ $q }}</td>
+                            <td class="py-2 pr-4 font-medium">{{ \App\Models\FootballMatch::periodLabel($q, $substitutionsPerQuarter) }}</td>
                             <td class="py-2 pr-4">
                                 @if($keeper)
                                     <span class="inline-block px-2 py-1 rounded text-white bg-blue-600 dark:bg-blue-500">{{ $keeper->name }}</span>
@@ -257,7 +265,7 @@
             <button onclick="window.print();" class="px-3 py-2 bg-indigo-600 text-white rounded cursor-pointer text-sm">🖨️ Print</button>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 line-up">
-            @foreach(range(1,4) as $q)
+            @foreach(range(1, $periodCount) as $q)
                 @php
                     $present = $assignmentsByQuarter[$q] ?? collect();
                     $starters = $present->filter(fn($p) => !is_null($p->position_id));
@@ -283,7 +291,7 @@
                     }
                 @endphp
                 <div class="border rounded p-3 line-up-block">
-                    <div class="text-sm font-medium mb-2">Q{{ $q }}</div>
+                    <div class="text-sm font-medium mb-2">{{ \App\Models\FootballMatch::periodLabel($q, $substitutionsPerQuarter) }}</div>
                     {{-- Simple vertical lines: Aanvaller (top), Middenvelder, Verdediger, Keeper (bottom) --}}
                     <div class="flex flex-col gap-4 sm:gap-6 bg-emerald-50 dark:bg-emerald-900 p-3 rounded line-up-player-rows">
                         {{-- Aanvallers --}}
@@ -325,7 +333,7 @@
                     <thead>
                     <tr class="text-left text-gray-600 dark:text-gray-300 border-b">
                         <th class="py-2 pr-4">Speler</th>
-                        <th class="py-2 pr-4">Kwarten gespeeld</th>
+                        <th class="py-2 pr-4">Keren gespeeld</th>
                     </tr>
                     </thead>
                     <tbody>

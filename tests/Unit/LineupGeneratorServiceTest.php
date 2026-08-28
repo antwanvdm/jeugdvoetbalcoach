@@ -32,7 +32,7 @@ class LineupGeneratorServiceTest extends TestCase
         return [$user, $team];
     }
 
-    private function createSeasonWithFormation(Team $team, string $lineupFormation = '2-1-2', int $totalPlayers = 6): Season
+    private function createSeasonWithFormation(Team $team, string $lineupFormation = '2-1-2', int $totalPlayers = 6, int $defaultSubstitutionsPerQuarter = 1): Season
     {
         $formation = Formation::create([
             'team_id' => null,
@@ -49,6 +49,7 @@ class LineupGeneratorServiceTest extends TestCase
             'start' => now()->startOfYear()->toDateString(),
             'end' => now()->endOfYear()->toDateString(),
             'track_goals' => false,
+            'default_substitutions_per_quarter' => $defaultSubstitutionsPerQuarter,
             'share_token' => Str::random(32),
         ]);
 
@@ -1983,5 +1984,190 @@ class LineupGeneratorServiceTest extends TestCase
             $this->assertSame(0, $keeperCount, "Wants_to_keep should not keep when dedicated keeper is present");
             $this->assertGreaterThan(0, $outfieldCount, "Wants_to_keep should play outfield");
         }
+    }
+
+    public function test_keeper_stays_within_quarter_when_match_has_two_subs_per_quarter(): void
+    {
+        [$user, $team] = $this->createUserAndTeam();
+        $season = $this->createSeasonWithFormation($team, '2-1-2', 6);
+
+        $players = $this->createPlayers($team, 10, keeperIndices: [0, 1]);
+        $season->players()->sync($players->pluck('id'));
+
+        // 2 subs per quarter → 8 total periods; keepers may only change between quarters.
+        $match = $this->createMatch($season, ['substitutions_per_quarter_override' => 2]);
+        $this->generateLineup($match, $players->pluck('id')->all());
+
+        // Within each quarter (pairs [1,2], [3,4], [5,6], [7,8]) the keeper must be identical.
+        for ($q = 1; $q <= 4; $q++) {
+            $p1 = ($q - 1) * 2 + 1;
+            $p2 = $q * 2;
+            $keeper1 = $match->players()->wherePivot('quarter', $p1)->wherePivot('position_id', 1)->first()?->id;
+            $keeper2 = $match->players()->wherePivot('quarter', $p2)->wherePivot('position_id', 1)->first()?->id;
+            $this->assertNotNull($keeper1, "Period $p1 (Q{$q}-1) must have a keeper");
+            $this->assertSame($keeper1, $keeper2, "Keeper must be the same in Q{$q}-1 and Q{$q}-2");
+        }
+    }
+
+    // === RESOLVER TESTS ===
+
+    public function test_effective_substitutions_per_quarter_defaults_to_one(): void
+    {
+        [$user, $team] = $this->createUserAndTeam();
+        $season = $this->createSeasonWithFormation($team, defaultSubstitutionsPerQuarter: 1);
+        $match = $this->createMatch($season);
+
+        $this->assertSame(1, $match->effectiveSubstitutionsPerQuarter());
+        $this->assertSame(4, $match->effectivePeriodCount());
+    }
+
+    public function test_effective_substitutions_per_quarter_uses_season_default(): void
+    {
+        [$user, $team] = $this->createUserAndTeam();
+        $season = $this->createSeasonWithFormation($team, defaultSubstitutionsPerQuarter: 2);
+        $match = $this->createMatch($season);
+
+        $match->load('season');
+        $this->assertSame(2, $match->effectiveSubstitutionsPerQuarter());
+        $this->assertSame(8, $match->effectivePeriodCount());
+    }
+
+    public function test_effective_substitutions_per_quarter_override_wins_over_season_default(): void
+    {
+        [$user, $team] = $this->createUserAndTeam();
+        $season = $this->createSeasonWithFormation($team, defaultSubstitutionsPerQuarter: 2);
+        $match = $this->createMatch($season, ['substitutions_per_quarter_override' => 3]);
+
+        $match->load('season');
+        $this->assertSame(3, $match->effectiveSubstitutionsPerQuarter());
+        $this->assertSame(12, $match->effectivePeriodCount());
+    }
+
+    public function test_effective_substitutions_per_quarter_clamps_to_minimum(): void
+    {
+        [$user, $team] = $this->createUserAndTeam();
+        $season = $this->createSeasonWithFormation($team);
+        $match = $this->createMatch($season);
+
+        // Bypass controller validation to test model-level clamping.
+        $match->substitutions_per_quarter_override = 0;
+        $this->assertSame(1, $match->effectiveSubstitutionsPerQuarter());
+    }
+
+    public function test_effective_substitutions_per_quarter_clamps_to_maximum(): void
+    {
+        [$user, $team] = $this->createUserAndTeam();
+        $season = $this->createSeasonWithFormation($team);
+        $match = $this->createMatch($season);
+
+        $match->substitutions_per_quarter_override = 9;
+        $this->assertSame(4, $match->effectiveSubstitutionsPerQuarter());
+    }
+
+    // === DYNAMIC MOMENTS GENERATOR TESTS ===
+
+    public function test_lineup_with_two_subs_per_quarter_has_correct_on_field_count(): void
+    {
+        [$user, $team] = $this->createUserAndTeam();
+        $season = $this->createSeasonWithFormation($team, '2-1-2', 6);
+        $players = $this->createPlayers($team, 8, keeperIndices: [0]);
+        $season->players()->sync($players->pluck('id'));
+
+        $match = $this->createMatch($season, ['substitutions_per_quarter_override' => 2]);
+        $this->generateLineup($match, $players->pluck('id')->all());
+
+        foreach (range(1, 8) as $p) {
+            $onField = $match->players()->wherePivot('quarter', $p)->whereNotNull('football_match_player.position_id')->count();
+            $benched  = $match->players()->wherePivot('quarter', $p)->whereNull('football_match_player.position_id')->count();
+            $this->assertSame(6, $onField, "Period $p: expected 6 on field");
+            $this->assertSame(2, $benched,  "Period $p: expected 2 benched");
+        }
+    }
+
+    public function test_lineup_with_two_subs_per_quarter_single_keeper_plays_all_periods(): void
+    {
+        [$user, $team] = $this->createUserAndTeam();
+        $season = $this->createSeasonWithFormation($team, '2-1-2', 6);
+        $players = $this->createPlayers($team, 7, keeperIndices: [0]);
+        $season->players()->sync($players->pluck('id'));
+
+        $match = $this->createMatch($season, ['substitutions_per_quarter_override' => 2]);
+        $this->generateLineup($match, $players->pluck('id')->all());
+
+        $keeper = $players[0];
+        $keeperPeriods = $match->players()->wherePivot('player_id', $keeper->id)->wherePivot('position_id', 1)->count();
+        $benchPeriods  = $match->players()->wherePivot('player_id', $keeper->id)->whereNull('football_match_player.position_id')->count();
+        $this->assertSame(8, $keeperPeriods, '1 dedicated keeper must keep all 8 periods');
+        $this->assertSame(0, $benchPeriods,  '1 dedicated keeper must never be benched');
+    }
+
+    public function test_lineup_with_three_subs_per_quarter_has_correct_on_field_count(): void
+    {
+        [$user, $team] = $this->createUserAndTeam();
+        $season = $this->createSeasonWithFormation($team, '2-1-2', 6);
+        $players = $this->createPlayers($team, 8, keeperIndices: [0]);
+        $season->players()->sync($players->pluck('id'));
+
+        $match = $this->createMatch($season, ['substitutions_per_quarter_override' => 3]);
+        $this->generateLineup($match, $players->pluck('id')->all());
+
+        foreach (range(1, 12) as $p) {
+            $onField = $match->players()->wherePivot('quarter', $p)->whereNotNull('football_match_player.position_id')->count();
+            $this->assertSame(6, $onField, "Period $p: expected 6 on field");
+        }
+    }
+
+    public function test_lineup_with_three_subs_per_quarter_no_unfilled_bench_slots(): void
+    {
+        // 9 players, 6 on field → 3 bench/period × 12 periods = 36 total bench slots.
+        [$user, $team] = $this->createUserAndTeam();
+        $season = $this->createSeasonWithFormation($team, '2-1-2', 6);
+        $players = $this->createPlayers($team, 9, keeperIndices: [0]);
+        $season->players()->sync($players->pluck('id'));
+
+        $match = $this->createMatch($season, ['substitutions_per_quarter_override' => 3]);
+        $this->generateLineup($match, $players->pluck('id')->all());
+
+        $totalBenched = 0;
+        foreach (range(1, 12) as $p) {
+            $benched = $match->players()->wherePivot('quarter', $p)->whereNull('football_match_player.position_id')->count();
+            $this->assertSame(3, $benched, "Period $p: expected 3 benched");
+            $totalBenched += $benched;
+        }
+        $this->assertSame(36, $totalBenched, 'All bench slots must be filled');
+    }
+
+    public function test_lineup_with_four_subs_per_quarter_has_correct_on_field_count(): void
+    {
+        [$user, $team] = $this->createUserAndTeam();
+        $season = $this->createSeasonWithFormation($team, '2-1-2', 6);
+        $players = $this->createPlayers($team, 9, keeperIndices: [0]);
+        $season->players()->sync($players->pluck('id'));
+
+        $match = $this->createMatch($season, ['substitutions_per_quarter_override' => 4]);
+        $this->generateLineup($match, $players->pluck('id')->all());
+
+        foreach (range(1, 16) as $p) {
+            $onField = $match->players()->wherePivot('quarter', $p)->whereNotNull('football_match_player.position_id')->count();
+            $this->assertSame(6, $onField, "Period $p: expected 6 on field");
+        }
+    }
+
+    public function test_lineup_season_default_flows_into_generator(): void
+    {
+        // Season default of 2 with no match override → 8 periods generated.
+        [$user, $team] = $this->createUserAndTeam();
+        $season = $this->createSeasonWithFormation($team, '2-1-2', 6, defaultSubstitutionsPerQuarter: 2);
+        $players = $this->createPlayers($team, 7, keeperIndices: [0]);
+        $season->players()->sync($players->pluck('id'));
+
+        $match = $this->createMatch($season); // no override
+        $match->load('season');
+        $this->generateLineup($match, $players->pluck('id')->all());
+
+        foreach (range(1, 8) as $p) {
+            $this->assertGreaterThan(0, $match->players()->wherePivot('quarter', $p)->count(), "Period $p must have assignments");
+        }
+        $this->assertSame(0, $match->players()->wherePivot('quarter', 9)->count(), 'Period 9 must not exist for 2 subs/quarter');
     }
 }

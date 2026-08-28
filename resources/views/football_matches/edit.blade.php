@@ -38,6 +38,12 @@
         </div>
 
         <div class="mb-3">
+            <label class="block text-sm font-medium mb-1">Wissels per kwart (optioneel override)</label>
+            <input type="number" name="substitutions_per_quarter_override" min="1" max="4" value="{{ old('substitutions_per_quarter_override', $footballMatch->substitutions_per_quarter_override) }}" class="w-full border rounded p-2 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" placeholder="Leeg = seizoen default {{ $footballMatch->season->default_substitutions_per_quarter ?? 1 }}">
+            <p class="mt-1 text-xs text-gray-600 dark:text-gray-300">Leeg laten gebruikt seizoen-default. Keepers wisselen altijd op kwartsgrens.</p>
+        </div>
+
+        <div class="mb-3">
             <label class="block text-sm font-medium mb-1">Notities coach (optioneel)</label>
             <textarea name="notes" rows="3" class="w-full border rounded p-2 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" placeholder="Gedachten over de wedstrijd...">{{ old('notes', $footballMatch->notes) }}</textarea>
             <p class="text-xs text-gray-600 dark:text-gray-300 mt-1">Privé notities; alleen zichtbaar voor coaches.</p>

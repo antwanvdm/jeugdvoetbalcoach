@@ -51,4 +51,12 @@
         @error('track_goals')
         <div class="text-red-600 dark:text-red-400 text-sm">{{ $message }}</div>@enderror
     </div>
+
+    <div>
+        <label class="block text-sm text-gray-600 dark:text-gray-300">Wissels per kwart <span class="text-xs text-gray-500 dark:text-gray-400">(1 t/m 4)</span></label>
+        <input type="number" name="default_substitutions_per_quarter" min="1" max="4" value="{{ old('default_substitutions_per_quarter', $season->default_substitutions_per_quarter ?? 1) }}" class="mt-1 block w-full border dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-gray-100 p-2 rounded">
+        <p class="text-xs text-gray-600 dark:text-gray-300 mt-1">1 = standaard (één wisselmoment per kwart). Hogere waarden geven extra wisselmomenten binnen elk kwart.</p>
+        @error('default_substitutions_per_quarter')
+        <div class="text-red-600 dark:text-red-400 text-sm">{{ $message }}</div>@enderror
+    </div>
 </div>

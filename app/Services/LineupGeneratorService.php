@@ -25,7 +25,9 @@ class LineupGeneratorService
     private Collection $players;
     private Collection $keeperCounts;
     private Collection $lastMatchKeepers;
-    private Collection $benchCounts; // Bench counts from last 3 matches
+    private Collection $benchCounts;
+    private int $substitutionsPerQuarter = 1;
+    private int $periodCount = 4;
 
     // Dynamic formation context (set per match): outfield needs; total on-field count is computed dynamically
     private array $formationNeeds = [];
@@ -39,6 +41,9 @@ class LineupGeneratorService
      */
     public function generateLineup(FootballMatch $match, array $availablePlayerIds = []): void
     {
+        $this->substitutionsPerQuarter = $match->effectiveSubstitutionsPerQuarter();
+        $this->periodCount = $match->effectivePeriodCount();
+
         // Apply formation from the match's season (dynamic desired players on field and role needs)
         $this->applyFormationFromMatch($match);
 
@@ -180,7 +185,7 @@ class LineupGeneratorService
             return $this->sortKeepersByPriority($wantsToKeepPlayers);
         }
 
-        // No dedicated keepers and no one wants to keep: fallback to old logic (everyone can keep)
+        // No dedicated keepers and no one wants to keep: fallback, one per quarter.
         $this->debugLog('Fallback: All players can keep');
         return $this->sortKeepersByPriority($this->players)->take(4)->values();
     }
@@ -199,19 +204,22 @@ class LineupGeneratorService
     }
 
     /**
-     * Map keepers to their designated quarters
+     * Map keepers to their designated quarters; keepers rotate on quarter boundaries only.
      */
     private function mapKeepersToQuarters(Collection $keepers): array
     {
-        // Distribute keepers over 4 quarters, repeat if necessary
         $keeperCount = $keepers->count();
         $mapping = [];
+
         for ($q = 1; $q <= 4; $q++) {
             if ($keeperCount > 0) {
                 $keeper = $keepers[($q - 1) % $keeperCount];
-                $mapping[$q] = $keeper->id;
+                foreach ($this->periodsOfQuarter($q) as $period) {
+                    $mapping[$period] = $keeper->id;
+                }
             }
         }
+
         return $mapping;
     }
 
@@ -238,34 +246,33 @@ class LineupGeneratorService
         // - 'dedicated' with 2+ keepers: keepers only play keeper, benched when not keeping
         // - 'wants_to_keep': keepers can also play outfield, so they get normal bench rotation (not forced bench)
         if ($keeperType === 'fallback' && $keepers->isNotEmpty() && $totalBenchesNeeded > 0) {
-            // No designated keepers: old logic where keepers get 1 bench quarter
+            // Fallback: each keeper keeps one quarter and is benched for one other quarter.
             foreach ($keepers as $index => $keeper) {
                 $keeperQuarter = $index + 1;
-                $benchQuarter = $this->calculateKeeperBenchQuarter($index, $keeperQuarter);
-                $keeperBenchPlan[$keeper->id] = [$benchQuarter];
+                $benchQuarterNum = $this->calculateKeeperBenchQuarter($index, $keeperQuarter);
+                $keeperBenchPlan[$keeper->id] = $this->periodsOfQuarter($benchQuarterNum);
             }
         } elseif ($keeperType === 'dedicated' && $designatedKeepersCount >= 2 && $totalBenchesNeeded > 0) {
-            // 2+ dedicated keepers: each keeper is benched in ALL their non-keeping quarters
-            // (they can ONLY play as keeper, never outfield)
-            $keepersByQuarter = [];
+            // 2+ dedicated keepers: each keeper benched for ALL periods of non-keeping quarters.
+            $keepingQuartersByKeeper = [];
             foreach ($keepers as $index => $keeper) {
                 for ($q = 1; $q <= 4; $q++) {
                     if (($q - 1) % $designatedKeepersCount === $index) {
-                        $keepersByQuarter[$keeper->id][] = $q;
+                        $keepingQuartersByKeeper[$keeper->id][] = $q;
                     }
                 }
             }
 
             foreach ($keepers as $keeper) {
-                $keepingQuarters = $keepersByQuarter[$keeper->id] ?? [];
-                $benchQuarters = [];
+                $keepingQuarters = $keepingQuartersByKeeper[$keeper->id] ?? [];
+                $benchPeriods = [];
                 for ($q = 1; $q <= 4; $q++) {
                     if (!in_array($q, $keepingQuarters)) {
-                        $benchQuarters[] = $q;
+                        $benchPeriods = array_merge($benchPeriods, $this->periodsOfQuarter($q));
                     }
                 }
-                if (!empty($benchQuarters)) {
-                    $keeperBenchPlan[$keeper->id] = $benchQuarters; // ALL non-keeping quarters
+                if (!empty($benchPeriods)) {
+                    $keeperBenchPlan[$keeper->id] = $benchPeriods;
                 }
             }
         }
@@ -275,7 +282,7 @@ class LineupGeneratorService
         // 2) Calculate how many benches remain per quarter after assigning keeper benches
         $keeperBenchCounts = $this->computeKeeperBenchCounts($keeperBenchPlan);
         $remainingPerQuarter = [];
-        foreach ([1, 2, 3, 4] as $q) {
+        foreach ($this->periodRange() as $q) {
             $remainingPerQuarter[$q] = max(0, ($targetsPerQuarter[$q] ?? 0) - ($keeperBenchCounts[$q] ?? 0));
         }
 
@@ -316,12 +323,12 @@ class LineupGeneratorService
         $desiredOnField = $this->getDesiredOnField(); // dynamic: computed from formation or fallback
         $benchesPerQuarter = max(0, $totalPlayers - $desiredOnField);
 
-        return [
-            1 => $benchesPerQuarter,
-            2 => $benchesPerQuarter,
-            3 => $benchesPerQuarter,
-            4 => $benchesPerQuarter,
-        ];
+        $targets = [];
+        foreach ($this->periodRange() as $quarter) {
+            $targets[$quarter] = $benchesPerQuarter;
+        }
+
+        return $targets;
     }
 
     /**
@@ -330,7 +337,11 @@ class LineupGeneratorService
      */
     private function computeKeeperBenchCounts(array $keeperBenchPlan): array
     {
-        $counts = [1 => 0, 2 => 0, 3 => 0, 4 => 0];
+        $counts = [];
+        foreach ($this->periodRange() as $quarter) {
+            $counts[$quarter] = 0;
+        }
+
         foreach ($keeperBenchPlan as $quarters) {
             foreach ($quarters as $q) {
                 if (isset($counts[$q])) {
@@ -369,27 +380,21 @@ class LineupGeneratorService
         if ($keepers && $keepers->isNotEmpty()) {
             $designatedKeepersCount = $keepers->count();
 
-            // Map keepers to their quarters based on type
-            // All keeper types should NOT be benched during their keeper quarters
             if ($designatedKeepersCount === 1) {
-                // Single keeper keeps all quarters - exclude from bench entirely
-                $keeperQuarterMap[$keepers->first()->id] = 'all'; // Special marker
-            } else if ($designatedKeepersCount >= 2) {
-                // Build reverse mapping from mapKeepersToQuarters
-                // keeper_id => [array of quarters they keep]
+                // Single keeper keeps all quarters — never bench them.
+                $keeperQuarterMap[$keepers->first()->id] = 'all';
+            } else {
+                // For 2+ keepers, exclude them from the periods of their keeping quarters.
                 foreach ($keepers->values() as $index => $keeper) {
-                    $keeperQuarters = [];
+                    $keepingPeriods = [];
                     for ($q = 1; $q <= 4; $q++) {
                         if (($q - 1) % $designatedKeepersCount === $index) {
-                            $keeperQuarters[] = $q;
+                            $keepingPeriods = array_merge($keepingPeriods, $this->periodsOfQuarter($q));
                         }
                     }
-                    $keeperQuarterMap[$keeper->id] = $keeperQuarters;
+                    $keeperQuarterMap[$keeper->id] = $keepingPeriods;
                 }
             }
-            // Note: Keepers cannot be benched in their keeper quarters, but:
-            // - dedicated keepers: benched in ALL non-keeper quarters (handled in createBenchPlan)
-            // - wants_to_keep: participate in normal bench rotation for non-keeper quarters
         }
 
         while ($totalRemaining > 0) {
@@ -451,9 +456,12 @@ class LineupGeneratorService
             $excludedQuarters = $excludedQuarter;
         }
 
-        // Helper to check adjacency considering wrap-around (1 adjacent to 2 and 4)
+        // Adjacent = in different consecutive quarters (quarter boundary, wraps Q4→Q1).
         $isAdjacent = function (int $a, int $b): bool {
-            return $a === $b - 1 || $a === $b + 1 || ($a === 4 && $b === 1) || ($a === 1 && $b === 4);
+            $qa = $this->quarterOf($a);
+            $qb = $this->quarterOf($b);
+            $diff = abs($qa - $qb);
+            return $diff === 1 || $diff === 3;
         };
 
         // Build candidate quarters with remaining slots, excluding ones already assigned and excluded quarters
@@ -483,9 +491,10 @@ class LineupGeneratorService
             }
         }
 
-        // If only adjacent quarters remain, enforce the rule by skipping assignment now
+        // With small N every quarter is adjacent; fall back to any candidate rather than leaving bench slots unfilled.
         if (empty($nonAdjacent)) {
-            return null;
+            arsort($candidates);
+            return (int) array_key_first($candidates);
         }
 
         // Choose the quarter with the highest remaining; tie-breaker by quarter number
@@ -499,11 +508,11 @@ class LineupGeneratorService
      */
     private function calculateKeeperBenchQuarter(int $keeperIndex, int $keeperQuarter): int
     {
-        $candidate = ($keeperIndex % 4) + 2; // yields 2,3,4,5 -> mod 4 to 1..4
+        $candidate = ($keeperIndex % 4) + 2;
         $benchQuarter = (($candidate - 1) % 4) + 1;
 
         if ($benchQuarter === $keeperQuarter) {
-            $benchQuarter = ($benchQuarter % 4) + 1; // next quarter
+            $benchQuarter = ($benchQuarter % 4) + 1;
         }
 
         return $benchQuarter;
@@ -514,7 +523,7 @@ class LineupGeneratorService
      */
     private function assignPlayersToQuarters(FootballMatch $match, array $keeperByQuarter, array $benchPlan): void
     {
-        foreach (range(1, 4) as $quarter) {
+        foreach ($this->periodRange() as $quarter) {
             $assignments = $this->buildQuarterAssignments($quarter, $keeperByQuarter, $benchPlan);
 
             if (!empty($assignments)) {
@@ -859,6 +868,22 @@ class LineupGeneratorService
         }
 
         return 6;
+    }
+
+    private function periodRange(): array
+    {
+        return range(1, $this->periodCount);
+    }
+
+    private function quarterOf(int $period): int
+    {
+        return (int) ceil($period / $this->substitutionsPerQuarter);
+    }
+
+    private function periodsOfQuarter(int $quarter): array
+    {
+        $n = $this->substitutionsPerQuarter;
+        return range(($quarter - 1) * $n + 1, $quarter * $n);
     }
 
     /**

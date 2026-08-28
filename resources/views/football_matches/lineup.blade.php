@@ -20,13 +20,13 @@
                 </svg>
                 Aanwezigheid deze wedstrijd
             </h3>
-            <p class="text-xs text-gray-600 dark:text-gray-300 mb-3">Vink spelers aan die de hele wedstrijd aanwezig zijn (alle 4 kwarten). Je kunt per kwart nog wijzigingen maken.</p>
+            <p class="text-xs text-gray-600 dark:text-gray-300 mb-3">Vink spelers aan die de hele wedstrijd aanwezig zijn (alle {{ $periodCount }} momenten). Je kunt per wisselmoment nog wijzigingen maken.</p>
             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
                 @foreach($players as $player)
                     @php
                         // Check if player is present in all quarters
                         $presentInAll = true;
-                        foreach(range(1,4) as $q) {
+                        foreach(range(1, $periodCount) as $q) {
                             if (!array_key_exists($player->id, $existing[$q] ?? [])) {
                                 $presentInAll = false;
                                 break;
@@ -46,9 +46,9 @@
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        @foreach(range(1,4) as $q)
+        @foreach(range(1, $periodCount) as $q)
             <div class="border rounded">
-                <div class="px-4 py-2 bg-gray-50 dark:bg-gray-900 font-medium">Kwart {{ $q }}</div>
+                <div class="px-4 py-2 bg-gray-50 dark:bg-gray-900 font-medium">{{ \App\Models\FootballMatch::periodLabel($q, $substitutionsPerQuarter) }}</div>
                 <div class="p-4 overflow-x-auto">
                     <div class="overflow-x-auto">
                     <table class="min-w-full text-sm">
@@ -97,6 +97,9 @@
     </form>
 
     <script>
+        const periodCount = {{ (int) $periodCount }};
+        const substitutionsPerQuarter = {{ (int) $substitutionsPerQuarter }};
+
         document.addEventListener('change', function (e) {
             // Handle quarter-specific present toggles
             if (e.target.classList.contains('present-toggle')) {
@@ -115,8 +118,8 @@
                 const playerId = e.target.getAttribute('data-player-id');
                 const isChecked = e.target.checked;
 
-                // Update all 4 quarters for this player
-                for (let q = 1; q <= 4; q++) {
+                // Update all periods for this player
+                for (let q = 1; q <= periodCount; q++) {
                     const quarterCheckbox = document.querySelector(`.present-toggle[data-target="sel-q${q}-p${playerId}"]`);
                     if (quarterCheckbox) {
                         quarterCheckbox.checked = isChecked;
