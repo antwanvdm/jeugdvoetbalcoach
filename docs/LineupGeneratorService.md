@@ -2,10 +2,10 @@
 
 ## Overview
 
-The `LineupGeneratorService` is responsible for automatically generating balanced football lineups for 4-quarter matches. It considers multiple factors including player rotation, weight distribution, position preferences, keeper history, and historical bench fairness across the last 3 matches.
+The `LineupGeneratorService` is responsible for automatically generating balanced football lineups. It supports a configurable number of substitution moments per quarter (default 1 = standard 4-quarter match), keeper rotation locked to quarter boundaries, and fair player bench distribution across periods and match history.
 
 **Supported Formations:** 2-1-2 (6 players), 3-2-2 (8 players), 4-3-3 (11 players)  
-**Test Coverage:** 45 comprehensive unit tests covering all scenarios
+**Test Coverage:** 57 unit tests + 10 feature tests = 67 tests, 470 assertions
 
 ## Key Features
 
@@ -19,12 +19,22 @@ The `LineupGeneratorService` is responsible for automatically generating balance
     -   **`wants_to_keep`**: Players with `wants_to_keep = true` - keep when scheduled, play outfield otherwise
     -   **`fallback`**: When no dedicated keepers AND no wants_to_keep - 4 random players selected
 -   **Smart keeper logic based on count:**
-    -   **0 keepers (fallback)**: 4 players selected randomly with weight balance, each keeps 1 quarter, gets 1 bench quarter
-    -   **1 keeper**: Plays all 4 quarters, NEVER benched (tested)
+    -   **0 keepers (fallback)**: 4 players selected (one per quarter), each keeps 1 quarter, gets 1 bench quarter
+    -   **1 keeper**: Plays all N periods, NEVER benched (tested)
     -   **2 keepers**: Each keeps 2 quarters, benches/plays outfield based on type (tested)
     -   **3 keepers**: Distribution 2-1-1 or similar across 4 quarters (tested)
     -   **4 keepers**: Each keeps exactly 1 quarter (tested)
--   **Rotation guarantee:** Each keeper gets complete 4-quarter assignment (keeping + bench/outfield)
+-   **Rotation guarantee:** Keeper assignment is per quarter; with multiple subs per quarter the same keeper plays all sub-periods within that quarter
+
+### 🔁 **Dynamic Substitution Moments**
+
+-   **Configurable per quarter**: `substitutions_per_quarter` (1–4) controls how many sub-periods exist within each quarter
+-   **Total periods**: always `4 × substitutionsPerQuarter` (e.g. N=2 → 8 periods Q1-1 … Q4-2)
+-   **Keeper boundary**: keepers ONLY change at quarter boundaries, never mid-quarter; the same keeper plays all sub-periods of their quarter
+-   **Bench plan**: operates at sub-period level — more sub-periods = more opportunities for fair distribution
+-   **Adjacency**: two periods are considered adjacent when they fall in consecutive quarters (quarter-boundary logic), not when they are merely consecutive period numbers
+-   **Backward compatible**: default N=1 produces exactly the same output as the old hardcoded 4-quarter behaviour
+-   **Resolver priority**: `match.substitutions_per_quarter_override` → `season.default_substitutions_per_quarter` → hardcoded 1
 
 ### ⚽ **Smart Player Rotation & Bench Fairness**
 
@@ -183,38 +193,50 @@ $lineupGenerator->generateLineup($match, [1, 3, 5, 7, 9]);
 -   `ATTACKER_POSITION_ID = 4`
 -   `ROLE_POSITION_MAP = ['keeper' => 1, 'defender' => 2, 'midfielder' => 3, 'attacker' => 4]`
 
+**FootballMatch model constants**
+
+-   `MIN_SUBSTITUTIONS_PER_QUARTER = 1`
+-   `MAX_SUBSTITUTIONS_PER_QUARTER = 4`
+
 ## Methods Overview
 
 ### Core Methods
 
--   `generateLineup(FootballMatch $match, array $availablePlayerIds = [])` - Main entry point with optional player filtering
+-   `generateLineup(FootballMatch $match, array $availablePlayerIds = [])` - Main entry point; reads `substitutionsPerQuarter` and `periodCount` from match
 -   `applyFormationFromMatch(FootballMatch $match)` - Dynamically applies formation from match's season
 -   `loadPlayersData(FootballMatch $currentMatch, array $availablePlayerIds = [])` - Loads players and statistics (with optional filtering)
--   `getRecentBenchCounts(FootballMatch $currentMatch)` - **NEW**: Queries last 3 matches for historical bench fairness
+-   `getRecentBenchCounts(FootballMatch $currentMatch)` - Queries last 3 matches for historical bench fairness
 -   `selectKeepers()` - Intelligent keeper selection with favorite keeper priority
--   `mapKeepersToQuarters(Collection $keepers)` - Maps selected keepers to specific quarters (cycles for 2+ keepers)
--   `createBenchPlan(Collection $keepers)` - Creates fair rotation plan considering keeper constraints
--   `computePerQuarterBenchTargets()` - Calculates bench needs per quarter based on formation
--   `distributeNonKeeperBenches(Collection $nonKeepers, array $remainingPerQuarter)` - **ENHANCED**: Sorts by historical bench count for fairness
--   `pickQuarterForPlayer(array $alreadyAssignedQuarters, array $remainingPerQuarter, int|string|array|null $excludedQuarter)` - **ENHANCED**: Handles keeper exclusion (single quarter, multiple quarters, or 'all')
+-   `mapKeepersToQuarters(Collection $keepers)` - Maps each period to its keeper based on quarter ownership
+-   `createBenchPlan(Collection $keepers)` - Creates fair rotation plan; keeper bench covers ALL periods of non-keeping quarters
+-   `computePerQuarterBenchTargets()` - Calculates bench needs per period based on formation
+-   `distributeNonKeeperBenches(Collection $nonKeepers, array $remainingPerQuarter)` - Sorts by historical bench count for fairness
+-   `pickQuarterForPlayer(...)` - Picks best period; adjacency based on quarter boundaries; falls back to any candidate when all adjacent (small N)
 
 ### Assignment Methods
 
--   `buildQuarterAssignments(...)` - Builds assignments per quarter
+-   `buildQuarterAssignments(...)` - Builds assignments per period
 -   `withBenchedPlayers(...)` - Adds bench assignments
--   `withAssignedKeeper(...)` - Assigns quarter keeper
+-   `withAssignedKeeper(...)` - Assigns period keeper
 -   `withAssignedOutfieldPlayers(...)` - Assigns field players
 -   `tryAssignPlayerForRole(...)` - Smart role-based assignment
 
 ### Helper Methods
 
--   `calculateWeightBalance(array $playerIds)` - Weight distribution scoring
+-   `periodRange(): array` - Returns `[1 .. periodCount]`
+-   `quarterOf(int $period): int` - Maps a period to its quarter (1–4)
+-   `periodsOfQuarter(int $quarter): array` - Returns all period numbers within a quarter
 -   `getPlayerFavoriteRole(?int $positionId)` - Role mapping from position ID
--   `determinePositionId(Player $player, string $role)` - Position assignment logic
 -   `getLastMatchKeepers(FootballMatch $currentMatch)` - Previous match keeper lookup
 -   `parseFormationNeeds(string $lineup)` - Parses formation string (e.g., "2-1-2") into role needs
 -   `getDesiredOnField()` - Computes desired players on field from formation context
 -   `debugLog(string $message, array $context = [])` - Debug logging when APP_DEBUG=true
+
+**FootballMatch model helpers**
+
+-   `effectiveSubstitutionsPerQuarter(): int` - Resolver: override → season default → 1, clamped 1–4
+-   `effectivePeriodCount(): int` - Returns `4 × effectiveSubstitutionsPerQuarter()`
+-   `periodLabel(int $period, int $substitutionsPerQuarter): string` - Returns "Q2" (N=1) or "Q2-1" (N>1)
 
 ## Benefits
 
@@ -225,12 +247,26 @@ $lineupGenerator->generateLineup($match, [1, 3, 5, 7, 9]);
 ✅ **Smart**: Considers multiple optimization factors
 ✅ **Fair**: Ensures balanced rotation and opportunities
 ✅ **Flexible**: Supports teams with/without dedicated keepers
-✅ **Configurable**: Respects formation settings from season
+✅ **Configurable**: Dynamic substitution moments per quarter (1–4), backward compatible with existing data
 ✅ **Debuggable**: Comprehensive logging when debug mode enabled
 
 ## Recent Improvements
 
-### Historical Bench Tracking (Latest Enhancement)
+### Dynamic Substitution Moments (Latest Enhancement)
+
+**Wissels per kwart configureerbaar (1–4)**
+
+-   Nieuw veld `seasons.default_substitutions_per_quarter` (default 1) geeft de seizoensstandaard
+-   Nieuw veld `football_matches.substitutions_per_quarter_override` (nullable) overschrijft de seizoensstandaard per wedstrijd
+-   Resolver `effectiveSubstitutionsPerQuarter()` op `FootballMatch` bepaalt de effectieve waarde (override → season → 1)
+-   `effectivePeriodCount()` = 4 × substitutionsPerQuarter — het totaal aantal periodes
+-   Keeper roteert **alleen op kwartsgrens**: zelfde keeper speelt alle sub-periodes binnen een kwart
+-   Bench plan werkt op sub-periode niveau: meer wisselmomenten = bredere spreiding mogelijk
+-   Adjacency-logica bijgewerkt: twee periodes zijn aangrenzend als ze in aangrenzende *kwarten* liggen
+-   Adjacency-fallback: als alle kandidaten aangrenzend zijn (klein N), wordt de beste kandidaat alsnog gekozen om bench-slots te vullen
+-   Volledig backward compatible: N=1 (default) = exact hetzelfde gedrag als de oude hardcoded 4-kwarten situatie
+-   Labels: `periodLabel()` geeft "Q2" bij N=1 of "Q2-1" bij N>1
+
 
 **Last 3 Matches Fairness**
 
@@ -279,14 +315,77 @@ $lineupGenerator->generateLineup($match, [1, 3, 5, 7, 9]);
 
 ## Test Coverage
 
-**Location:** `tests/Unit/LineupGeneratorServiceTest.php`  
-**Total Tests:** 45 comprehensive scenarios  
-**Framework:** PHPUnit with RefreshDatabase  
+**Location:** `tests/Unit/LineupGeneratorServiceTest.php` + `tests/Feature/SubstitutionMomentsTest.php`  
+**Total Tests:** 67 (57 unit + 10 feature), 470 assertions  
+**Framework:** PHPUnit / Pest with RefreshDatabase  
 **Database:** SQLite (isolated test environment)
+
+```bash
+# Run all relevant tests
+php artisan test --filter="LineupGeneratorServiceTest|SubstitutionMomentsTest"
+```
 
 ### Test Categories
 
-#### ✅ Dedicated Keeper Scenarios (6 tests)
+#### ✅ Dedicated Keeper Scenarios (14 tests)
+
+Single/2/3/4/5 keepers, availability changes, never outfield, adjacent quarter avoidance, WTK with dedicated present.
+
+#### ✅ Wants-to-keep Scenarios (11 tests)
+
+1/2/3/4 WTK players, WTK can play outfield, dedicated takes priority, rotation fair across matches, one absent edge case.
+
+#### ✅ Bench Fairness (4 tests)
+
+3-match consecutive fairness, last-3-match weighting, 10-match extreme imbalance, identical weights.
+
+#### ✅ Formation & On-field Count (6 tests)
+
+2-1-2 on-field adherence, 3-2-2 bench fairness, 3-2-2 variable availability, 4-3-3 formation, team-size-equals-formation (no bench), too-few players graceful.
+
+#### ✅ Variable Availability (4 tests)
+
+7-match season 2-1-2, new player mid-season, 3-2-2 variable, nine-player integration scenarios.
+
+#### ✅ Position Preference & Weight (4 tests)
+
+>70% position adherence, position maintained across matches, weight clustering avoidance, mixed weight distribution.
+
+#### ✅ Nine Players / Integration (9 tests)
+
+All present, one/both keepers absent, zero keepers, one player absent, variable 3-match, never outfield, formation applied, 7 players 2 keepers.
+
+#### ✅ Dynamic Substitution Moments (12 tests)
+
+| Test | What it verifies |
+|---|---|
+| `keeper_stays_within_quarter` (N=2) | Same keeper in Q1-1 and Q1-2 |
+| `effective_substitutions_per_quarter_defaults_to_one` | Resolver default = 1, periodCount = 4 |
+| `effective_substitutions_per_quarter_uses_season_default` | Season N=2 → periodCount=8 |
+| `effective_substitutions_per_quarter_override_wins` | Override 3 beats season default 2 |
+| `effective_substitutions_per_quarter_clamps_to_minimum` | Value 0 → 1 |
+| `effective_substitutions_per_quarter_clamps_to_maximum` | Value 9 → 4 |
+| `lineup_with_two_subs_per_quarter_correct_on_field` | All 8 periods have correct on-field count |
+| `lineup_with_two_subs_single_keeper_plays_all_periods` | 1 keeper → 8 keeper periods, 0 bench |
+| `lineup_with_three_subs_correct_on_field` | All 12 periods correct |
+| `lineup_with_three_subs_no_unfilled_bench_slots` | Adjacency fallback fills all 36 bench slots |
+| `lineup_with_four_subs_correct_on_field` | All 16 periods correct |
+| `lineup_season_default_flows_into_generator` | Season N=2 → 8 periods, no period 9 |
+
+#### ✅ Feature Tests / HTTP Layer (10 tests)
+
+| Test | What it verifies |
+|---|---|
+| Season store persists `default_substitutions_per_quarter` | DB write via POST |
+| Season update persists change | DB update via PUT |
+| Season rejects value below 1 | Validation min:1 |
+| Season rejects value above 4 | Validation max:4 |
+| Match store persists `substitutions_per_quarter_override` | DB write + lineup generated |
+| Match store rejects value above 4 | Validation max:4 |
+| Match update persists override | DB update via PUT |
+| Show page renders Q4-2 with N=2 | View label correctness |
+| Lineup page renders Q4-2 with N=2 | View label + period count |
+| Show page shows Q4, not Q5 or Q1-1 with N=1 | Backward-compatible default labels |
 
 -   `test_one_keeper_keeps_all_quarters_and_is_never_benched` - Single keeper plays all quarters, 0 benches
 -   `test_two_keepers_only_play_keeper_and_rotate_fairly` - 2 keepers each keep 2 quarters, bench 2 quarters, never outfield
