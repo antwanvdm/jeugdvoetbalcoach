@@ -1986,6 +1986,91 @@ class LineupGeneratorServiceTest extends TestCase
         }
     }
 
+    public function test_no_field_player_is_benched_in_directly_consecutive_quarters(): void
+    {
+        // 8 players (1 keeper + 7 non-keepers), 2-1-2 formation = 6 on field → 2 bench/quarter = 8 slots total.
+        // With 7 non-keepers covering 8 slots, exactly one player gets 2 bench slots.
+        // That pair must never be consecutive quarters (e.g. Q3+Q4 as seen in production).
+        [$user, $team] = $this->createUserAndTeam();
+        $season = $this->createSeasonWithFormation($team, '2-1-2', 6);
+        $players = $this->createPlayers($team, 8, keeperIndices: [0]);
+        $season->players()->sync($players->pluck('id'));
+
+        for ($i = 0; $i < 10; $i++) {
+            $match = $this->createMatch($season, ['date' => now()->addDays($i)]);
+            $this->generateLineup($match, $players->pluck('id')->all());
+        }
+
+        $matches = FootballMatch::where('season_id', $season->id)->orderBy('date')->get();
+        foreach ($matches as $match) {
+            foreach ($players as $player) {
+                if ($player->position_id === 1) continue;
+
+                $benchQuarters = \DB::table('football_match_player')
+                    ->where('football_match_id', $match->id)
+                    ->where('player_id', $player->id)
+                    ->whereNull('position_id')
+                    ->orderBy('quarter')
+                    ->pluck('quarter')
+                    ->toArray();
+
+                for ($j = 0; $j < count($benchQuarters) - 1; $j++) {
+                    $diff = abs($benchQuarters[$j] - $benchQuarters[$j + 1]);
+                    $this->assertNotEquals(1, $diff,
+                        "Player {$player->name} benched in consecutive quarters {$benchQuarters[$j]} and {$benchQuarters[$j+1]} in match {$match->id}"
+                    );
+                }
+            }
+        }
+    }
+
+    public function test_no_field_player_is_benched_in_consecutive_quarters_with_two_subs_per_quarter(): void
+    {
+        // N=2 → 8 periods. Adjacency must be quarter-level, not period-level.
+        // Periods 1+2 (same Q1) are fine; periods 2+3 (Q1→Q2 boundary) are not.
+        [$user, $team] = $this->createUserAndTeam();
+        $season = $this->createSeasonWithFormation($team, '2-1-2', 6);
+        $players = $this->createPlayers($team, 8, keeperIndices: [0]);
+        $season->players()->sync($players->pluck('id'));
+
+        for ($i = 0; $i < 10; $i++) {
+            $match = $this->createMatch($season, [
+                'date' => now()->addDays($i),
+                'substitutions_per_quarter_override' => 2,
+            ]);
+            $this->generateLineup($match, $players->pluck('id')->all());
+        }
+
+        $matches = FootballMatch::where('season_id', $season->id)->orderBy('date')->get();
+        foreach ($matches as $match) {
+            foreach ($players as $player) {
+                if ($player->position_id === 1) continue;
+
+                $benchPeriods = \DB::table('football_match_player')
+                    ->where('football_match_id', $match->id)
+                    ->where('player_id', $player->id)
+                    ->whereNull('position_id')
+                    ->orderBy('quarter')
+                    ->pluck('quarter')
+                    ->toArray();
+
+                // Convert periods to quarters (N=2: ceil(period/2)) and deduplicate.
+                $benchQuarterNumbers = array_values(array_unique(array_map(
+                    fn($p) => (int) ceil($p / 2),
+                    $benchPeriods
+                )));
+                sort($benchQuarterNumbers);
+
+                for ($j = 0; $j < count($benchQuarterNumbers) - 1; $j++) {
+                    $diff = abs($benchQuarterNumbers[$j] - $benchQuarterNumbers[$j + 1]);
+                    $this->assertNotEquals(1, $diff,
+                        "Player {$player->name} benched in consecutive quarters Q{$benchQuarterNumbers[$j]} and Q{$benchQuarterNumbers[$j+1]} (N=2, match {$match->id})"
+                    );
+                }
+            }
+        }
+    }
+
     public function test_keeper_stays_within_quarter_when_match_has_two_subs_per_quarter(): void
     {
         [$user, $team] = $this->createUserAndTeam();

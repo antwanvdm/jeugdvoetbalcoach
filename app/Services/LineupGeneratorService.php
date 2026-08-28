@@ -431,6 +431,42 @@ class LineupGeneratorService
             }
         }
 
+        // Mop-up: fill any remaining slots by picking the player whose existing bench is furthest away.
+        // This only runs when strict non-adjacent placement left slots unfilled.
+        if ($totalRemaining > 0) {
+            foreach ($remainingPerQuarter as $q => $remaining) {
+                if ($remaining <= 0) continue;
+
+                $bestPlayer = null;
+                $bestDist   = -1;
+                foreach ($ordered as $player) {
+                    $already = $benchPlan[$player->id] ?? [];
+                    if (in_array($q, $already, true)) continue;
+
+                    $exc = $keeperQuarterMap[$player->id] ?? null;
+                    if ($exc === 'all') continue;
+                    $excArr = is_array($exc) ? $exc : ($exc !== null ? [$exc] : []);
+                    if (in_array($q, $excArr, true)) continue;
+
+                    // Prefer the player whose existing bench is farthest from $q.
+                    $minDist = empty($already) ? 4 : min(array_map(
+                        fn($bq) => abs($this->quarterOf($q) - $this->quarterOf($bq)),
+                        $already
+                    ));
+                    if ($minDist > $bestDist) {
+                        $bestDist   = $minDist;
+                        $bestPlayer = $player;
+                    }
+                }
+
+                if ($bestPlayer !== null) {
+                    $already = $benchPlan[$bestPlayer->id] ?? [];
+                    $benchPlan[$bestPlayer->id] = array_values(array_unique(array_merge($already, [$q])));
+                    $remainingPerQuarter[$q]--;
+                }
+            }
+        }
+
         return $benchPlan;
     }
 
@@ -491,8 +527,13 @@ class LineupGeneratorService
             }
         }
 
-        // With small N every quarter is adjacent; fall back to any candidate rather than leaving bench slots unfilled.
+        // When the player already has a bench slot, never force an adjacent quarter — return null so the
+        // mop-up pass can assign it to the least-bad alternative instead.
         if (empty($nonAdjacent)) {
+            if (!empty($alreadyAssignedQuarters)) {
+                return null;
+            }
+            // No existing bench yet (e.g. small N where all quarters are adjacent): pick best available.
             arsort($candidates);
             return (int) array_key_first($candidates);
         }
