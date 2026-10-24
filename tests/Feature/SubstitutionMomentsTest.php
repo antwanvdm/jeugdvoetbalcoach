@@ -113,6 +113,80 @@ describe('Season default_substitutions_per_quarter', function () {
             ])
             ->assertSessionHasErrors('default_substitutions_per_quarter');
     });
+
+    test('store rejects a season that overlaps another season for the team', function () {
+        Season::create([
+            'team_id' => $this->team->id,
+            'formation_id' => $this->formation->id,
+            'year' => 2026,
+            'part' => 1,
+            'start' => '2026-01-01',
+            'end' => '2026-06-30',
+            'default_substitutions_per_quarter' => 1,
+            'share_token' => Str::random(32),
+        ]);
+
+        $this
+            ->actingAs($this->user)
+            ->withSession(['current_team_id' => $this->team->id])
+            ->post(route('seasons.store'), [
+                'year' => 2026,
+                'part' => 2,
+                'start' => '2026-06-01',
+                'end' => '2026-12-31',
+                'formation_id' => $this->formation->id,
+                'default_substitutions_per_quarter' => 1,
+            ])
+            ->assertSessionHasErrors([
+                'start' => 'De opgegeven periode overlapt met seizoen 2026 fase 1 (01-01-2026 t/m 30-06-2026).',
+            ]);
+    });
+
+    test('store copies only the players from the chronologically preceding season', function () {
+        Position::query()->firstOrCreate(['id' => 2], ['name' => 'Defender']);
+        Position::query()->firstOrCreate(['id' => 3], ['name' => 'Midfielder']);
+
+        $previousSeason = Season::create([
+            'team_id' => $this->team->id,
+            'formation_id' => $this->formation->id,
+            'year' => 2025,
+            'part' => 1,
+            'start' => '2025-01-01',
+            'end' => '2025-06-30',
+            'default_substitutions_per_quarter' => 1,
+            'share_token' => Str::random(32),
+        ]);
+        $otherSeason = Season::create([
+            'team_id' => $this->team->id,
+            'formation_id' => $this->formation->id,
+            'year' => 2024,
+            'part' => 1,
+            'start' => '2024-01-01',
+            'end' => '2024-12-31',
+            'default_substitutions_per_quarter' => 1,
+            'share_token' => Str::random(32),
+        ]);
+        $previousPlayer = Player::create(['team_id' => $this->team->id, 'name' => 'Vorige speler', 'position_id' => 2, 'weight' => 2]);
+        $otherPlayer = Player::create(['team_id' => $this->team->id, 'name' => 'Oudere speler', 'position_id' => 3, 'weight' => 2]);
+        $previousSeason->players()->attach($previousPlayer);
+        $otherSeason->players()->attach($otherPlayer);
+
+        $this
+            ->actingAs($this->user)
+            ->withSession(['current_team_id' => $this->team->id])
+            ->post(route('seasons.store'), [
+                'year' => 2026,
+                'part' => 1,
+                'start' => '2026-01-01',
+                'end' => '2026-06-30',
+                'formation_id' => $this->formation->id,
+                'default_substitutions_per_quarter' => 1,
+            ])
+            ->assertSessionHasNoErrors();
+
+        $season = Season::withoutGlobalScopes()->where('year', 2026)->where('part', 1)->firstOrFail();
+        expect($season->players()->pluck('players.id')->all())->toBe([$previousPlayer->id]);
+    });
 });
 
 // ─── FootballMatch: substitutions_per_quarter_override + view rendering ───────

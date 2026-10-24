@@ -9,6 +9,7 @@ use Gate;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class SeasonController extends Controller
@@ -40,14 +41,9 @@ class SeasonController extends Controller
     {
         Gate::authorize('create', Season::class);
 
-        $data = $request->validate([
-            'year' => ['required', 'integer'],
-            'part' => ['required', 'integer', 'min:1'],
-            'start' => ['required', 'date'],
-            'end' => ['required', 'date', 'after_or_equal:start'],
-            'formation_id' => ['required', 'integer', 'exists:formations,id'],
-            'default_substitutions_per_quarter' => ['required', 'integer', 'min:1', 'max:4'],
-        ]);
+        $data = $this->validateSeason($request);
+
+        $this->ensureDoesNotOverlapExistingSeason($data);
 
         $data['user_id'] = auth()->id();
         $data['team_id'] = session('current_team_id');
@@ -58,7 +54,7 @@ class SeasonController extends Controller
         $season = Season::create($data);
 
         // Attach players from the most recent previous season (if any)
-        $prev = Season::where('end', '<', $season->start)
+        $prev = Season::where('end', '<=', $season->start)
             ->where('team_id', $data['team_id'])
             ->orderBy('end', 'desc')
             ->first();
@@ -105,19 +101,54 @@ class SeasonController extends Controller
     {
         Gate::authorize('update', $season);
 
-        $data = $request->validate([
+        $data = $this->validateSeason($request, true);
+
+        $this->ensureDoesNotOverlapExistingSeason($data, $season);
+
+        $season->update($data);
+
+        return redirect()->route('seasons.index')->with('success', 'Seizoen bijgewerkt.');
+    }
+
+    private function validateSeason(Request $request, bool $includeTrackGoals = false): array
+    {
+        $rules = [
             'year' => ['required', 'integer'],
             'part' => ['required', 'integer', 'min:1'],
             'start' => ['required', 'date'],
             'end' => ['required', 'date', 'after_or_equal:start'],
             'formation_id' => ['required', 'integer', 'exists:formations,id'],
-            'track_goals' => ['boolean'],
             'default_substitutions_per_quarter' => ['required', 'integer', 'min:1', 'max:4'],
-        ]);
+        ];
 
-        $season->update($data);
+        if ($includeTrackGoals) {
+            $rules['track_goals'] = ['boolean'];
+        }
 
-        return redirect()->route('seasons.index')->with('success', 'Seizoen bijgewerkt.');
+        return $request->validate($rules);
+    }
+
+    private function ensureDoesNotOverlapExistingSeason(array $data, ?Season $season = null): void
+    {
+        $overlappingSeason = Season::query()
+            ->where('team_id', session('current_team_id'))
+            ->when($season, fn ($query) => $query->whereKeyNot($season->id))
+            ->where('start', '<=', $data['end'])
+            ->where('end', '>=', $data['start'])
+            ->orderBy('start')
+            ->first();
+
+        if ($overlappingSeason) {
+            throw ValidationException::withMessages([
+                'start' => sprintf(
+                    'De opgegeven periode overlapt met seizoen %d fase %d (%s t/m %s).',
+                    $overlappingSeason->year,
+                    $overlappingSeason->part,
+                    $overlappingSeason->start->format('d-m-Y'),
+                    $overlappingSeason->end->format('d-m-Y'),
+                ),
+            ]);
+        }
     }
 
     public function destroy(Season $season): RedirectResponse
