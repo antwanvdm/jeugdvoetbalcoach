@@ -210,7 +210,7 @@
                 </div>
             </div>
 
-            <div>
+            <div class="order-first md:order-last">
                 @if($nextMatch)
                     <div class="bg-white dark:bg-gray-800 p-4 shadow dark:shadow-gray-700 rounded flex flex-col gap-2">
                         <h2 class="text-lg font-semibold">Volgende wedstrijd</h2>
@@ -228,9 +228,31 @@
                         </div>
                         <a href="{{ route('football-matches.show', $nextMatch) }}" class="mt-2 px-3 py-2 bg-indigo-600 text-white rounded text-center">Bekijk</a>
                     </div>
+                @elseif($lastMatch && ($lastMatch->goals_scored === null || $lastMatch->goals_conceded === null))
+                    <div class="bg-white dark:bg-gray-800 p-4 shadow dark:shadow-gray-700 rounded flex flex-col gap-2">
+                        <h2 class="text-lg font-semibold">Hoe is de wedstrijd afgelopen?</h2>
+                        <p class="text-sm text-gray-600 dark:text-gray-300">
+                            Voer het resultaat in van de wedstrijd tegen {{ $lastMatch->opponent?->name }} van {{ $lastMatch->date->translatedFormat('j F Y') }}.
+                        </p>
+                        @can('update', $lastMatch)
+                            <a href="{{ route('football-matches.edit', $lastMatch) }}" class="mt-2 px-3 py-2 bg-indigo-600 text-white rounded text-center">Resultaat invoeren</a>
+                        @endcan
+                    </div>
+                @else
+                    <div class="bg-white dark:bg-gray-800 p-4 shadow dark:shadow-gray-700 rounded flex flex-col gap-2">
+                        <h2 class="text-lg font-semibold">Op naar de volgende wedstrijd!</h2>
+                        @if($activeSeason)
+                            @can('create', \App\Models\FootballMatch::class)
+                                <a href="{{ route('football-matches.create', ['season_id' => $activeSeason->id]) }}" class="mt-2 px-3 py-2 bg-indigo-600 text-white rounded text-center">Plan volgende wedstrijd</a>
+                            @endcan
+                        @endif
+                        @can('create', \App\Models\Season::class)
+                            <a href="{{ route('seasons.create') }}" class="px-3 py-2 border border-indigo-600 text-indigo-600 dark:text-indigo-400 rounded text-center">Maak nieuw seizoen aan</a>
+                        @endcan
+                    </div>
                 @endif
 
-                <div class="bg-white dark:bg-gray-800 p-4 shadow dark:shadow-gray-700 rounded @if($nextMatch) mt-4 @endif">
+                <div class="bg-white dark:bg-gray-800 p-4 shadow dark:shadow-gray-700 rounded mt-4">
                     <h2 class="text-lg font-semibold mb-3">Laatste resultaten</h2>
                     @if($recentMatches->isEmpty())
                         <div class="text-gray-500 dark:text-gray-400 text-sm">Nog geen gespeelde wedstrijden.</div>

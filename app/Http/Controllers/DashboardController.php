@@ -57,8 +57,14 @@ class DashboardController extends Controller
         $onboardingComplete = $onboardingSteps['season'] && $onboardingSteps['players'] && $onboardingSteps['match'];
 
         $recentMatches = $currentTeam->footballMatches()->whereNotNull('goals_scored')->orderByDesc('date')->take(3)->get();
-        $nextMatch = $currentTeam->footballMatches()->where('date', '>', now())->get()->first();
-        
-        return view('dashboard', compact('recentMatches', 'nextMatch', 'currentTeam', 'onboardingSteps', 'onboardingComplete', 'activeSeason', 'requiredPlayers', 'playerCount'));
+        $nextMatch = $currentTeam->footballMatches()->where('date', '>', now())->orderBy('date')->orderBy('id')->first();
+        $lastMatch = $nextMatch ? null : $currentTeam->footballMatches()
+            ->with('opponent')
+            ->where('date', '<=', now())
+            ->orderByDesc('date')
+            ->orderByDesc('id')
+            ->first();
+
+        return view('dashboard', compact('recentMatches', 'nextMatch', 'lastMatch', 'currentTeam', 'onboardingSteps', 'onboardingComplete', 'activeSeason', 'requiredPlayers', 'playerCount'));
     }
 }
